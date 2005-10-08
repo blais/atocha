@@ -10,8 +10,8 @@ See class FormParser (below).
 """
 
 
-# form imports.
-from form_messages import msg_registry
+# atocha imports.
+from messages import msg_registry
 
 
 __all__ = ['FormParser']

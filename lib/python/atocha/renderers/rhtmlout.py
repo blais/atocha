@@ -17,8 +17,9 @@ Renderer for forms using htmlout.
 import os.path
 import datetime
 
-# hume imports
+# atocha imports
 from form import *
+
 
 # FIXME: you need to put a check here, and output an appropriate warning message
 # if htmlout is not found.

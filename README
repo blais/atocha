@@ -1,6 +1,6 @@
-===================================================
-  atocha: Web Form Handling and Rendering Library
-===================================================
+============================
+  atocha: Web Form Library
+============================
 
 .. contents::
 
@@ -8,8 +8,8 @@
 Description
 ===========
 
-*Atocha* is a Python library for parsing and rendering data from web forms.  It
-is framework-agnostic, generic, and it should be possible to use it with CGI
+*Atocha* is a Python library for *parsing* and *rendering* data from web forms.
+It is framework-agnostic, generic, and it should be possible to use it with CGI
 scrips or to incorporate it in your favourite web application framework
 
 
@@ -115,6 +115,7 @@ Features
 ========
 
 - FIXME complete the list
+- I18n of all messages is supported.
 - Supports per-field errors, to be rendered next to the erroneous widgets;
 - Supports a UI message and status for the re-rendering a form with errors;
 

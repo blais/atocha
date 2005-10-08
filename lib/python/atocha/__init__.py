@@ -72,13 +72,17 @@ Notes
 """
 
 # form imports.
-from form_def import *
-from form_fields import *
-from form_messages import *
-from form_parse import *
-from form_render import *
-from form_rtext import *
-## from form_rhtmlout import *
+from form import *
+from fields import *
+from messages import *
+from parser import *
+from render import *
+from renderers.rtext import *
 
-
+try:
+    #from renderers.rhtmlout import *
+    # FIXME: add this when done.
+    pass
+except ImportError:
+    pass
 

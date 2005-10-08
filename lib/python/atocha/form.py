@@ -11,9 +11,9 @@ Form definition and exceptions.
 # stdlib imports
 import types, re, datetime, StringIO
 
-# form imports.
-from form_fields import *
-from form_messages import msg_registry, msg_type
+# atocha imports.
+from ields import *
+from messages import msg_registry, msg_type
 
 
 __all__ = ['Form']

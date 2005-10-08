@@ -19,9 +19,9 @@ import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 
-# form imports.
-import form_fields
-import form_messages # To make sure that the _() function is setup.
+# atocha imports.
+import fields
+import messages # To make sure that the _() function is setup.
 
 
 __all__ = ['FormRenderer']

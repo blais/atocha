@@ -12,8 +12,8 @@ import sys, types, re, datetime, StringIO, email.Utils
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 
-# form imports.
-from form_messages import msg_registry, msg_type
+# atocha imports.
+from messages import msg_registry, msg_type
 
 
 

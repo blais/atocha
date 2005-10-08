@@ -10,9 +10,9 @@ Simple text-based form renderers.
 # stdlib imports.
 import StringIO, codecs
 
-# form imports.
-from form_render import FormRenderer
-from form_messages import msg_type
+# atocha imports.
+from atocha.render import FormRenderer
+from atocha.messages import msg_type
 
 
 __all__ = ['TextFormRenderer']
