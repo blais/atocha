@@ -1,0 +1,169 @@
+===================================================
+  atocha: Web Form Handling and Rendering Library
+===================================================
+
+.. contents::
+
+
+Description
+===========
+
+*Atocha* is a Python library for parsing and rendering data from web forms.  It
+is framework-agnostic, generic, and it should be possible to use it with CGI
+scrips or to incorporate it in your favourite web application framework
+
+
+Motivation
+----------
+
+Just before I decided to write this (2005-10-08), I had the following problems:
+
+- There was no both *decent* and *simple* library that could parse input from
+  widgets and perform automatic types conversions reliably, that was not tied to
+  a specific web application framework;
+
+- I was having lots of trouble in the various data paths of my handlers with
+  type conversions, often having unicode encoding problems;
+
+- I felt that the problem of handling and rendering web forms were really tied
+  closely, and that it could be solved in a generic manner.
+
+At the time, I had written my own web application framework, and a small form
+library I had copied from somewhere had grown into a messy monster. So I decided
+to attack the problem and rewrite it separately, with the following goals in
+mind:
+
+#. Generic library that I will be able to reuse in many frameworks and
+   applications;
+
+#. An emphasis on type checking and robustness via tests;
+
+#. Widgets should automatically perform appropriate type conversion when
+   returning the parsed value to the user;
+
+
+Documentation
+=============
+
+Ultimately, you'll have to delve into the heavily documented code to find out
+about all the gory details, but the simple introduction in this section will
+give you a taste for what the library can do for you.
+
+Form Definition
+---------------
+
+You create a single ``Form`` instance for both rendering and handling of the
+form.  The form consists of "fields", which are akin to desktop application
+widgets, which automatically return an appropriate data type for the value
+entered by the user::
+
+  (FIXME add example.)
+
+Form Rendering
+--------------
+
+You then use this form object, in collboration with a ``FormRenderer`` to render
+the page to the user::
+
+  (FIXME add example.)
+
+This can be heavily customized by breaking down the process in its component
+phases, which lets you decide on the particular layout of the widgets if
+desired::
+
+  (FIXME add example.)
+
+The form rendering process is decoupled from the form definition so it is
+possible to create custom form renderers for your particular system or with
+specific layout characteristics, without changing the library.
+
+
+Form Handling
+-------------
+
+A ``FormParser`` is used to oversee the process of parsing and validating
+user-submitted inputs.  Most of the basic validation is automatic, and depends
+on the types of the fields in the form.  Since part of the validation can only
+be implemented on the client-side--there is always some kind of custom code that
+needs be used there--, the parser allows you to invoke methods to signal errors
+and to indicate completion of the parsing.  This establishes a protocol in which
+you can customize validation (another pattern involves attaching validators to
+the widgets, but we think it is more limited and complicated than the simple
+protocol that we offer)
+
+When the parsing is complete, the parser either redirects automatically to the
+submitter resource if necessary, with the accumulated errors for rendering the
+annotated form back to the user, or contains the final parsed values for client
+perusal::
+
+  (FIXME add example.)
+
+
+Form Values Display
+-------------------
+
+The form object can also be used to display parsed values in a table, without
+editing.  This is simply accomplished by using a special display-only renderer
+on the form, instead of the normal renderer which renders inputs. This is useful
+because much of the presentation information is already present in the form
+definition::
+
+  (FIXME add example.)
+
+
+Features
+========
+
+- FIXME complete the list
+- Supports per-field errors, to be rendered next to the erroneous widgets;
+- Supports a UI message and status for the re-rendering a form with errors;
+
+Download
+========
+
+Snapshots of the latest pipexcel source code can be found in the `Download Area
+</downloads/atocha>`_.  If you make any modification to the source, please
+update and run the tests.
+
+
+Reporting Bugs
+==============
+
+Send email to the author: Martin Blais <blais@furius.ca>.
+
+
+.. Links
+.. =====
+
+
+Installation and Dependencies
+=============================
+
+- Python >=2.3
+
+
+Copyright and License
+=====================
+
+Copyright (C) 2005  Martin Blais.
+This code is distributed under the `GNU General Public License <COPYING>`_.
+
+
+Acknowledgements
+================
+
+The Atocha library has evolved a lot from my original use of the form.py file in
+the `draco framework`__ written by Geert Jansen.  I originally copied and
+modified the file quite a bit, and at some point I got really frustrated in my
+mess, being constantly in data type conversion hell and decided to rewrite the
+whole thing completely, with a particular emphasis on identifying and checking
+the types which flow throughout the life of a request.
+
+__ http://draco.boskant.nl/
+
+
+Author
+======
+
+Martin Blais <blais@furius.ca>
+
