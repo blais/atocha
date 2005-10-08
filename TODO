@@ -2,17 +2,24 @@
   atocha: TODO
 ================
 
+- Finish dataflow diagram.
+
 - Add a phase for adapting the args from various sources, CGI, mod_python,
   draco, etc.  You will need to observe, characterize and normalize the data
   types that each of these sources present.
 
-- Implement replacement value types
+- Implement replacement value types!!!!!
+
+- Finish htmlout renderer.
+
+- Convert all my codebase to atocha.
+
+
 
 Tests
 =====
 
 - Automate tests for four cases: hidden, valid, invalid, empty
-
 
 Progress:
 * form_rsimple.py
