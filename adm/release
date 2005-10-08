@@ -7,7 +7,7 @@ set -x
 
 SVNROOT=/home/blais/repos/svnroot
 VER=`svnlook youngest $SVNROOT`
-OUTNAME=pipexcel-svn$VER
+OUTNAME=atocha-svn$VER
 WEBROOT=/home/blais/w.furius
 
 if [ -z "$VER" ]; then
@@ -17,8 +17,8 @@ fi
 
 echo "Exporting to $OUTNAME ..."
 cd /var/tmp
-svn export file://$SVNROOT/pipexcel/trunk $OUTNAME
+svn export file://$SVNROOT/atocha/trunk $OUTNAME
 tar jcvf $OUTNAME.tar.bz2 $OUTNAME
-cp $OUTNAME.tar.bz2 $WEBROOT/downloads/pipexcel
+cp $OUTNAME.tar.bz2 $WEBROOT/downloads/atocha
 rm -r $OUTNAME $OUTNAME.tar.bz2
 cd -
