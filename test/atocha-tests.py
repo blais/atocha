@@ -14,11 +14,7 @@ Run these tests using the codespeak py.test tool.
 import sys, os, datetime, StringIO, webbrowser
 
 # form imports.
-from form_def import *
-from form_fields import *
-from form_parse import *
-from form_render import *
-from form_rtext import *
+from atocha import *
 
 
 #-------------------------------------------------------------------------------

@@ -84,7 +84,7 @@ class FormRenderer:
         If 'hide' is specified, we force the rendering of this field as if it
         was a hidden field, with the same conditions.
         """
-        assert isinstance(field, form_fields.Field)
+        assert isinstance(field, fields.Field)
 
         # Figure out if this field should be rendered as hidden or not.
         hidden = hide or field.ishidden()

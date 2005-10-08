@@ -12,7 +12,7 @@ Form definition and exceptions.
 import types, re, datetime, StringIO
 
 # atocha imports.
-from ields import *
+from fields import *
 from messages import msg_registry, msg_type
 
 

@@ -75,7 +75,7 @@ Notes
 from form import *
 from fields import *
 from messages import *
-from parser import *
+from parse import *
 from render import *
 from renderers.rtext import *
 

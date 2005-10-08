@@ -7,7 +7,7 @@
 Renderer for forms using htmlout.
 """
 
-# FIXME: review all this
+# FIXME: review all this, this is not complete yet.
 
 #===============================================================================
 # EXTERNAL DECLARATIONS
@@ -34,7 +34,8 @@ from htmlout import *
 # appropriate.
 
 
-# FIXME: we should remove this, and review the code that uses it.  Worst case, use form_messages.py
+# FIXME: we should remove this, and review the code that uses it.
+# Use messages.py instead
 deferror = N_('Error')
 
 # Alters the behaviour of the error marking.
@@ -101,7 +102,7 @@ class HtmloutRenderer(BaseRenderer):
 
         return inputs
 
-    def rendertable( self, form, values=None, 
+    def rendertable( self, form, values=None,
                      style=None, fields=None ):
         """
         Render the form, filling in the values that are present with the
@@ -121,7 +122,7 @@ class HtmloutRenderer(BaseRenderer):
         # FIXME: you need to make the fields render in the order that is
         # given. Right now they will render in the order that they're defined in
         # the form.
-            
+
         for field in form.fields():
             if fields is not None and field.name not in fields:
                 continue
@@ -164,7 +165,7 @@ class HtmloutRenderer(BaseRenderer):
         inputs container), with the same HTML structure as for rendertable().
         """
         return self._rendertable_empty('form', label, inputs, style)
-        
+
     @staticmethod
     def _rendertable_empty( pfx, label=None, inputs=None, style=None ):
         """
@@ -175,7 +176,7 @@ class HtmloutRenderer(BaseRenderer):
         if style == 'horizontal':
             tr1, tr2 = TR(parent=table), TR(parent=table)
         hidden_fields = []
-        
+
         tdlabel = TD(CLASS='%s-label' % pfx)
         tdinput = TD(CLASS='%s-input' % pfx)
 
@@ -183,7 +184,7 @@ class HtmloutRenderer(BaseRenderer):
             tdlabel.append(label + ':')
         if inputs:
             tdinput.append(inputs)
-            
+
         if style == 'vertical':
             table.append( TR(tdlabel), TR(tdinput) )
         elif style == 'horizontal':
