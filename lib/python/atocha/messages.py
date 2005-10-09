@@ -58,13 +58,14 @@ class TranslatorDict(dict):
     A dictionary class that automatically translates on access.
     """
     def __getitem__( self, key ):
-        if isinstance(key, tuple) and key[1]:
-            s = dict.__getitem__(self, key[0])
-        else:
-            s = dict.__getitem__(self, key)
-            s = _(s)
-        return s
+        """
+        Automatically translate the key.
+        """
+        return _(dict.__getitem__(self, key))
 
+    def get_notrans( self, key ):
+        return dict.__getitem__(self, key)
+    
 # Message registry: the single place where we store all forms of human-readable
 # strings that you may want to customize for your application.
 msg_registry = TranslatorDict({

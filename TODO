@@ -8,11 +8,42 @@
   draco, etc.  You will need to observe, characterize and normalize the data
   types that each of these sources present.
 
+  Should this be done by the parser class?  If the parser class has a special
+  class attribute for this, with the normalizer object, it will apply the
+  conversion itself.  Otherwise we can assume that the web app framework code
+  could do it (I think we will do it ourselves in our app).
+
+- Consider making the implementation for the form renderer use a delegate rather
+  than derivation.  The delegate would be specified as a class attribute on the
+  form renderer itself.  This reflects well the fact that the form renderer
+  changes, but the styling code contains no if little variable code.
+
+  I'm not about this, since the text form renderer does take an option...
+
+
 - Implement replacement value types!!!!!
+  (We need to support a replacement value of the incorrect type for fields.)
+  
+  - replacement value names should use a space in them, because that makes them
+    otherwise illegal, probably just "varname *" would be good enough.
 
-- Finish htmlout renderer.
+- Finish htmlout renderer and convert all my codebase to atocha.
+ 
+- Write an interactive test with a menu to choose the creation string for the
+  widget.
 
-- Convert all my codebase to atocha.
+- Support the "required" star rendering.
+
+- Implement DISABLED option for all the fields.
+
+  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It cannot
+    be hidden/disabled.
+
+  * Also, a field can be rendered disabled, but not actually be disabled
+    permanently.  I'm not sure what would be the utility in creating a field as
+    disabled.  Disabled is akin to hidden, and as such is more of a rendering
+    option than anything else.  IMO we should support disabled similar to
+    hidden.
 
 
 
@@ -35,7 +66,6 @@ on the fields: maybe we have to add the following methods:
 
 
 
-- We need to support a replacement value of the incorrect type for fields.
 
 
 

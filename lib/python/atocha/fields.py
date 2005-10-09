@@ -85,6 +85,9 @@ class Field:
     us the possibility of having widgets for which we can insure that at least
     one value has been submitted (radio buttons, required listboxes).
     """
+    
+    # Regular expression for valid variable names.
+    varname_re = re.compile('[a-z0-9]')
 
     def __init__( self, name, label=None, hidden=None, initial=None ):
         assert isinstance(name, str)
@@ -95,6 +98,7 @@ class Field:
         self.name = name
         "Name of the field."
 
+        assert Field.varname_re.match(name)
         self.varname = name
         """Name of the variable used for the field, by default, the same name
         as the field itself."""

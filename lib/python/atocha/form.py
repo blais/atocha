@@ -71,7 +71,7 @@ class Form:
         """The string on the submit button, or a tuple of strings if there are
         many."""
         if self.submit is None:
-            self.submit = msg_registry['submit-button', 1]
+            self.submit = msg_registry.get_notrans('submit-button')
         # Check the types.
         if isinstance(self.submit, (list, tuple)):
             for n in self.submit:
