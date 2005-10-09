@@ -93,6 +93,16 @@ class FormRenderer:
         # Get value to be used to render the field.
         #
         if self._values is None or field.name not in self._values:
+            dvalue = None # Not set.
+        else:
+            try:
+                # Note: this assignment may result in dvalue being None, which
+                # is the same as if not set.
+                dvalue = self._values[field.name]
+            except KeyError:
+                dvalue = None # Not set.
+            
+        if dvalue is None:
             # If the field is hidden and the value is not set, we raise an
             # error. We should not be able to render hidden fields without a
             # value, and we will not use the initial value for hidden fields.
@@ -104,8 +114,6 @@ class FormRenderer:
 
             # Otherwise we use the initial value for rendering.
             dvalue = field.initial
-        else:
-            dvalue = self._values[field.name]
 
         # Convert the data value into a value suitable for rendering.
         #
@@ -134,7 +142,6 @@ class FormRenderer:
                 error = None
         else:
             error = None
-
 
         #
         # Dispatch to the appropriate method for rendering the fields.

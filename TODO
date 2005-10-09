@@ -36,8 +36,8 @@
 
 - Implement DISABLED option for all the fields.
 
-  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It cannot
-    be hidden/disabled.
+  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It
+    cannot be hidden/disabled.
 
   * Also, a field can be rendered disabled, but not actually be disabled
     permanently.  I'm not sure what would be the utility in creating a field as
