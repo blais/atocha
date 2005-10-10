@@ -33,13 +33,24 @@ library I had copied from somewhere had grown into a messy monster. So I decided
 to attack the problem and rewrite it separately, with the following goals in
 mind:
 
-#. Generic library that I will be able to reuse in many frameworks and
+#. Reuse the form definition for parsing submitted arguments as well as
+   rendering and displaying data (leverage the knowledge stored in the form
+   definition as much as possible);
+
+#. **Generic** library that is able to reused in many frameworks and
    applications;
 
-#. An emphasis on type checking and robustness via tests;
+#. Robustness: an emphasis on strict type checking and robustness via tests;
 
-#. Widgets should automatically perform appropriate type conversion when
-   returning the parsed value to the user;
+#. Fields automatically perform appropriate type conversion when returning the
+   parsed value to the user; Like desktop toolkit widgets, fields may return all
+   sorts of data types;
+
+#. Fields may render to multiple input widgets and are consolidated in a single
+   value automatically;
+
+Essentially, I wanted functionality closer to what desktop UI toolkits provide,
+which is often not present in web form parsing toolkits.
 
 
 Documentation
@@ -48,6 +59,9 @@ Documentation
 Ultimately, you'll have to delve into the heavily documented code to find out
 about all the gory details, but the simple introduction in this section will
 give you a taste for what the library can do for you.
+
+
+FIXME move this to documentation
 
 Form Definition
 ---------------
