@@ -8,13 +8,13 @@ Form fields (widgets) definitions.
 """
 
 # stdlib imports
-import sys, types, re, datetime, StringIO, email.Utils
+import sys, types, re, datetime, StringIO, email.Utils, locale
+from types import NoneType
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 
 # atocha imports.
 from messages import msg_registry, msg_type
-
 
 
 __all__ = [
@@ -24,8 +24,15 @@ __all__ = [
     'RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',
     'JSDateField',
     'FileUploadField',
+    'ORI_HORIZONTAL', 'ORI_VERTICAL'
     ]
 
+#-------------------------------------------------------------------------------
+#
+# Constants.
+
+ORI_HORIZONTAL = 1
+ORI_VERTICAL = 2
 
 #-------------------------------------------------------------------------------
 #
@@ -53,13 +60,22 @@ class Field:
     - 'initial': Default value that is used for rendering the field with known
       initial conditions if no value is given for it.  Important note: this
       value is not used by the parsing at all.  If an argument is missing during
-      parsing, the value associated with the field will be set to None.
+      parsing, the value associated with the field will be set to None.  This is
+      NOT a default value to be provided by the parser if the field is not
+      submitted.
 
     Types: every field class should define the following class attributes:
 
-    - 'types_data' -> tuple: possible data types for parsed values.
-    - 'types_parse' -> tuple: possible types of input of parsing method.
-    - 'types_render' -> tuple: possible types for prepared values for rendering.
+    - 'types_data' -> tuple: possible data types for parsed values, which may
+      include None if it is a valid data value that can be returned by the
+      widget.  For values which are not required, you do NOT have to include
+      None as a possibility.
+
+    - 'types_parse' -> tuple: possible types that are given to us from the web
+      application framework to parse.
+
+    - 'types_render' -> tuple: possible types for values for prepared to be used
+      for rendering.
 
     Important note about usage of required fields
     ---------------------------------------------
@@ -85,23 +101,24 @@ class Field:
     us the possibility of having widgets for which we can insure that at least
     one value has been submitted (radio buttons, required listboxes).
     """
-    
+
     # Regular expression for valid variable names.
     varname_re = re.compile('[a-z0-9]')
 
     def __init__( self, name, label=None, hidden=None, initial=None ):
         assert isinstance(name, str)
-        assert isinstance(label, (type(None), msg_type))
-        assert isinstance(initial, (type(None), bool, int))
-        assert isinstance(hidden, (type(None), bool, int))
+        assert isinstance(label, (NoneType, msg_type))
+        assert isinstance(hidden, (NoneType, bool, int))
 
         self.name = name
         "Name of the field."
 
         assert Field.varname_re.match(name)
-        self.varname = name
-        """Name of the variable used for the field, by default, the same name
-        as the field itself."""
+        self.varnames = [name]
+        """Tuple of variable names used for the field, by default, a one-element
+        tuple, of the same name as the field itself."""
+        # Note: customization for the variable names is relatively rare, so we
+        # leave it to the derived classes to do the right thing.
 
         self.label = label
         "The visible label used by the form rendering."
@@ -111,7 +128,7 @@ class Field:
 
         # Make sure that the initial value is of an acceptable type for this
         # field.
-        assert isinstance(initial, (type(None),) + self.types_data)
+        assert isinstance(initial, (NoneType,) + self.types_data)
         self.initial = initial
         """The initial value set on the field when rendering, if not provided
         by the values array."""
@@ -152,31 +169,58 @@ class Field:
         so 'pvalue' strings or strings contained within lists are actually
         already given as unicode objects.
 
-        If there is an error in parsing, DUE TO OUTPUT THAT THE USER MAY HAVE
-        ENTERED, the protocol is to raise a ValueError, initialized with an
-        message that indicates what the error and a 'dvalue' (of one of the
-        valid data-types for the field) that be used to render the field back
-        with the invalid value when re-rendering.  This value may optionally be
-        corrected as well.
+        This method MUST return one of the valid data types or raise a
+        ValueError.
 
-        (Note that if there is an unexpected value, which is NOT DUE TO USER
-        INPUT, you should not raise a ValueError, but rathre fail with an assert
-        or a RuntimeError.)
+        Error Protocol
+        --------------
+
+        If there is an error in parsing, due to output THAT THE USER MAY HAVE
+        ENTERED, the protocol is to raise a ValueError, like this::
+
+           raise ValueError(message, rvalue)
+
+        The exception is initialized with an message that indicates what the
+        error is, and two optional representations for the erroneous value that
+        will be used to replace the entered value when re-rendering the form
+        with errors (we call this the 'replacement' value): 'rvalue' (of one of
+        the 'render' types) if we could not parse the data but we would sill
+        like to place a replacement value in the field when re-rendering. You
+        cannot specify both 'dvalue' and 'rvalue'
+
+        Note that if there is an unexpected value or an error, which is NOT DUE
+        TO USER INPUT, you should NOT raise a ValueError, but rather fail with
+        an assert or a RuntimeError.  Raising ValueError is reserved for
+        signaling user input error.
         """
         raise NotImplementedError # return dvalue
 
     def render_value( self, dvalue ):
         """
         Prepare the data value for rendering as part of a form rendering for an
-        HTML input widget.  This is not meant for displayin the value read-only
-        to the user (see other method to do that).  This will generally involve
-        a type change, but may also implement other kinds of preparation.  The
-        renderer classes are expected to know how to deal with the particular
-        types to be rendered for each of the field types.
+        HTML input widget.  This is not meant for displaying the value read-only
+        to the user (see special renderers to do that).  This will generally
+        involve a type change, but may also implement other kinds of
+        preparation.  The renderer classes are expected to know how to deal with
+        the particular types to be rendered for each of the field types.
+
+        The input value is either of one of the valid data types for the field,
+        or None, to render a value that has not been set.  This method should
+        always be prepared to render a dvalue of None.
         """
         raise NotImplementedError # return rvalue
 
+    def display_value( self, dvalue ):
+        """
+        From a valid data value after having been succesfully parsed, convert
+        the value from data type to unicode for user-friendly display.  This is
+        meant to be used by the display renderers.
 
+        Note that this is different from the render_value method because that is
+        meant to render in a form.  We are meant to render to visible text to
+        the user, such as would be displayed in a read-only table.
+        """
+        raise NotImplementedError # return uvalue
 
 
 #------------------------------------------------------------------------------
@@ -208,7 +252,7 @@ class _OptRequired:
           required field.
 
         """
-        assert isinstance(required, (type(None), bool, int))
+        assert isinstance(required, (NoneType, bool, int))
         self.required = required
         "Whether the argument is OPTIONALLY required or not."
 
@@ -219,7 +263,7 @@ class _OptRequired:
         """
         if self.required and pvalue is None or pvalue == u'' or pvalue == []:
             # We indicate an error mentioning that this field was required.
-            raise ValueError(msg_registry['error-required-value'], None)
+            raise ValueError(msg_registry['error-required-value'])
 
         return pvalue
 
@@ -240,8 +284,8 @@ class _TextField(Field, _OptRequired):
                   Unicode values.
 
     """
-    types_data = (str, unicode, type(None))
-    types_parse = (type(None), unicode,)
+    types_data = (str, unicode,)
+    types_parse = (NoneType, unicode,)
     types_render = (unicode,)
     css_class = 'text'
 
@@ -264,14 +308,13 @@ class _TextField(Field, _OptRequired):
         # Check the required value.
         pvalue = _OptRequired.parse_value(self, pvalue)
 
-        # If the value is not required and not given to us, return unparsed
-        # value.
+        # If the value is not sent, return an empty value.
         #
-        # Note: a field can have a minimal value, but still be unsent (if it is
-        # not required) and if that happens the minimal length will not trigger
-        # an error.
+        # A field that has a minimal value option will trigger an error if it is
+        # not set at all.  We could make that optional in the future.  The
+        # minimal length check below will trigger an error.
         if pvalue is None:
-            return None
+            pvalue = u''
 
         # Convert the data value to the specified encoding if requested.
         if self.encoding is not None:
@@ -281,23 +324,29 @@ class _TextField(Field, _OptRequired):
                 # Encode a string for the proper encoding that will still be
                 # printable but with the offending chars replaced with
                 # something.
-                dvalue = pvalue.encode(self.encoding, 'replace')
-                raise ValueError(msg_registry['text-invalid-chars'], dvalue)
+                if self.encoding:
+                    rvalue = pvalue.encode(
+                        self.encoding, 'replace').decode(self.encoding)
+                else:
+                    rvalue = pvalue
+                raise ValueError(msg_registry['text-invalid-chars'], rvalue)
         else:
             # Otherwise we simply use the unicode value.
             dvalue = pvalue
 
         # Check the minimum and maximum lengths.
         if self.minlen is not None and self.minlen > len(dvalue):
-            raise ValueError(msg_registry['text-minlen'], dvalue)
+            raise ValueError(msg_registry['text-minlen'],
+                             self.render_value(dvalue))
         if self.maxlen is not None and len(dvalue) > self.maxlen:
-            raise ValueError(msg_registry['text-maxlen'], dvalue)
+            raise ValueError(msg_registry['text-maxlen'],
+                             self.render_value(dvalue))
 
         # Make sure that the value does not contain control chars.
         v, dvalue_chars = None, []
         for ch in dvalue:
             o = ord(ch)
-            if o < 0x20 and o != 10:
+            if o < 0x20 and o != 10 and o != 13:
                 v = ValueError(msg_registry['text-invalid-chars'])
             else:
                 # We're also building a clean version of the string for
@@ -315,6 +364,11 @@ class _TextField(Field, _OptRequired):
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            return u''
+        return _TextField.display_value(self, dvalue)
+
+    def display_value( self, dvalue ):
         if self.encoding is not None:
             assert isinstance(dvalue, str)
             # Convert the data value to a unicode object for rendering.
@@ -323,6 +377,7 @@ class _TextField(Field, _OptRequired):
             assert isinstance(dvalue, unicode)
             rvalue = dvalue
         return rvalue
+
 
 #-------------------------------------------------------------------------------
 #
@@ -351,13 +406,10 @@ class StringField(_TextField):
     def parse_value( self, pvalue ):
         dvalue = _TextField.parse_value(self, pvalue)
 
-        # Unset value should be returned without checks.
-        if dvalue is None:
-            return None
-
         # Check that the value contains no newlines.
         if '\n' in dvalue or '\r' in dvalue:
-            raise ValueError(msg_registry['text-invalid-chars'], dvalue)
+            raise ValueError(msg_registry['text-invalid-chars'],
+                             self.render_value(dvalue))
 
         if self.strip:
             # Strip the parsed valid text value.
@@ -402,6 +454,8 @@ class TextAreaField(_TextField):
         # the browser, in case some data value is set wrongly.
         return rvalue.replace('\r\n', '\n')
 
+    display_value = render_value
+
 
 #-------------------------------------------------------------------------------
 #
@@ -429,6 +483,9 @@ class PasswordField(StringField):
         else:
             return _TextField.render_value(self, dvalue)
 
+    def display_value( self, dvalue ):
+        # Never display passwords in any case ever!
+        return '*' * len(dvalue)
 
 #-------------------------------------------------------------------------------
 #
@@ -437,14 +494,23 @@ class DateField(StringField):
     A string field that accepts strings that represent dates, in some specific
     formats.
     """
-    types_data = (type(None), datetime.date,)
-    types_parse = (type(None), unicode,)
+    types_data = (NoneType, datetime.date,)
+    types_parse = (NoneType, unicode,)
     types_render = (unicode,)
     css_class = 'date'
 
-    # Note: for now, we only support iso-8601 format.  When this becomes
-    # necessary, some more improvements could be done here.
-    __date_re = re.compile('(\d\d\d\d)-(\d\d)-(\d\d)')
+    __def_display_format = '%a, %d %B %Y' # or '%x'
+
+    # Support ISO-8601 format.  
+    __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
+
+    # Support a natural format, like 11 Sep 2001, or Sep 11, 2001
+    __date_re2 = re.compile('(?P<day>\d+)\s+(?P<nmonth>\w+)\s+(?P<year>\d+)')
+    __date_re3 = re.compile('(?P<nmonth>\w+)\s+(?P<day>\d+)[\s,]+(?P<year>\d+)')
+
+    # Pre-fetch lists of constants for month locale lookups.
+    _mon_list = [getattr(locale, 'MON_%d' % x) for x in xrange(1, 13)]
+    _abmon_list = [getattr(locale, 'ABMON_%d' % x) for x in xrange(1, 13)]
 
     def __init__( self, name, label=None, hidden=None,
                   initial=None, required=None ):
@@ -452,30 +518,74 @@ class DateField(StringField):
                              initial, required, strip=True)
 
     def parse_value( self, pvalue ):
-        dvalue = StringField.parse_value(self, pvalue)
-
-        # Unset value should be returned without more checks.
-        if dvalue is None:
+        value = StringField.parse_value(self, pvalue)
+        assert isinstance(value, unicode)
+        
+        # Indicate that this field has not been sent.
+        if not value:
             return None
 
-        # Check that the value matches our format.
-        mo = self.__date_re.match(dvalue)
-        if not mo:
-            raise ValueError(
-                msg_registry['date-invalid-format'] % dvalue, None)
+        # Check formats.
+        for fre in self.__date_re1, self.__date_re2, self.__date_re3:
+            mo = fre.match(value)
+            if mo:
+                break
+        else:
+            raise ValueError(msg_registry['date-invalid-format'] % value, value)
 
+        year, day = map(int, mo.group('year', 'day'))
+        try:
+            month = int(mo.group('month'))
+        except IndexError:
+            # Get abbreviated and full month names.
+            abmons = map(locale.nl_langinfo, self._abmon_list)
+            mons = map(locale.nl_langinfo, self._mon_list)
+
+            nmonth = mo.group('nmonth')
+            try:
+                month = abmons.index(nmonth.capitalize()) + 1
+            except ValueError:
+                try:
+                    month = mons.index(nmonth.capitalize()) + 1
+                except ValueError:
+                    raise ValueError(
+                        msg_registry['date-invalid-month'] % nmonth, value)
+
+        assert type(month) is int
+            
         # Convert into date.
         try:
-            dvalue = datetime.date(*map(int, mo.groups()))
+            dvalue = datetime.date(year, month, day)
         except ValueError, e:
-            raise ValueError(msg_registry['date-invalid'] % dvalue, None)
+            raise ValueError(msg_registry['date-invalid'] % value,
+                             value)
 
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            return u''
+
         # Convert the date object in a format suitable for rendering it.
         rvalue = unicode(dvalue.isoformat())
         return rvalue
+
+    def display_value( self, dvalue ):
+        if dvalue is None:
+            return u''
+        return DateField._time_to_string(dvalue)
+
+    def _time_to_string( date ):
+        """
+        Convert a date object to a unicode string.  We need this because
+        strftime has calendar limitations on years before 1900.
+        """
+        if date.year < 1900:
+            # Use simplistic format for old dates.
+            return u'%d-%d-%d' % (date.year, date.month, date.day)
+        else:
+            return unicode(date.strftime(DateField.__def_display_format))
+    _time_to_string = staticmethod(_time_to_string)
 
 #-------------------------------------------------------------------------------
 #
@@ -486,7 +596,7 @@ class EmailField(StringField):
 
     Encoding is fixed to 'ascii', data is stripped automatically.
     """
-    types_data = (str, type(None))
+    types_data = (str,)
     css_class = 'email'
 
     def __init__( self, name, label=None, hidden=None,
@@ -499,20 +609,22 @@ class EmailField(StringField):
 
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
-        assert isinstance(dvalue, (type(None), str))
+        assert isinstance(dvalue, str)
 
-        # Unset value should be returned without checks.
-        if dvalue is None:
-            return None
+        # Accept an empty string as a valid value for email address.
+        if not dvalue:
+            return dvalue
 
         # Parse the email address using the appropriate Python module.
         name, addr = email.Utils.parseaddr(dvalue)
-        if (name, addr) == ('', ''):
-            raise ValueError(msg_registry['email-invalid'], dvalue)
+        if not addr:
+            raise ValueError(msg_registry['email-invalid'],
+                             self.render_value(dvalue))
         else:
             # Check for local addresses.
             if not self.accept_local and '@' not in addr:
-                raise ValueError(msg_registry['email-invalid'], dvalue)
+                raise ValueError(msg_registry['email-invalid'],
+                                 self.render_value(dvalue))
                 # Note: if we had a little more balls, we would remove the
                 # offending characters in the replacement value.
 
@@ -521,6 +633,13 @@ class EmailField(StringField):
             return addr
 
     def render_value( self, dvalue ):
+        # Mangle the @ character into an HTML equivalent.
+        # dvalue.replace('@', '&#64;')
+        # Note: disabled, until we can find a nice way to output this without
+        # escaping in htmlout.
+        return StringField.render_value(self, dvalue)
+
+    def display_value( self, dvalue ):
         # Mangle the @ character into an HTML equivalent.
         # dvalue.replace('@', '&#64;')
         # Note: disabled, until we can find a nice way to output this without
@@ -537,7 +656,7 @@ class URLField(StringField):
 
     Encoding is fixed to 'ascii', data is stripped automatically.
     """
-    types_data = (str, type(None))
+    types_data = (str,)
     css_class = 'url'
 
     def __init__( self, name, label=None, hidden=None,
@@ -547,16 +666,12 @@ class URLField(StringField):
 
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
-        assert isinstance(dvalue, (type(None), str))
-
-        # Unset value should be returned without checks.
-        if dvalue is None:
-            return None
+        assert isinstance(dvalue, str)
 
         # Check for embedded spaces.
         if ' ' in dvalue:
             raise ValueError(msg_registry['url-invalid'],
-                             dvalue.replace(' ', '?'))
+                             self.render_value(dvalue.replace(' ', '?')))
 
         # Note: eventually, we want to parse using urlparse or something.
 
@@ -569,18 +684,21 @@ class _NumericalField(Field, _OptRequired):
     Base class for a single-line text field that accepts and parses a numerical
     value.  The field has minimum and maximum values as well.  Classes such as
     int and float are derived from this class.
+
+    Note: the fields derived from this field can parse 'no value' and in that
+    case return None to indicate that nothing was sent by the user.
     """
-    types_parse = (type(None), unicode,)
+    types_parse = (NoneType, unicode,)
     types_render = (unicode,)
 
     def __init__( self, name,
                   label=None, hidden=None, initial=None, required=None,
-                  minval=None, maxval=None ):
+                  minval=None, maxval=None, format=None ):
         Field.__init__(self, name, label, hidden, initial)
         _OptRequired.__init__(self, required)
 
-        assert isinstance(minval, (type(None), self._numtype))
-        assert isinstance(maxval, (type(None), self._numtype))
+        assert isinstance(minval, (NoneType, self._numtype))
+        assert isinstance(maxval, (NoneType, self._numtype))
 
         self.minval = minval
         "Minimum value that is accepted."
@@ -588,45 +706,56 @@ class _NumericalField(Field, _OptRequired):
         self.maxval = maxval
         "Maximum value that is accepted."
 
+        self.format = unicode(format)
+        """Printf-like format for output display.  If this is not set the
+        default string conversion routines are used.  Note that you should set
+        an appropriate format for the relevant numerical type.  Also, this does
+        not affect the input parsing at all."""
+
     def parse_value( self, pvalue ):
         # Check the required value.
         pvalue = _OptRequired.parse_value(self, pvalue)
 
         # Unset value should be returned without checks.
-        if pvalue is None:
-            return None
-
-        # Treat an empty string submission same as unset.
-        if pvalue == u'':
-            return None
+        # And treat an empty string submission same as unset.
+        if pvalue is None or pvalue == u'':
+            return None # Indicate nothing sent by the user.
 
         # Otherwise try to perform the conversion and assume that the string is
         # convertible to the numerical type.
         try:
             dvalue = self._numtype(pvalue)
         except ValueError:
-            raise ValueError(msg_registry['numerical-invalid'], None)
+            raise ValueError(msg_registry['numerical-invalid'] % pvalue,
+                             pvalue)
 
         # Check bounds.
         if self.minval is not None and dvalue < self.minval:
             raise ValueError(msg_registry['numerical-minval'] % self.minval,
-                             dvalue)
+                             self.render_value(dvalue))
         if self.maxval is not None and dvalue > self.maxval:
             raise ValueError(msg_registry['numerical-maxval'] % self.maxval,
-                             dvalue)
+                             self.render_value(dvalue))
 
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            return u''
         # Simply convert from the numerical type into a string.
-        return unicode(dvalue)
+        if self.format:
+            return self.format % dvalue
+        else:
+            return unicode(dvalue)
+
+    display_value = render_value
 
 
 class IntField(_NumericalField):
     """
     A single-line text field that accepts and parses a Python integer.
     """
-    types_data = (int, type(None))
+    types_data = (NoneType, int,)
     css_class = 'int'
     _numtype = int
 
@@ -635,7 +764,7 @@ class FloatField(_NumericalField):
     """
     A single-line text field that accepts and parses a Python float.
     """
-    types_data = (float, type(None))
+    types_data = (NoneType, float,)
     css_class = 'float'
     _numtype = float
 
@@ -649,9 +778,18 @@ class BoolField(Field): # Cannot be optionally required.
     Note: this field cannot be required.
     """
     types_data = (bool,)
-    types_parse = (type(None), unicode,)
-    types_render = (unicode,)
+    types_parse = (NoneType, unicode,)
+    types_render = (bool,)
     css_class = 'bool'
+
+    def __init__( self, name,
+                  label=None, hidden=None, initial=None,
+                  disptrue=None, dispfalse=None ):
+        Field.__init__(self, name, label, hidden, initial)
+
+        self.disptrue = disptrue
+        self.dispfalse = dispfalse
+        """String for display.  This can be a useful convenience."""
 
     def parse_value( self, pvalue ):
         # Accept a missing argument or an empty string as False value (browsers
@@ -660,9 +798,15 @@ class BoolField(Field): # Cannot be optionally required.
         return bool(pvalue is not None and pvalue)
 
     def render_value( self, dvalue ):
-        # We convert the value to an int to show up appropriately in the input.
-        return dvalue and u'1' or u'0'
+        if dvalue is None:
+            return False
+        return dvalue
 
+    def display_value( self, dvalue ):
+        if dvalue:
+            return self.disptrue or msg_registry['display-true']
+        else:
+            return self.dispfalse or msg_registry['display-false']
 
 #-------------------------------------------------------------------------------
 #
@@ -691,7 +835,7 @@ class _MultipleField(Field):
     See the concrete fields for an explanation of the kinds of parsing input
     that they can accept, and how they deal with them.
     """
-    types_parse = (type(None), list,)
+    types_parse = (NoneType, list,)
     types_render = (list,)
 
     def __init__( self, name, values,
@@ -745,7 +889,7 @@ class _MultipleField(Field):
           strings, but these will be automatically converted to strings.
 
         """
-        self.valueset = set()
+        self.valueset = {}
         self.values = []
 
         # Accumulator for the normalized values.
@@ -795,7 +939,7 @@ class _MultipleField(Field):
                 # We add the new pair to our internal, normalized set of
                 # values.
                 self.values.append( (value, label) )
-                self.valueset.add(value)
+                self.valueset[value] = label
 
 
     def checkvalues( self, values ):
@@ -829,13 +973,9 @@ class _Orientable:
     this setting allows the user to choose the layout style.
     """
 
-    ORI_VERTICAL = 1
-    ORI_HORIZONTAL = 2
-
     def __init__( self, orient=ORI_VERTICAL ):
 
-        assert orient in [_Orientable.ORI_VERTICAL,
-                          _Orientable.ORI_HORIZONTAL]
+        assert orient in [ORI_HORIZONTAL, ORI_VERTICAL]
         self.orient = orient
         """Orientation of the field for rendering."""
 
@@ -849,8 +989,8 @@ class _OneChoiceField(_MultipleField):
     least one choice that must be selected.
     """
     types_data = (str,)
-    types_parse = (type(None), unicode)
-    types_render = (list,)
+    types_parse = (NoneType, unicode, list)
+    types_render = (str,)
 
     def __init__( self, name, values,
                   label=None, hidden=None, initial=None, nocheck=None ):
@@ -859,7 +999,7 @@ class _OneChoiceField(_MultipleField):
         # for values.
         if isinstance(initial, int):
             initial = str(initial)
-        assert isinstance(initial, (type(None),) + _OneChoiceField.types_data)
+        assert isinstance(initial, (NoneType,) + _OneChoiceField.types_data)
 
         # Initialize base classes, always set as required.
         _MultipleField.__init__(self, name, values, label, hidden,
@@ -878,12 +1018,12 @@ class _OneChoiceField(_MultipleField):
             # one value, in which case it is not really the user's fault, and
             # the right thing to do is to return an error to the user so that he
             # can make the desired choice.
-            raise ValueError(msg_registry['one-choice-required'], None)
+            raise ValueError(msg_registry['one-choice-required'])
 
         if isinstance(pvalue, list):
             # We really should not be receiving more than one value here.
             raise RuntimeError(
-                "Error: internal error with radio value encoding")
+                "Error: internal error with radio (list received).")
 
         # Decode the string as a ascii strings.
         try:
@@ -891,17 +1031,28 @@ class _OneChoiceField(_MultipleField):
         except UnicodeEncodeError:
             # The values really should be ascii-encodeable strings...
             raise RuntimeError(
-                "Error: internal error with radio value encoding")
+                "Error: internal error with radio (value encoding)")
 
         # Check the given argument against the value.
-        self.checkvalues( [dvalue] )
+        self.checkvalues( (dvalue,) )
 
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            if self.values:
+                return self.values[0][0]
+            else:
+                # Not sure what to do if there are not field values.
+                raise RuntimeError("Error: single selection field without "
+                                   "values... cannot set default state.")
+
         # Nothing special to do, the selection string should remain that way
         # for the renderer to do its thing.
         return dvalue
+
+    def display_value( self, dvalue ):
+        return self.valueset[dvalue]
 
 
 #-------------------------------------------------------------------------------
@@ -915,7 +1066,7 @@ class RadioField(_OneChoiceField, _Orientable):
 
     def __init__( self, name, values,
                   label=None, hidden=None, initial=None,
-                  nocheck=None, orient=_Orientable.ORI_VERTICAL ):
+                  nocheck=None, orient=ORI_VERTICAL ):
         _OneChoiceField.__init__(self, name, values, label, hidden,
                                  initial, nocheck)
         _Orientable.__init__(self, orient)
@@ -941,8 +1092,8 @@ class _ManyChoicesField(_MultipleField):
     """
     Zero or many checkbox choices among many.
     """
-    types_data = (type(None), str, list)
-    types_parse = (type(None), unicode, list)
+    types_data = (list,)
+    types_parse = (NoneType, unicode, list)
     types_render = (list,)
 
     def __init__( self, name, values, label=None, hidden=None,
@@ -961,7 +1112,7 @@ class _ManyChoicesField(_MultipleField):
                     assert isinstance(el, str)
                 newinitial.append(el)
             initial = newinitial
-        assert isinstance(initial, (type(None),) + _ManyChoicesField.types_data)
+        assert isinstance(initial, (NoneType,) + _ManyChoicesField.types_data)
 
         # Initialize base classes, always set as required.
         _MultipleField.__init__(self, name, values, label, hidden,
@@ -994,9 +1145,17 @@ class _ManyChoicesField(_MultipleField):
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            return []
+
         # Nothing special to do, the selection string should remain that way
         # for the renderer to do its thing.
         return dvalue
+
+    def display_value( self, dvalue ):
+        # Get labels and join them.
+        labels = [self.valueset[x] for x in dvalue]
+        return u', '.join(labels)
 
 
 #-------------------------------------------------------------------------------
@@ -1010,7 +1169,7 @@ class CheckboxesField(_ManyChoicesField, _Orientable):
 
     def __init__( self, name, values,
                   label=None, hidden=None, initial=None,
-                  nocheck=None, orient=_Orientable.ORI_VERTICAL ):
+                  nocheck=None, orient=ORI_VERTICAL ):
 
         _ManyChoicesField.__init__(self, name, values, label, hidden,
                                    initial, nocheck)
@@ -1030,7 +1189,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, _OptRequired):
     provide at least one value, use the 'required' option.
 
     """
-    types_data = _ManyChoicesField.types_data
+    types_data = (list, str,) # Must include all possibilities for many or one.
     types_parse = _ManyChoicesField.types_parse
     types_render = _ManyChoicesField.types_render
 
@@ -1089,6 +1248,11 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, _OptRequired):
         else:
             return _OneChoiceField.parse_value(self, pvalue)
 
+    def display_value( self, dvalue ):
+        if self.multiple:
+            return _ManyChoicesField.display_value(self, dvalue)
+        else:
+            return _OneChoiceField.display_value(self, dvalue)
 
 
 #-------------------------------------------------------------------------------
@@ -1102,8 +1266,8 @@ class JSDateField(Field): # Is always required.
     conditions of utilisation of that code is that a notice should be present
     and kept intact somewhere in the comments.
     """
-    types_data = (type(None), datetime.date,)
-    types_parse = (type(None), unicode,)
+    types_data = (datetime.date,)
+    types_parse = (NoneType, unicode,)
     types_render = (unicode,)
     css_class = 'jsdate'
 
@@ -1130,9 +1294,11 @@ class JSDateField(Field): # Is always required.
         assert re.match(JSDateField.__script_re, name)
 
     def parse_value( self, pvalue ):
-        # See note about a value expected to have been submitted for the field,
-        # in parse_value() docstring.
-        assert pvalue is not None
+        if pvalue is None:
+            # No value submitted... this is strange, since this field should
+            # always send us a value, always, even without user edits. Raise a
+            # strange user error.
+            raise ValueError(msg_registry['date-invalid'] % '')
 
         # Encode value into ascii.
         try:
@@ -1150,15 +1316,22 @@ class JSDateField(Field): # Is always required.
         try:
             dvalue = datetime.date(*map(int, mo.groups()))
         except ValueError, e:
-            raise ValueError(msg_registry['date-invalid'] % dvalue, None)
+            raise ValueError(msg_registry['date-invalid'] % pvalue)
 
         return dvalue
 
     def render_value( self, dvalue ):
+        if dvalue is None:
+            return u''
+
         # Convert the date object in a format suitable for being accepted by the
-        # Javascript code.
+        # Javascript code. Note: this may not work before 1900.
         rvalue = dvalue.strftime('%Y%m%d')
         return rvalue
+
+    def display_value( self, dvalue ):
+        assert dvalue is not None
+        return DateField._time_to_string(dvalue)
 
 
 #-------------------------------------------------------------------------------
@@ -1176,8 +1349,8 @@ class FileUploadField(Field, _OptRequired):
     is possible
     """
 
-    types_data = (type(None), types.InstanceType,)
-    types_parse = (type(None), types.InstanceType, str,)
+    types_data = (NoneType, types.InstanceType,)
+    types_parse = (NoneType, types.InstanceType, str,)
     types_render = (unicode,)
     css_class = 'file'
 
@@ -1214,8 +1387,11 @@ class FileUploadField(Field, _OptRequired):
         their types 'by name'.
         """
 
+        # Check for not submitted.
+        if pvalue is None:
+            dvalue = None
         # Check for strings.
-        if isinstance(pvalue, str):
+        elif isinstance(pvalue, str):
             # We got data as a string, wrap around file-like object.
             #
             # Note: we need to accept string types, since from the mechanize
@@ -1261,7 +1437,7 @@ class FileUploadField(Field, _OptRequired):
         # special case.
         if self.required and pvalue is None:
             # We indicate an error mentioning that this field was required.
-            raise ValueError(msg_registry['error-required-value'], None)
+            raise ValueError(msg_registry['error-required-value'])
 
         return dvalue
 
@@ -1270,6 +1446,10 @@ class FileUploadField(Field, _OptRequired):
         # anyway (at least not without a warning, when it is, e.g. Opera).
         return None
 
+    def display_value( self, dvalue ):
+        # Nothing to display from this, it's a file, you'll have to do something
+        # special.
+        raise RuntimeError("Error: attempting to display a file upload.")
 
 class FileUpload:
     """

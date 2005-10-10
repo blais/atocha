@@ -50,7 +50,9 @@ class Form:
 
     __def_action = None
     __def_method = 'POST'
-    __def_encoding = 'UTF-8'
+    __def_enctype = None # 'application/x-www-form-urlencoded'
+    __def_enctype_file = 'multipart/form-data'
+    __def_accept_charset = 'UTF-8'
 
     def __init__( self, name, *fields, **kwds ):
         """
@@ -87,7 +89,12 @@ class Form:
         self.method = kwds.get('method', self.__def_method)
         "The submit method, GET or POST."
 
-        self.encoding = kwds.get('encoding', self.__def_encoding)
+        self.enctype = kwds.get('enctype', self.__def_enctype)
+        """Encapsulation type for the form data.  This should be set
+        appropriately, depending on the presence of a file upload input."""
+
+        self.accept_charset = kwds.get('accept_charset',
+                                       self.__def_accept_charset)
         "The charset encoding that the form handler will accept."
 
         self._fields = []
@@ -143,7 +150,10 @@ class Form:
         Returns a list of the variable names that the fields encompass.
         This will normally be the same as the field names.
         """
-        return [x.varname for x in self._fields]
+        varnames = []
+        for fi in self._fields:
+            varnames.extend(fi.varnames)
+        return varnames
 
     def labels( self, fieldnames=None ):
         """
@@ -182,9 +192,15 @@ class Form:
         """
         if not isinstance(field, Field):
             raise TypeError('Expecting a Field instance.')
+        elif isinstance(field, FileUploadField):
+            # If a FileUpload field is added, make sure that we modify the
+            # enctype for the form appropriately.
+            self._enctype = self.__def_enctype
+
         if field.name in self._fieldsmap:
             raise RuntimeError(
                 'Error: Field name %s is already used.' % field.name)
+
         self._fields.append(field)
         self._fieldsmap[field.name] = field
 
@@ -233,67 +249,64 @@ class Form:
         return fields
 
 
-    def parse( self, args, only=None, ignore=None ):
+    def parse_field( self, fi, args ):
         """
-        Parse and validate the incoming arguments for the form.  The values of
-        the parsed arguments are returned in a dict which is indexed by the
-        field name (and not the variable name-- they are usually the same, but
-        they may differ, see class Field).
-
-        If there are errors, the parsed values are set as per the protocol for
-        the specific fields (i.e. they *may* not return a settable replacement
-        value if there is an error; if there is no replacement value passed
-        along with the ValueError, the replacement value is always set to None).
-
-        Therefore, a value for all the fields variable names is guaranteed to be
-        present in the returned array, with values of None for those arguments
-        that were not present.
+        Parse and validate the incoming arguments for a single field.  The value
+        of the parsed argument is returned, along with accompanying errors, if
+        any.
 
         This form parsing code extracts ONLY the fields of args for which there
         are corresponding fields.  It uses the variable names specified on the
         fields for finding the values to be parsed.
 
+        If there are errors, the replacement values are provided as per the
+        protocol for the specific fields (see Field.parse_value() for full
+        details of this protocol).
+
         Note that this method is not really meant to be called from client code;
-        you should instead make use of the FormParser, which provide support for
-        common patterns for parsing arguments, which include possibly some
-        client code for validating combinations of parsed arguments and error
+        you should instead make use of the FormParser, which provides support
+        for common patterns for parsing arguments, which include possibly some
+        client code for coordinating combinations of parsed arguments and error
         rendering.
 
         :Arguments:
 
-          See the documentation for method Form.select_fields() for the meaning
-          of the 'only' and 'ignore' arguments.
+          - 'fi' -> Field instance: a field that is part of this form.
 
-        :Return Values: a triple, consisting of
+          - 'args' -> dict: a dictionary of the arguments in 'parse' types.
+            This method will extract the appropriate key from the field's
+            varname.
 
-          - 'parsed_args' -> dict of str to parsed values: a dict of parsed
-            arguments, each key being store as the varnames of the fields,
-            including values for the arguments that failed to parse/validate, as
-            set by the field.
+        :Return Values:
 
-          - 'errors' -> dict of str to str: a dict of field names to error
-            messages for which there were errors (illegal values were supplied,
-            the fields did not validate, required values, etc. It depends on the
-            field type itself).
+          A pair of 'success' and 'value', and there are two possibilities:
 
-        If 'errors' is None, no error occurred.
+          - (0, parsed_arg): success, and the parsed argument value (which can
+            be None);
+
+          - (1, (error_message, repl_rvalue)): error, with an appropriate error
+            message, unparsed replacement value (in one of the 'render' types
+            for the field).  The replacement value is used to provide something
+            for re-rendering a field when the value could not be parsed.
+
+            The message is, for example, when an illegal value was supplied,
+            when a field did not validate, the value was required, etc.  ...it
+            depends on the field type itself.
+
         """
-        fields = self.select_fields(only, ignore)
+        assert isinstance(fi.varnames, list) # Sanity check.
 
-        # Initialize return values.
-        parsed_args = {}
-        errors = {}
-
-        # For each selected field...
-        for fi in self._fields:
+        # Accumulate the parsed value of each of the varnames for the field.
+        pvalues = []
+        for varname in fi.varnames:
             try:
-                argvalue = args[fi.varname]
+                argvalue = args[varname]
 
                 # Internal sanity check, to make sure that values of None are
                 # always set by use to indicate that an argument is missing,
                 # then letting the fields deal with the specific meaning of that
                 # themselves.
-                assert argvalue != None
+                assert argvalue is not None
 
             except KeyError:
                 # The argument value was not present/found...  we simply set the
@@ -319,29 +332,26 @@ class Form:
             elif isinstance(argvalue, str):
                 # The value is a string, directly. Decode that.
                 try:
-                    pvalue = argvalue.decode(self.encoding)
+                    pvalue = argvalue.decode(self.accept_charset)
                 except UnicodeDecodeError, e:
                     # Broken client browser?  There is not much we can do if
                     # the browser cannot send the data in the appropriate
                     # encoding.
-                    errors[fi.name] = msg_registry['error-invalid-encoding']
+                    return (1, (msg_registry['error-invalid-encoding'],
+                                None, None))
 
-                    parsed_args[fi.name] = None
-                    continue # Skip to next field.
-
-            elif isinstance(argvalue, (list, tuple)):
+            elif isinstance(argvalue, list):
                 # The raw argument type is a list of strings.
                 # Decode each string individually to unicode before parsing.
                 vallist = []
                 for val in argvalue:
                     try:
-                        vallist.append(val.decode(self.encoding))
+                        vallist.append(val.decode(self.accept_charset))
                     except UnicodeDecodeError, e:
                         # (Same decoding error as above.)
-                        errors[fi.name] = msg_registry['error-invalid-encoding']
+                        return (1, (msg_registry['error-invalid-encoding'],
+                                    None, None))
 
-                        parsed_args[fi.name] = None
-                        continue # Skip to next field.
                 pvalue = vallist
 
             else:
@@ -349,60 +359,64 @@ class Form:
                     'Internal error with types: unexpected type: %s.' %
                     type(argvalue))
 
-            # Now we check that we're always giving the field an expected value
-            # type for the stuff to be parsed.
+            pvalues.append(pvalue)
+
+        # If there is a single pvalue, unwrap it form the list.
+        if len(pvalues) == 1:
+            pvalue = pvalues[0]
+        else:
+            pvalue = pvalues
+
+        # Now we check that we're always giving the field an expected value
+        # type for the stuff to be parsed.
+        #
+        # Note that we do not make an exception for the None type, which
+        # indicates that the value is absent (we let the field deal with
+        # that situation itself), but the field must specify itself if it
+        # can accept that situation (the answer should be yes, most of the
+        # time, see the types_parse in each field).
+        if not isinstance(pvalue, fi.types_parse):
+            raise RuntimeError(
+                'Internal error with parse value type: %s.' % type(pvalue))
+
+        #
+        # Ask the field to parse the value itself.
+        #
+        try:
+            parsed_dvalue = fi.parse_value(pvalue)
+
+            # We check that the type of the parsed data value is one of the
+            # expected types.
+            assert isinstance(parsed_dvalue, fi.types_data)
+
+        except ValueError, e:
+            # There was an error parsing the field, i.e. the parsing raised
+            # an invalid condition for that field. This is the receiving
+            # part of the protocol for the fields to signal a user error.
             #
-            # Note that we do not make an exception for the None type, which
-            # indicates that the value is absent (we let the field deal with
-            # that situation itself), but the field must specify itself if it
-            # can accept that situation (the answer should be yes, most of the
-            # time, see the types_parse in each field).
-            if not isinstance(pvalue, fi.types_parse):
-                raise RuntimeError(
-                    'Internal error with parse value type: %s.' % type(pvalue))
-
+            # Pickup the error message, and the value to be set instead, if
+            # given, via the second attribute of the exception (see Field
+            # class for a description of the protocol).
             #
-            # Ask the field to parse the value itself.
-            #
-            try:
-                dvalue = parsed_args[fi.name] = fi.parse_value(pvalue)
+            # Note: there is always a string specified for an error.
+            repl_rvalue = None
+            if len(e.args) == 2:
+                msg, repl_rvalue = e.args
+            else:
+                assert len(e.args) == 1
+                msg, = e.args
+            assert isinstance(msg, unicode)
 
-                # We check that the type of the parsed data value is one of the
-                # expected types.
-                assert isinstance(dvalue, fi.types_data)
+            # We check that the data type of the error replacement value is
+            # a valid data type for that field.
+            assert repl_rvalue is None or \
+                   isinstance(repl_rvalue, fi.types_render)
 
-            except ValueError, e:
-                # There was an error parsing the field, i.e. the parsing raised
-                # an invalid condition for that field. Pickup the error message,
-                # and the value to be set instead, if given, via the second
-                # attribute of the exception (see Field class for a description
-                # of the protocol).
-                #
-                # Note: there is always a string specified for an error.
-                if len(e.args) == 2:
-                    msg, dvalue = e.args
-                else:
-                    msg, dvalue = str(e), None
+            # Return error produced by the field.
+            return (1, (msg, repl_rvalue))
 
-                # Mark the error.
-                errors[fi.name] = msg
-
-                # Set the replacement value in the slot for the parsed value.
-                parsed_args[fi.name] = dvalue
-
-                # We check that the data type of the error replacement value is
-                # a valid data type for that field.
-                assert isinstance(dvalue, (type(None),) + fi.types_data)
-
-
-        # Internal sanity check to make sure that we always fill an output for all
-        # the checked fields.
-        for fi in self._fields:
-            assert fi.name in parsed_args
-
-        if not errors:
-            errors = None
-        return parsed_args, errors
+        # Return succesfully parsed value.
+        return (0, parsed_dvalue)
 
 
     def __get_submit_values( self ):

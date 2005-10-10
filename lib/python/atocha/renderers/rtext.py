@@ -12,29 +12,27 @@ import StringIO, codecs
 
 # atocha imports.
 from atocha.render import FormRenderer
+from atocha.fields import ORI_VERTICAL
 from atocha.messages import msg_type
 
 
-__all__ = ['TextFormRenderer']
+__all__ = ['TextFormRenderer', 'TextDisplayRenderer']
 
 
 #-------------------------------------------------------------------------------
 #
-class TextFormRenderer(FormRenderer):
+class TextRenderer(FormRenderer):
     """
-    Form renderer that outputs HTML text directly.
-
-    See base class for full details.
-    """
+    Base class for all renderers that will output to text.
+    """    
 
     # Default encoding for output.
-    default_encoding = 'UTF-8'
+    default_encoding = None # Default: to unicode.
 
-    # CSS class for errors.
-    css_errors = 'form-error'
-    css_table = 'form-table'
-    css_label = 'form-label'
-    css_input = 'form-input'
+    # CSS classes.
+    css_errors = u'formerror'
+    css_table = u'formtable'
+    css_label = u'formlabel'
 
     def __init__( self, *args, **kwds ):
         """
@@ -59,18 +57,70 @@ class TextFormRenderer(FormRenderer):
         FormRenderer.__init__(self, *args, **kwds)
 
 
-    def __create_buffer( self ):
+    def _create_buffer( self ):
         """
         Create the default file for output.
         """
-        return codecs.EncodedFile(StringIO.StringIO(), self.outenc)
+        sio = StringIO.StringIO()
+        if self.outenc is not None:
+            Writer = codecs.getwriter(self.outenc)
+            sio = Writer(sio)
+        return sio
 
 
+    def do_table( self, pairs=(), extra=None ):
+        # Use side-effect for efficiency if requested.
+        f = self.ofile or self._create_buffer()
+
+        print >> f, u'<table class=%s>' % self.css_table
+        for label, inputs in pairs:
+            label = label and _(label) or u''
+            assert isinstance(label, unicode)
+            assert isinstance(inputs, unicode)
+
+            if self.label_semicolon:
+                label += ':'
+            print >> f, ((u'<tr><td class="%s">%s</td>\n'
+                          u'    <td class="%s">%s</td></tr>') %
+                         (self.css_label, label, self.css_input, inputs or u''))
+        if extra:
+            assert isinstance(extra, unicode)
+            print >> f, extra
+        print >> f, u'</table>'
+
+        if self.ofile is None: return f.getvalue()
+
+    def _geterror( self, errmsg ):
+        if errmsg:
+            assert isinstance(errmsg, unicode)
+            return (u'<span class="%s">%s</span><br/>' %
+                    (self.css_errors, errmsg))
+        else:
+            return u''
+
+
+#-------------------------------------------------------------------------------
+#
+class TextFormRenderer(TextRenderer):
+    """
+    Form renderer that outputs HTML text directly.
+
+    See FormRenderer class for full details.
+    """
+
+    # CSS classes.
+    css_input = u'forminput'
+    css_required = u'formreq'
+    css_vertical = u'formminitable'
+
+    _emptyin = u'<input name="%s" type="%s" value="%s" class="%s" />'
+    _in = u'<input name="%s" type="%s" value="%s" class="%s">%s</input>'
+    
     def do_render( self, fields, action, submit ):
         form = self._form
         try:
             # File object that gets set as a side-effect.
-            self.ofile = f = self.__create_buffer()
+            self.ofile = f = self._create_buffer()
 
             # (Side-effect will add to the file.)
             self.do_render_container(action)
@@ -82,7 +132,7 @@ class TextFormRenderer(FormRenderer):
             self.do_render_submit(submit)
 
             # Close the form (the container rendering only outputs the header.
-            print >> f, '</form>'
+            print >> f, u'</form>'
         finally:
             self.ofile = None
 
@@ -91,71 +141,61 @@ class TextFormRenderer(FormRenderer):
 
     def do_render_container( self, action ):
         # Use side-effect for efficiency if requested.
-        f = self.ofile or self.__create_buffer()
+        f = self.ofile or self._create_buffer()
         form = self._form
 
-        assert action is not None
+        if action is None:
+            raise RuntimeError('Error: You must specify a non-null action '
+                               'for rendering this form.')
 
-        print >> f, ('<form id="%s" name="%s" action="%s" method="%s"' %
-                     (form.name, form.name, action, form.method))
+        # Other options.
+        opts = [('id', form.name),
+                ('name', form.name),
+                ('action', form.action),
+                ('method', form.method),]
+        if form.accept_charset is not None:
+            opts.append(('accept-charset', form.accept_charset))
+        if form.enctype is not None:
+            opts.append(('enctype', form.enctype))
+
+        print >> f, (u'<form %s>' % ' '.join(['%s="%s"' % x for x in opts]))
 
         if self.ofile is None: return f.getvalue()
 
 
     def do_render_table( self, fields ):
         # Use side-effect for efficiency if requested.
-        f = self.ofile or self.__create_buffer()
+        f = self.ofile or self._create_buffer()
 
-        print >> f, '<table class="%s">' % self.css_table
-        hidden_rendered = []
+        hidden, visible = [], []
         for field in fields:
             rendered = self._render_field(field)
             if field.ishidden():
-                hidden_rendered.append(rendered)
+                hidden.append(rendered)
             else:
-                label = field.label and _(field.label) or ''
-                if self.label_semicolon:
-                    label += ':'
-                print >> f, (('<tr><td class="%s">%s</td>\n'
-                              '    <td class="%s">%s</td></tr>') %
-                             (self.css_label, label, self.css_input, rendered))
-        print >> f, '\n'.join(hidden_rendered)
-        print >> f, '</table>'
-
-        if self.ofile is None: return f.getvalue()
-
-
-    def do_table( self, label=None, inputs=None ):
-        # Use side-effect for efficiency if requested.
-        f = self.ofile or self.__create_buffer()
-
-        print >> f, '<table>'
-        for field in fields:
-            label = label and _(label) or ''
-            if self.label_semicolon:
-                label += ':'
-            print >> f, (('<tr><td class="%s">%s</td>\n'
-                          '    <td class="%s">%s</td></tr>') %
-                         (self.css_label, label, self.css_input, inputs))
-        print >> f, '\n'.join(hidden_rendered)
-        print >> f, '</table>'
+                label = _(field.label)
+                if field.isrequired():
+                    label += u'<span class="%s">*</a>' % self.css_required
+                visible.append( (label, rendered) )
+            
+        self.do_table(visible, '\n'.join(hidden))
 
         if self.ofile is None: return f.getvalue()
 
 
     def do_render_submit( self, submit ):
         # Use side-effect for efficiency if requested.
-        f = self.ofile or self.__create_buffer()
+        f = self.ofile or self._create_buffer()
 
         if isinstance(submit, msg_type):
-            print >> f, ('<input type="submit" value="%s" />' %
-                         _(submit).encode(self.outenc))
+            print >> f, (u'<input type="submit" value="%s" />' %
+                         _(submit))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
                 print >> f, \
-                      ('<input type="submit" name="%s" value="%s" />' %
-                       (name, _(value).encode(self.outenc)))
+                      (u'<input type="submit" name="%s" value="%s" />' %
+                       (name, _(value)))
 
         if self.ofile is None: return f.getvalue()
 
@@ -165,12 +205,12 @@ class TextFormRenderer(FormRenderer):
     def renderHidden( self, field, rvalue ):
         inputs = []
 
-        if isinstance(rvalue, str):
-            inputs.append('<input name="%s" type="hidden" value="%s" />' %
+        if isinstance(rvalue, unicode):
+            inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
                           (field.name, rvalue))
-        elif isinstance(rvalue, (list, tuple)):
+        elif isinstance(rvalue, list):
             for rval in rvalue:
-                inputs.append('<input name="%s" type="hidden" value="%s" />' %
+                inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
                               (field.name, rval))
         else:
             raise RuntimeError("Error: unexpected type '%s' for rendering." %
@@ -179,120 +219,143 @@ class TextFormRenderer(FormRenderer):
         return '\n'.join(inputs)
 
 
-    def _geterror( self, error ):
-        if error:
-            return ('<span class="%s">%s</span><br/>' %
-                    (self.css_errors, error))
+    def _input( self,
+                htmltype, field, value, required,
+                checked=False, label=None ):
+        """
+        Render an html input.
+        """
+        if checked:
+            checkstr = u'checked="1"'
         else:
-            return ''
+            checkstr = u''
 
-    def _simple( self, field, rvalue, error, required, htmltype ):
+        fargs = (field.name,
+                 htmltype,
+                 value or u'',
+                 field.css_class,
+                 checkstr)
+        
+        if label is not None:
+            o = ((u'<input name="%s" type="%s" value="%s" '
+                  u'class="%s" %s>%s</input>') % (fargs + (label,)))
+        else:
+            o = (u'<input name="%s" type="%s" value="%s" class="%s" %s/>' %
+                 fargs)
+        return o
+            
+    def _single( self,
+                 htmltype, field, value, errmsg, required,
+                 checked=False, label=None ):
         """
-        Render the simple field with the given parameters.
+        Render a single field.
         """
-        return (self._geterror(error) +
-                '<input name="%s" type="%s" value="%s" class="%s" />' %
-                (field.name, htmltype, rvalue or '', field.css_class))
+        return self._geterror(errmsg) + \
+               self._input(htmltype, field, value, required, checked, label)
 
-    def renderStringField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def _orient( self, field, inputs ):
+        """
+        Place the given list of inputs in a small vertical table if necessary.
+        """
+        if field.orient is ORI_VERTICAL:
+            s = StringIO.StringIO()
+            s.write(u'<table class="%s">\n' % self.css_vertical)
+            for i in inputs:
+                s.write(u'<tr><td>%s</td></td>\n' % i)
+            s.write(u'</table>\n')
+            return s.getvalue()
+        else:
+            return u'\n'.join(inputs)
+        
+    def renderStringField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderTextAreaField( self, field, rvalue, error, required ):
-        s = self._geterror(error)
-        rowstr = field.rows and ' rows="%d"' % field.rows or ''
-        colstr = field.cols and ' cols="%d"' % field.cols or ''
-        return (self._geterror(error) +
-                '<textarea name="%s" %s %s class="%s">%s</textarea>' %
+    def renderTextAreaField( self, field, rvalue, errmsg, required ):
+        s = self._geterror(errmsg)
+        rowstr = field.rows and u' rows="%d"' % field.rows or u''
+        colstr = field.cols and u' cols="%d"' % field.cols or u''
+        return (self._geterror(errmsg) +
+                u'<textarea name="%s" %s %s class="%s">%s</textarea>' %
                 (field.name, rowstr, colstr, field.css_class, rvalue or ''))
 
-        return self._simple(field, rvalue, error, required, 'text')
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderPasswordField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderPasswordField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderDateField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderDateField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderEmailField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderEmailField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderURLField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderURLField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderIntField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderIntField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderFloatField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'text')
+    def renderFloatField( self, field, rvalue, errmsg, required ):
+        return self._single('text', field, rvalue, errmsg, required)
 
-    def renderBoolField( self, field, rvalue, error, required ):
-        return self._simple(field, rvalue, error, required, 'checkbox')
+    def renderBoolField( self, field, rvalue, errmsg, required ):
+        # The render type calls for any value and for the rvalue to determine
+        # whether this will get checked or not.
+        return self._single('checkbox', field, u'1', errmsg, required, rvalue)
 
-##  def render_MultipleField( self, field, rvalue, error, required ):
-##  def render_Orientable:( self, field, rvalue, error, required ):
-##  def render_OneChoiceField( self, field, rvalue, error, required ):
-##  def renderRadioField( self, field, rvalue, error, required ):
-##  def renderMenuField( self, field, rvalue, error, required ):
-##  def render_ManyChoicesField( self, field, rvalue, error, required ):
-##  def renderCheckboxesField( self, field, rvalue, error, required ):
-##  def renderListboxField( self, field, rvalue, error, required ):
-##  def renderJSDateField( self, field, rvalue, error, required ):
-##  def renderFileUploadField( self, field, rvalue, error, required ):
-##  def renderFileUpload( self, field, rvalue, error, required ):
+    def renderRadioField( self, field, rvalue, errmsg, required ):
+        assert rvalue is not None
+        inputs = []
+        for vname, label in field.values:
+            checked = bool(vname == rvalue)
+            inputs.append(
+                self._input('radio', field, vname, required, checked, label))
+        output = self._orient(field, inputs)
+        return self._geterror(errmsg) + output
 
-# FIXME: support the required field.
+    def renderMenuField( self, field, rvalue, errmsg, required ):
+##         assert rvalue is not None
+##         inputs = []
+##         lines = []
+##         lines.append(
+##             u'<select name="%s" class="%s">' % (field.name, field.css_class))
+##         for vname, label in field.values:
+##             checked = bool(vname == rvalue)
+##             inputs.append(
+##                 self._input('radio', field, vname, required, checked, label))
+##         lines.append(u'</select>')
 
-## FIXME: complete this.
+        return self._geterror(errmsg) + output
 
-
-
-
-
+## FIXME continue here
+        raise NotImplementedError
 
 #
-# # guarantees that we have that the value will be a bool.
-#     def render_Field( self, field, value, type_='text', checked=NoDef ):
-#         label = _(field.label)
+#          <select name='name'>
+#          <option value='1' />
+#          <option value='2' />
+#          <option value='3' />
+#          </select>
 #
-#         vstr = ''
-#         if value:
-#             vstr += 'value="%s" ' % value
-#         if checked is not NoDef and checked:
-#             vstr += 'checked="checked"'
-#
-#         inpu = '<input name="%s" type="%s" %s/>' % (field.name, type_, vstr)
-#
-#         return self.__fieldfmt % {'label': label, 'inputs': inpu}
-#
-#     def render_StringField( self, field, value ):
-#         return self.render_Field(field, value, 'text')
-#
-#     def render_PasswordField( self, field, value ):
-#         return self.render_Field(field, value, 'password')
-#
-#     def render_TextAreaField( self, field, value ):
-#         label = _(field.label)
-#
-#         astr = []
-#         if field.rows:
-#             astr += ['rows="%s"' % field.rows]
-#         if field.cols:
-#             astr += ['cols="%s"' % field.cols]
-#
-#         inpu = '<textarea name="%s" %s>%s</textarea>' % \
-#                (field.name, ' '.join(astr), value or '')
-#
-#         return self.__fieldfmt % {'label': label, 'inputs': inpu}
-#
-#     def render_IntField( self, field, value ):
-#         return self.render_Field(field, value, 'text')
-#
-#     def render_FloatField( self, field, value ):
-#         return self.render_Field(field, value, 'text')
-#
-#     def render_BoolField( self, field, value ):
-#         return self.render_Field(field, '1', 'checkbox', checked=value)
-#
+
+
+
+
+    def renderCheckboxesField( self, field, rvalue, errmsg, required ):
+        raise NotImplementedError
+
+    def renderListboxField( self, field, rvalue, errmsg, required ):
+        raise NotImplementedError
+
+    def renderJSDateField( self, field, rvalue, errmsg, required ):
+        raise NotImplementedError
+
+    def renderFileUploadField( self, field, rvalue, errmsg, required ):
+       raise NotImplementedError
+
+
+
+## FIXME: remove
 #     def render_MultipleField( self, field, value, type_ ):
 #         label = _(field.label)
 #
@@ -351,17 +414,6 @@ class TextFormRenderer(FormRenderer):
 #      Choices
 #      -------
 #
-#      exactly 1 : radio buttons  OR  menu (without multiple option)
-#          <input name='name' type='radio' value='1'/>
-#          <input name='name' type='radio' value='2'/>
-#          <input name='name' type='radio' value='3'/>
-#
-#          <select name='name'>
-#          <option value='1' />
-#          <option value='2' />
-#          <option value='3' />
-#          </select>
-#
 #
 #      0 or many: checkboxes  OR  menu (with multiple option)
 #          <input name='name' type='checkbox' value='1'/>
@@ -374,4 +426,88 @@ class TextFormRenderer(FormRenderer):
 #          <option value='2' />
 #          <option value='3' />
 #          </select>
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+#
+class TextDisplayRenderer(TextRenderer):
+    """
+    Display renderer in normal text. This renderer is meant to display parsed
+    values as a read-only table, and not as an editable form.
+    """
+
+    # CSS classes.
+    css_input = u'formdisplay'
+
+    def do_render( self, fields, action, submit ):
+        form = self._form
+        try:
+            # File object that gets set as a side-effect.
+            self.ofile = f = self._create_buffer()
+            
+            # (Side-effect will add to the file.)
+            self.do_render_table(fields)
+
+            # Close the form (the container rendering only outputs the header.
+            print >> f, '</form>'
+        finally:
+            self.ofile = None
+
+        return f.getvalue()
+
+    def do_render_container( self, action ):
+        return ''
+
+    def do_render_table( self, fields ):
+        # Use side-effect for efficiency if requested.
+        f = self.ofile or self._create_buffer()
+
+        visible = []
+        for field in fields:
+            rendered = self._display_field(field)
+            visible.append( (_(field.label), _(rendered)) )
+            
+        self.do_table(visible)
+
+        if self.ofile is None: return f.getvalue()
+
+    def do_render_submit( self, submit ):
+        return ''
+
+    #---------------------------------------------------------------------------
+
+    def renderHidden( self, field, rvalue ):
+        return ''
+
+    def _simple( self, field, value, errmsg, required ):
+        """
+        Render a simple field with the given parameters.
+        """
+        return (self._geterror(errmsg) + value)
+
+    renderStringField = _simple
+
+    def renderTextAreaField( self, field, value, errmsg, required ):
+        return (self._geterror(errmsg) + u'<pre>%s</pre>' % value)
+
+    renderPasswordField = _simple
+    renderDateField = _simple
+    renderEmailField = _simple
+    renderURLField = _simple
+    renderIntField = _simple
+    renderFloatField = _simple
+    renderBoolField = _simple
+    renderRadioField = _simple
+    renderMenuField = _simple
+    renderCheckboxesField = _simple
+    renderListboxField = _simple
+    renderJSDateField = _simple
+    renderFileUploadField = _simple
 

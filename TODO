@@ -2,37 +2,52 @@
   atocha: TODO
 ================
 
-- Finish dataflow diagram.
+- COMMIT ALL THE WORK ASAP!
 
-- Add a phase for adapting the args from various sources, CGI, mod_python,
-  draco, etc.  You will need to observe, characterize and normalize the data
-  types that each of these sources present.
+- Rendering radio buttons that have no default value currently initializes
+  without a selection (invalid to submit).
 
-  Should this be done by the parser class?  If the parser class has a special
-  class attribute for this, with the normalizer object, it will apply the
-  conversion itself.  Otherwise we can assume that the web app framework code
-  could do it (I think we will do it ourselves in our app).
+
+- Finish testing all the widgets, implementing rtext.
+- Finish htmlout renderer and convert all my codebase to atocha.
+
+- Create builder.cgi builder, where you gradually store the form contents in the
+  session data, where you can create fields and remove them too.  Also, simple
+  test with a menu and a list of widget strings to eval would be nice and easy.
+
+- Document the types_* where a list is present.  Type assertions should use a
+  debugging function that can be noop'ed and that recurses into the lists.  Find
+  a way to do that.
+
+- Create a mod_python normalizer, and one for draco (my framework).
+
+- Provide examples for:
+
+  * Parsing with user checks
+  * Customized rendering
+
+  Examples should also be runnable code, use the same files (maybe with symlinks
+  to remove the extensions).
+
+
+
+Ideas and Eventually
+====================
+
+- Could our system support fields which have more than one varname?  I think so.
+  Would that be useful?  If it does, look into doing this, creating fields which
+  are comprised of multiple possibly-heterogeneous input widgets.  For example,
+  we could have a date field with three string input widgets.  Implement a date
+  field with three input widgets to test the varname list with more than one
+  name.
 
 - Consider making the implementation for the form renderer use a delegate rather
   than derivation.  The delegate would be specified as a class attribute on the
   form renderer itself.  This reflects well the fact that the form renderer
   changes, but the styling code contains no if little variable code.
 
-  I'm not about this, since the text form renderer does take an option...
-
-
-- Implement replacement value types!!!!!
-  (We need to support a replacement value of the incorrect type for fields.)
-  
-  - replacement value names should use a space in them, because that makes them
-    otherwise illegal, probably just "varname *" would be good enough.
-
-- Finish htmlout renderer and convert all my codebase to atocha.
- 
-- Write an interactive test with a menu to choose the creation string for the
-  widget.
-
-- Support the "required" star rendering.
+  I'm not sure about this, since the text form renderer already does take an
+  option...
 
 - Implement DISABLED option for all the fields.
 
@@ -45,62 +60,26 @@
     option than anything else.  IMO we should support disabled similar to
     hidden.
 
-
-
-Tests
-=====
-
-- Automate tests for four cases: hidden, valid, invalid, empty
-
-Progress:
-* form_rsimple.py
-* form_rhtmlout.py
-
-on the fields: maybe we have to add the following methods:
-- hidden_value( self, dvalue ) 
-- display_value( self, dvalue ) 
-
-- move the css styles for the table on the renderer classes themselves.  The
-  styles should be default'ed on the classes and looked up with 'self.' so
-  that it becomes possible to simply override those in derived classes.
-
-
-
-
-
-
-
-Ideas
-=====
-
-Renderer
---------
-
-Fields
-------
-
+New Widgets
+-----------
 
 - Other widgets:
 
    - Reset button, see Quixote for some examples.
    - Agree button, bool checkbox that MUST be enabled by the user.
 
-- Rendering radio buttons that have no default value currently initializes
-  without a selection (invalid to submit).
-
-- prepare_values() implementations may have to be different when the
-  field is a hidden type.  How do you deal with this?
-
 Parser
 ------
-
-- We could add a method in this object that will simply allow redirecting,
-  because this object always knows how to store the form data, form errors,
-  etc.
 
 - Maybe we could eventually provide a way to at least decode the args which
   have no corresponding field in the form (if that never becomes necessary,
   don't do so).
+
+
+Tests
+=====
+
+- Automate tests for four cases: hidden, valid, invalid, empty
 
 
 
@@ -132,10 +111,6 @@ ListField becomes CheckboxesField
 
 hidden fields now require an explicit 'hidden=1' option.
 
-
-
-
-
 form_parser: Needs a concrete implementation for hume:
 
 # FIXME: change this to use the errors to check if there are errors
@@ -149,7 +124,4 @@ form_parser: Needs a concrete implementation for hume:
                 setFormData(self._form.name, self)
             if self._errors:
                 setFormErrors(self._form.name, self._errors)
-
-
-
 

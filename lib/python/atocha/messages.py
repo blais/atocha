@@ -10,18 +10,13 @@ We group here all the human readable strings that are used in the form library,
 so that there is a single place for i18n and for changing them.  The strings are
 meant to be translated at the time of rendering only.
 
+Any active translation will be carried out by the renderer code only, all other
+strings are meant to be identifiers that get translated later.
 
-
-FIXME: not sure about the following... how about the type checking then?  N_()
-returns a str, not a unicode...
-
-  Any active translation will be carried out by the renderer code only, all
-  other strings are meant to be identifiers that get translated later.
-
-
-, and we don't perform the translation ourselves, except in the renderer, where
-a translator object is clearly passed or assumed to have been set at a global
-builtin (as _() and N_(), which is standard naming for gettext applications).
+In other words, we don't perform translation lookups, except in the renderer
+code, where a translator object is clearly passed or assumed to have been set at
+a global builtin (as _() and N_(), which is standard naming for gettext
+applications).
 """
 
 
@@ -85,6 +80,12 @@ msg_registry = TranslatorDict({
     # Generic error message for a value that has a parse error.
     'generic-value-error': N_("Invalid value."),
 
+    # Strings for display renderers.
+    'display-error': N_("(Error)"),
+    'display-unset': N_("(Not set)"),
+    'display-true': N_("Yes"),
+    'display-false': N_("No"),
+
     #
     # Field-specific error messages.
     #
@@ -96,7 +97,9 @@ msg_registry = TranslatorDict({
     'email-invalid': N_("Invalid email address."),
     'email-error-local': N_("Please specify a full email address."),
 
-    'numerical-invalid': N_("Invalid number."),
+    'url-invalid': N_("Invalid URL."),
+
+    'numerical-invalid': N_("Invalid number: '%s'."),
     'numerical-minval': N_("Value too small.  Minimum value is '%s'."),
     'numerical-maxval': N_("Value too large.  Maximum value is '%s'."),
 
@@ -104,6 +107,7 @@ msg_registry = TranslatorDict({
 
     'date-invalid-format':
     N_("Invalid format for date: '%s'. Use YYYY-MM-DD format."),
+    'date-invalid-month': N_("Invalid month name for date: '%s'."),
     'date-invalid': N_("Invalid date: '%s'."),
 
     })

@@ -77,6 +77,7 @@ from fields import *
 from messages import *
 from parse import *
 from render import *
+from norm import *
 from renderers.rtext import *
 
 try:

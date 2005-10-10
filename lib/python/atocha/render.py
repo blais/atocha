@@ -18,10 +18,13 @@ rendering to a tree of elements which gets flattenned out later.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
+import types
 
 # atocha imports.
 import fields
-import messages # To make sure that the _() function is setup.
+from messages import msg_registry
+from parse import FormParser
+# Note: Also to make sure that the _() function is setup.
 
 
 __all__ = ['FormRenderer']
@@ -39,8 +42,8 @@ class FormRenderer:
     check to make sure that all the fields in a form have been renderer before
     it gets deleted.
     """
-
     def __init__( self, form, values=None, errors=None, incomplete=False ):
+        assert form is not None
         self._form = form
         "The form instance that we're rendering."
 
@@ -51,7 +54,8 @@ class FormRenderer:
 
         self._errors = errors
         """A dict of the previous errors to render. The keys should correspond
-        to the names of the fields."""
+        to the names of the fields, and the values are either bools, strings or
+        error tuples (message, replacement_rvalue)."""
 
         self._incomplete = incomplete
         """Whether we allow the rendering to be an incomplete set of the form's
@@ -66,7 +70,7 @@ class FormRenderer:
         Destructor override that just makes sure that we rendered all the fields
         of the given form before we got destroyed.
         """
-        if not self._incomplete and self._form.names() != self._rendered:
+        if not self._incomplete and set(self._form.names()) != self._rendered:
             # This gets ignored to some extent, because it is called within the
             # destructor, and only outputs a message to stderr, but it should be
             # ugly enough in the program's logs to show up.
@@ -88,55 +92,18 @@ class FormRenderer:
 
         # Figure out if this field should be rendered as hidden or not.
         hidden = hide or field.ishidden()
-        
-        #
-        # Get value to be used to render the field.
-        #
-        if self._values is None or field.name not in self._values:
-            dvalue = None # Not set.
-        else:
-            try:
-                # Note: this assignment may result in dvalue being None, which
-                # is the same as if not set.
-                dvalue = self._values[field.name]
-            except KeyError:
-                dvalue = None # Not set.
-            
-        if dvalue is None:
-            # If the field is hidden and the value is not set, we raise an
-            # error. We should not be able to render hidden fields without a
-            # value, and we will not use the initial value for hidden fields.
-            # Hidden fields should have an explicit value provided in the
-            # 'values' array.
-            if hidden:
-                raise RuntimeError(
-                    "Error: Hidden field '%s' has no value." % field.name)
-
-            # Otherwise we use the initial value for rendering.
-            dvalue = field.initial
-
-        # Convert the data value into a value suitable for rendering.
-        #
-        # This should never fail, the fields should always be able to convert
-        # the data values from the all the types that they declare into a
-        # rendereable value type.
-        if dvalue is not None:
-            assert isinstance(dvalue, field.types_data)
-            rvalue = field.render_value(dvalue)
-
-            if not isinstance(rvalue, field.types_render):
-                raise RuntimeError(
-                    "Error: rvalue '%s' is invalid (expecting %s)." %
-                    (repr(rvalue), repr(field.types_render)))
-        else:
-            rvalue = None
 
         #
         # Get error to be used for rendering.
         #
+        errmsg = None
         if self._errors is not None:
             try:
                 error = self._errors[field.name]
+
+                # Make sure that the error is a triple.
+                error = FormParser._normalize_error(error)
+                errmsg = error[0]
             except KeyError:
                 # An error of None signals there is no error.
                 error = None
@@ -144,18 +111,119 @@ class FormRenderer:
             error = None
 
         #
-        # Dispatch to the appropriate method for rendering the fields.
+        # Get value to be used to render the field.
         #
+        dorender = True
+        if self._values is None or field.name not in self._values:
+            # There is no value for the field.
+
+            # If the field is hidden and the value is not set, we raise an
+            # error. We should not be able to render hidden fields without a
+            # value, and we will not use the initial value for hidden fields.
+            # Also, hidden fields should not have errors.  Hidden fields should
+            # have an explicit value provided in the 'values' array.
+            if hidden:
+                raise RuntimeError(
+                    "Error: Hidden field '%s' has no value." % field.name)
+
+            # We will look at using the replacement value instead of the value.
+            if error is not None:
+                # If the values field is not present, use the replacement value.
+                errmsg, repl_rvalue = error
+                if repl_rvalue is None:
+                    dvalue = None # Ask to render a value of None.
+                else:
+                    rvalue = repl_rvalue
+                    dorender = False
+            else:
+                # The value is not present for the given field.  We use the
+                # initial value.
+                dvalue = field.initial
+        else:
+            # The value is present, get it.
+            dvalue = self._values[field.name]
+
+
+        # Convert the data value into a value suitable for rendering.
+        #
+        # This should never fail, the fields should always be able to convert
+        # the data values from the all the types that they declare into a
+        # rendereable value type.
+        if dorender:
+            assert dvalue is None or isinstance(dvalue, field.types_data)
+            rvalue = field.render_value(dvalue)
+
+        if not isinstance(rvalue, field.types_render):
+            raise RuntimeError(
+                "Error: rvalue '%s' is invalid (expecting %s)." %
+                (repr(rvalue), repr(field.types_render)))
+
+        # Dispatch to renderer.
+        output = self._dispatch_render(field, rvalue, errmsg, hidden)
+
+        # Mark this fields as having been rendered.
+        self._rendered.add(field.name)
+
+        # Return output from the field-specific rendering code.
+        return output
+
+
+    def _display_field( self, field ):
+        """
+        Convert the value for the given field from valid type data to a
+        user-displayable string.  This is used by the display renderers to
+        provide a nice user rendering of the values.
+
+        This always returns a unicode string, ready to be printed.
+        """
+        assert isinstance(field, fields.Field)
+
+        # If there is an error for the field, return a constant error string. We
+        # do not print replacement values for the display, the value has to be
+        # fully valid.
+        if self._errors is not None and field.name in self._errors:
+            return msg_registry['display-error']
+
+        # Check if there is a valid dvalue.
+        if self._values is None:
+            return msg_registry['display-unset']
+        try:
+            dvalue = self._values[field.name]
+        except KeyError:
+            return msg_registry['display-unset']
+
+        # Have the value converted by the field for display.
+        uvalue = field.display_value(dvalue)
+
+        # Dispatch to renderer. Notice we hard-wire no-errors and not-hidden
+        # states.
+        output = self._dispatch_render(field, uvalue, None, False)
+
+        # Mark this fields as having been rendered.
+        self._rendered.add(field.name)
+
+        # Return output from the field-specific rendering code.
+        return output
+
+    def _dispatch_render( self, field, rvalue, errmsg, hidden ):
+        """
+        Dispatch to the appropriate method for rendering the fields.
+        """
+
+        # The class is derived, so dispatch to this class. This might become
+        # customizable in the future.
         renderobj = self
+
         if hidden:
             # Make sure that we're not trying to render hidden fields that have
             # errors associated to them.
-            if error is not None:
+            if errmsg is not None:
                 raise RuntimeError(
                     "Error: Hidden field '%s' must have no errors." %
                     field.name)
 
             output = renderobj.renderHidden(field, rvalue)
+
         else:
             # Dispatch to function with name renderXXX() on type field, for
             # example, renderStringField().  Your derived class must have
@@ -166,14 +234,34 @@ class FormRenderer:
             mname = 'render%s' % field.__class__.__name__
             try:
                 method = getattr(renderobj, mname)
-                output = method(field, rvalue, error, field.isrequired())
+                output = method(field, rvalue, errmsg, field.isrequired())
+            except Exception, e:
+                raise
+                raise RuntimeError(
+                    "Error: Attempting to render field '%s': %s" %
+                    (field, str(e)))
+
+        return output
+
+    def validate_renderer( cls ):
+        """
+        Checks that all the required rendering methods are present in the
+        renderer's implementation.  A rendering method should be provided for
+        each of the field types, so that an explicit about what to do for each
+        of them is made explicit.
+
+        Note: this method is used by the test routines only, to verify that any
+        implemented renderer is complete.
+        """
+        for att in fields.__all__:
+            try:
+                getattr(cls, 'render%s' % att)
             except AttributeError:
                 raise RuntimeError(
-                    "Error: No method on renderer to handle field '%s'." %
-                    field)
+                    'Class %s does not have required method %s' % (cls, att))
 
-        # Return output from the field-specific rendering code.
-        return output
+    validate_renderer = classmethod(validate_renderer)
+
 
     #---------------------------------------------------------------------------
     # Public methods that you can use.
@@ -190,7 +278,7 @@ class FormRenderer:
 
           See the documentation for method Form.select_fields() for the meaning
           of the 'only' and 'ignore' arguments.
-        
+
         """
         fields = self._form.select_fields(only, ignore)
         return self.do_render(fields,
@@ -206,7 +294,7 @@ class FormRenderer:
         An alternate action from the one that is in the form can be specified.
         """
         return self.do_render_container(action or self._form.action)
-    
+
     def render_table( self, *fieldnames, **kwds ):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
@@ -230,11 +318,12 @@ class FormRenderer:
         # Render the table given the fields.
         return self.do_render_table(fields)
 
-    def table( self, label=None, inputs=None ):
+    def table( self, pairs=() ):
         """
-        User-callable method for do_table().
+        User-callable method for rendering a simple table. 'pairs' is an
+        iterable of (label, value) pairs.
         """
-        return self.do_table(label, inputs)
+        return self.do_table(pairs)
 
     def render_field( self, fieldname, hide=None ):
         """
@@ -253,7 +342,7 @@ class FormRenderer:
 
     def render_submit( self, submit=None ):
         """
-        Renders the submit buttons. 
+        Renders the submit buttons.
 
         An alternate set of submit buttons from the ones that is in the form can
         be specified.
@@ -278,7 +367,7 @@ class FormRenderer:
         implement the actual rendering algorithm for the form container.
         """
         raise NotImplementedError
-        
+
     def do_render_table( self, fields ):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
@@ -289,13 +378,14 @@ class FormRenderer:
         This is the implementation of the render_table() method.
         """
         raise NotImplementedError
-        
-    def do_table( self, label=None, inputs=None ):
+
+    def do_table( self, pairs=(), extra=None ):
         """
-        Renders a simplistic table, inserting the given label and inputs.  The
-        inputs and return values depend on the renderer.  The render_table()
-        method is expected to reuse this in its implementation, and it is
-        convenient to provide such a method for really custom rendering as well.
+        Renders a simplistic table, inserting the given list of (label, inputs)
+        pairs.  The return value type depend on the renderer.  The
+        do_render_table() method is expected to reuse this in its
+        implementation, and it is convenient to provide such a method for really
+        custom rendering as well.
 
         This method assumes that the field is visible and has some kind of
         label.  You should therefore avoid using the method to render hidden
@@ -323,9 +413,10 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def renderField( self, field, rvalue, error, required ):
+    def renderField( self, field, rvalue, errmsg, required ):
         """
         Example of the signature for the methods that must be overriden.
         """
         raise RuntimeError("Do not call this.")
+
 
