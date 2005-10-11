@@ -1,0 +1,16 @@
+====================================
+  atocha: Data Flow and Data Paths
+====================================
+
+:Abstract:
+
+   This document describes what happens when rendering and handling a form, with
+   particular emphasis on the data types that flow through the various possible
+   paths.
+
+
+.. figure:: data-flow-types.png
+   
+   Data flow and the possible paths during the life of a form to be filled and
+   until it finally gets validated and accepted.
+

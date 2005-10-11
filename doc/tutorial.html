@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="Docutils 0.3.10: http://docutils.sourceforge.net/" />
+<title>atocha: 10-min Tutorial</title>
+<link rel="stylesheet" href="../style.css" type="text/css" />
+</head>
+<body>
+
+<div id="project-header">
+  <a href="/"><img src="/home/project-header.png" id="logo"></a>
+  <div id="project-home"><a href="..">Project Home</a></div>
+</div>
+
+<div class="document" id="atocha-10-min-tutorial">
+<h1 class="title">atocha: 10-min Tutorial</h1>
+<table class="docinfo" frame="void" rules="none">
+<col class="docinfo-name" />
+<col class="docinfo-content" />
+<tbody valign="top">
+<tr class="field"><th class="docinfo-name">FIXME:</th><td class="field-body">Complete this before release!</td>
+</tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title first">Abstract</p>
+<p>A short and sweet overview and tutorial to teach the flavour of what the
+Atocha library provides for the web developer.</p>
+</div>
+<div class="section">
+<h1><a id="form-definition" name="form-definition">Form Definition</a></h1>
+<p>You create a single <tt class="docutils literal"><span class="pre">Form</span></tt> instance for both rendering and handling of the
+form.  The form consists of &quot;fields&quot;, which are akin to desktop application
+widgets, which automatically return an appropriate data type for the value
+entered by the user:</p>
+<pre class="literal-block">
+(FIXME add example.)
+</pre>
+</div>
+<div class="section">
+<h1><a id="form-rendering" name="form-rendering">Form Rendering</a></h1>
+<p>You then use this form object, in collboration with a <tt class="docutils literal"><span class="pre">FormRenderer</span></tt> to render
+the page to the user:</p>
+<pre class="literal-block">
+(FIXME add example.)
+</pre>
+<p>This can be heavily customized by breaking down the process in its component
+phases, which lets you decide on the particular layout of the widgets if
+desired:</p>
+<pre class="literal-block">
+(FIXME add example.)
+</pre>
+<p>The form rendering process is decoupled from the form definition so it is
+possible to create custom form renderers for your particular system or with
+specific layout characteristics, without changing the library.</p>
+</div>
+<div class="section">
+<h1><a id="form-handling" name="form-handling">Form Handling</a></h1>
+<p>A <tt class="docutils literal"><span class="pre">FormParser</span></tt> is used to oversee the process of parsing and validating
+user-submitted inputs.  Most of the basic validation is automatic, and depends
+on the types of the fields in the form.  Since part of the validation can only
+be implemented on the client-side--there is always some kind of custom code that
+needs be used there--, the parser allows you to invoke methods to signal errors
+and to indicate completion of the parsing.  This establishes a protocol in which
+you can customize validation (another pattern involves attaching validators to
+the widgets, but we think it is more limited and complicated than the simple
+protocol that we offer)</p>
+<p>When the parsing is complete, the parser either redirects automatically to the
+submitter resource if necessary, with the accumulated errors for rendering the
+annotated form back to the user, or contains the final parsed values for client
+perusal:</p>
+<pre class="literal-block">
+(FIXME add example.)
+</pre>
+</div>
+<div class="section">
+<h1><a id="form-values-display" name="form-values-display">Form Values Display</a></h1>
+<p>The form object can also be used to display parsed values in a table, without
+editing.  This is simply accomplished by using a special display-only renderer
+on the form, instead of the normal renderer which renders inputs. This is useful
+because much of the presentation information is already present in the form
+definition:</p>
+<pre class="literal-block">
+(FIXME add example.)
+</pre>
+</div>
+</div>
+</body>
+</html>

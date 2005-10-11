@@ -1,0 +1,73 @@
+===========================
+  atocha: 10-min Tutorial
+===========================
+
+:Abstract:
+
+   A short and sweet overview and tutorial to teach the flavour of what the
+   Atocha library provides for the web developer.
+
+:FIXME: Complete this before release!
+
+
+Form Definition
+---------------
+
+You create a single ``Form`` instance for both rendering and handling of the
+form.  The form consists of "fields", which are akin to desktop application
+widgets, which automatically return an appropriate data type for the value
+entered by the user::
+
+  (FIXME add example.)
+
+Form Rendering
+--------------
+
+You then use this form object, in collboration with a ``FormRenderer`` to render
+the page to the user::
+
+  (FIXME add example.)
+
+This can be heavily customized by breaking down the process in its component
+phases, which lets you decide on the particular layout of the widgets if
+desired::
+
+  (FIXME add example.)
+
+The form rendering process is decoupled from the form definition so it is
+possible to create custom form renderers for your particular system or with
+specific layout characteristics, without changing the library.
+
+
+Form Handling
+-------------
+
+A ``FormParser`` is used to oversee the process of parsing and validating
+user-submitted inputs.  Most of the basic validation is automatic, and depends
+on the types of the fields in the form.  Since part of the validation can only
+be implemented on the client-side--there is always some kind of custom code that
+needs be used there--, the parser allows you to invoke methods to signal errors
+and to indicate completion of the parsing.  This establishes a protocol in which
+you can customize validation (another pattern involves attaching validators to
+the widgets, but we think it is more limited and complicated than the simple
+protocol that we offer)
+
+When the parsing is complete, the parser either redirects automatically to the
+submitter resource if necessary, with the accumulated errors for rendering the
+annotated form back to the user, or contains the final parsed values for client
+perusal::
+
+  (FIXME add example.)
+
+
+Form Values Display
+-------------------
+
+The form object can also be used to display parsed values in a table, without
+editing.  This is simply accomplished by using a special display-only renderer
+on the form, instead of the normal renderer which renders inputs. This is useful
+because much of the presentation information is already present in the form
+definition::
+
+  (FIXME add example.)
+
