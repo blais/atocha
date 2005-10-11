@@ -2,8 +2,6 @@
   atocha: TODO
 ================
 
-- Rename atocha-tests.py to remove underscode
-
 - Implement option for reset button to be present and rendered.
 
 - Finish htmlout renderer and convert all my codebase to atocha.

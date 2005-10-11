@@ -360,7 +360,7 @@ class TextFormRenderer(TextRenderer):
         return self._single('file', field, rvalue, errmsg)
 
     def renderJSDateField( self, field, rvalue, errmsg, required ):
-       raise NotImplementedError
+        return self._single('text', field, rvalue, errmsg)
 
 
 
@@ -446,9 +446,9 @@ class TextDisplayRenderer(TextRenderer):
     renderMenuField = _simple
     renderCheckboxesField = _simple
     renderListboxField = _simple
-    renderJSDateField = _simple
 
     def renderFileUploadField( self, field, value, errmsg, required ):
         # Never display a file upload. Don't even try.
         return u''
 
+    renderJSDateField = _simple

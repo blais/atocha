@@ -3,4 +3,4 @@
 PYTEST = python2.3 $(HOME)/src/dist-py/py/bin/py.test -s -x
 
 all:
-	$(PYTEST) atocha-tests.py
+	$(PYTEST) atochatests.py

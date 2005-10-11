@@ -106,6 +106,9 @@ form1 = Form('test-form',
              # Simple date.
              DateField('birthday', N_("Birthday")),
 
+             # A fancier date input widget.
+             JSDateField('barmitz', N_("Bar Mitzvah")),
+             
              # Email address and URL fields.
              EmailField('email', N_("Email")),
              URLField('homepage', N_("Home Page")),
@@ -164,7 +167,4 @@ form1 = Form('test-form',
              FileUploadField('photo', N_('Photograph')),
 
              action='handle.cgi')
-
-## 'CheckboxesField', 'ListboxField',
-## 'JSDateField', 'FileUploadField',
 

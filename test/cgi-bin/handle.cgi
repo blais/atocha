@@ -30,7 +30,7 @@ def main():
     """
 
     cargs = cgi.FieldStorage()
-    p = FormParser(form1, cargs, 'render.cgi')
+    p = FormParser(form1, cargs, 'query.cgi')
 
     if 'merengue' in (p['dances'] or []):
         repldances = list(p['dances'])
@@ -51,7 +51,7 @@ def main():
     for name, value in p.getvalues().iteritems():
         print >> s, '%s: %s' % (name, repr(value))
     print >> s, '</pre>'
-    print >> s, '<a href="render.cgi">EDIT VALUES</a>'
+    print >> s, '<a href="query.cgi">EDIT VALUES</a>'
     contents += s.getvalue()
 
     # Set form data for edit.
