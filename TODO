@@ -2,13 +2,7 @@
   atocha: TODO
 ================
 
-- Implement option for reset button to be present and rendered.
-
 - Finish htmlout renderer and convert all my codebase to atocha.
-
-- Create builder.cgi builder, where you gradually store the form contents in the
-  session data, where you can create fields and remove them too.  Also, simple
-  test with a menu and a list of widget strings to eval would be nice and easy.
 
 - Create a mod_python normalizer, and one for draco (my framework).
 
@@ -19,6 +13,9 @@
 
   Examples should also be runnable code, use the same files (maybe with symlinks
   to remove the extensions).
+
+
+
 
 
 
@@ -63,6 +60,13 @@ Ideas and Eventually
 
 - Support images for submit buttons.
 
+- Create builder.cgi builder test script, where you gradually store the form
+  contents in the session data, where you can create fields and remove them too.
+  Also, simple test with a menu and a list of widget strings to eval would be
+  nice and easy.
+
+- Implement a ``ButtonForm`` class that will render a form with a single submit
+  button, just to redirect somewhere, no table.
 
 
 
@@ -74,6 +78,11 @@ New Widgets
 
    - Reset button, see Quixote for some examples.
    - General purpose buttons that would replace the submit one anywhere...?
+
+- Something to fix eventually: the JSDateField script has hardcoded paths for
+  its accompanying images... not sure what to do about this yet. I suppose the
+  user has to copy the files anyway, so it might be ok to assume he might edit
+  the scripts somewhat.
 
 Parser
 ------

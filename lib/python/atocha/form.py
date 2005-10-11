@@ -97,6 +97,15 @@ class Form:
                                        self.__def_accept_charset)
         "The charset encoding that the form handler will accept."
 
+        reset = kwds.get('reset', None)
+        if reset and isinstance(reset, (bool, int)):
+            reset = msg_registry.get_notrans('reset-button')
+        assert isinstance(reset, (types.NoneType, msg_type))
+        self.reset = reset
+        """Whether a reset button should be provided. The value can be either a
+        string to be translated later or a bool/int, where we will use the
+        default value."""
+            
         self._fields = []
         "The list of fields, essentially to keep the ordering."
 
@@ -469,3 +478,14 @@ class Form:
 
             return found
 
+    def getscripts( self ):
+        """
+        Returns a dict of Javascript script filenames that need to be included
+        to support the widgets present in the form.
+        """
+        scripts = {}
+        for fi in self._fields:
+            for fn, notice in fi.scripts:
+                if fn not in scripts:
+                    scripts[fn] = notice
+        return scripts

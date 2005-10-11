@@ -9,6 +9,7 @@ Simple text-based form renderers.
 
 # stdlib imports.
 import StringIO, codecs
+from os.path import join
 
 # atocha imports.
 from atocha.render import FormRenderer
@@ -24,7 +25,7 @@ __all__ = ['TextFormRenderer', 'TextDisplayRenderer']
 class TextRenderer(FormRenderer):
     """
     Base class for all renderers that will output to text.
-    """    
+    """
 
     # Default encoding for output.
     default_encoding = None # Default: to unicode.
@@ -121,7 +122,9 @@ class TextFormRenderer(TextRenderer):
 
     _emptyin = u'<input name="%s" type="%s" value="%s" class="%s" />'
     _in = u'<input name="%s" type="%s" value="%s" class="%s">%s</input>'
-    
+
+    scriptsdir = None
+
     def do_render( self, fields, action, submit ):
         form = self._form
         try:
@@ -135,13 +138,17 @@ class TextFormRenderer(TextRenderer):
             self.do_render_table(fields)
 
             # Render submit buttons.
-            self.do_render_submit(submit)
+            self.render_submit(submit)
 
             # Close the form (the container rendering only outputs the header.
-            print >> f, u'</form>'
+            f.write(self.close_container())
+
         finally:
             self.ofile = None
 
+        # Note: we don't do anything explicit about the scripts and notices.
+
+        # Return the string for the entire form.
         return f.getvalue()
 
 
@@ -168,6 +175,8 @@ class TextFormRenderer(TextRenderer):
 
         if self.ofile is None: return f.getvalue()
 
+    def close_container( self ):
+        return u'</form>'
 
     def do_render_table( self, fields ):
         # Use side-effect for efficiency if requested.
@@ -183,18 +192,17 @@ class TextFormRenderer(TextRenderer):
                 if field.isrequired():
                     label += u'<span class="%s">*</a>' % self.css_required
                 visible.append( (label, rendered) )
-            
+
         self.do_table(visible, '\n'.join(hidden))
 
         if self.ofile is None: return f.getvalue()
 
-    def do_render_submit( self, submit ):
+    def do_render_submit( self, submit, reset ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
         if isinstance(submit, msg_type):
-            print >> f, (u'<input type="submit" value="%s" />' %
-                         _(submit))
+            print >> f, (u'<input type="submit" value="%s" />' % _(submit))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
@@ -202,8 +210,26 @@ class TextFormRenderer(TextRenderer):
                       (u'<input type="submit" name="%s" value="%s" />' %
                        (name, _(value)))
 
+        if reset:
+            print >> f, (u'<input type="reset" value="%s" />' % _(reset))
+
         if self.ofile is None: return f.getvalue()
 
+    def do_render_scripts( self, scripts ):
+        if not scripts:
+            return u''
+        
+        f = self._create_buffer()
+        scriptsdir = self.scriptsdir or ''
+        for fn, notice in scripts.iteritems():
+            f.write(u'<script language="JavaScript" '
+                    u'src="%s" ' % join(scriptsdir, fn) + 
+                    u'type="text/javascript">\n')
+            if notice:
+                f.write(notice)
+                f.write('\n')
+            f.write(u'</script>\n')
+        return f.getvalue()
 
     #---------------------------------------------------------------------------
 
@@ -238,7 +264,7 @@ class TextFormRenderer(TextRenderer):
                  value or u'',
                  field.css_class,
                  checkstr)
-        
+
         if label is not None:
             o = ((u'<input name="%s" type="%s" value="%s" '
                   u'class="%s" %s>%s</input>') % (fargs + (label,)))
@@ -246,7 +272,7 @@ class TextFormRenderer(TextRenderer):
             o = (u'<input name="%s" type="%s" value="%s" class="%s" %s/>' %
                  fargs)
         return o
-            
+
     def _single( self, htmltype, field, value, errmsg,
                  checked=False, label=None ):
         """
@@ -268,7 +294,7 @@ class TextFormRenderer(TextRenderer):
             return s.getvalue()
         else:
             return u'\n'.join(inputs)
-        
+
     def renderStringField( self, field, rvalue, errmsg, required ):
         return self._single('text', field, rvalue, errmsg)
 
@@ -359,8 +385,35 @@ class TextFormRenderer(TextRenderer):
     def renderFileUploadField( self, field, rvalue, errmsg, required ):
         return self._single('file', field, rvalue, errmsg)
 
+    def _script( self, field, errmsg, script, noscript=None ):
+        "Render a script widget."
+        # Note: setting 'name' on a SCRIPT tag is not standard, but it allows us
+        # to render the errors later on.
+        lines = [
+            u'<script name="%s" class="%s">' % (field.name, field.css_class),
+            script,
+            u'</script>']
+        if noscript:
+            lines.extend([
+                u'<noscript class="%s">' % field.css_class,
+                noscript,
+                u'</noscript>'])
+        return self._geterror(errmsg) + '\n'.join(lines)
+
     def renderJSDateField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg)
+        fargs = (field.name, rvalue and ", '%s'" % rvalue or '')
+        script = (u"DateInput('%s', true, 'YYYYMMDD' %s);"
+                  u"hideInputs(this);") % fargs
+
+        # We must be able to accept both the string version and the datetime
+        # version because of the different paths of argument parsing... it's
+        # possible that we get asked to render something using values that have
+        # not been parsed previously (for example, during the automated form
+        # parsing errors).
+        noscript = u'<input name="%s" value="%s"/>' % fargs
+
+        return self._script(field, errmsg, script, noscript)
+
 
 
 
@@ -371,17 +424,29 @@ class TextDisplayRenderer(TextRenderer):
     """
     Display renderer in normal text. This renderer is meant to display parsed
     values as a read-only table, and not as an editable form.
+
+    Note: we do not render the errors.
     """
 
     # CSS classes.
     css_input = u'formdisplay'
+
+    def __init__( self, *args, **kwds ):
+        try:
+            self.show_hidden = kwds['show_hidden']
+            del kwds['show_hidden']
+        except KeyError:
+            self.show_hidden = True # Default is to display.
+        """Determines whether we render the fields that are hidden."""
+
+        TextRenderer.__init__(self, *args, **kwds)
 
     def do_render( self, fields, action, submit ):
         form = self._form
         try:
             # File object that gets set as a side-effect.
             self.ofile = f = self._create_buffer()
-            
+
             # (Side-effect will add to the file.)
             self.do_render_table(fields)
 
@@ -402,21 +467,24 @@ class TextDisplayRenderer(TextRenderer):
         visible = []
         for field in fields:
             # Don't display hidden fields.
-            if field.ishidden():
+            if not self.show_hidden and field.ishidden():
                 continue
 
             # Never display a file upload. Don't even try.
             if isinstance(field, FileUploadField):
                 continue
-            
+
             rendered = self._display_field(field)
             visible.append( (self._get_label(field), rendered) )
-            
+
         self.do_table(visible)
 
         if self.ofile is None: return f.getvalue()
 
-    def do_render_submit( self, submit ):
+    def do_render_submit( self, submit, reset ):
+        return ''
+
+    def do_render_scripts( self ):
         return ''
 
     #---------------------------------------------------------------------------
@@ -428,17 +496,26 @@ class TextDisplayRenderer(TextRenderer):
         """
         Render a simple field with the given parameters.
         """
-        return (self._geterror(errmsg) + value)
+        return value
 
     renderStringField = _simple
 
     def renderTextAreaField( self, field, value, errmsg, required ):
-        return (self._geterror(errmsg) + u'<pre>%s</pre>' % value)
+        return u'<pre>%s</pre>' % value
 
     renderPasswordField = _simple
     renderDateField = _simple
-    renderEmailField = _simple
-    renderURLField = _simple
+
+    def renderEmailField( self, field, value, errmsg, required ):
+        if value:
+            return u'<a href="mailto:%s">%s</a>' % (value, value)
+        return u''
+
+    def renderURLField( self, field, value, errmsg, required ):
+        if value:
+            return u'<a href="%s">%s</a>' % (value, value)
+        return u''
+        
     renderIntField = _simple
     renderFloatField = _simple
     renderBoolField = _simple

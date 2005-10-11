@@ -38,8 +38,10 @@ def main():
                          output_encoding='latin-1')
 
     uimsg = message and '<div id="message">%s</div>' % message or ''
-    sys.stdout.write(template_pre % {'title': 'Form Rendering',
-                                     'uimsg': uimsg})
+    sys.stdout.write(template_pre % {'title': 'Test Form Query/Render',
+                                     'uimsg': uimsg,
+                                     'scripts': r.render_scripts()})
+    
     sys.stdout.write(r.render(action='handle.cgi'))
     sys.stdout.write(template_post)
 

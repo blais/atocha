@@ -42,16 +42,17 @@ def main():
     
     # On success, render as display, with a text rendition at the bottom.
     r = TextDisplayRenderer(form1, p.getvalues(), incomplete=1,
+                            show_hidden=1,
                             output_encoding='latin-1')
     contents = r.render()
     assert isinstance(contents, str) # Sanity check while we're developing.
-    
+
     s = StringIO.StringIO()
+    print >> s, '<a href="query.cgi" id="edit-button">EDIT VALUES</a>'
     print >> s, '<pre id="values-repr">'
     for name, value in p.getvalues().iteritems():
         print >> s, '%s: %s' % (name, repr(value))
     print >> s, '</pre>'
-    print >> s, '<a href="query.cgi">EDIT VALUES</a>'
     contents += s.getvalue()
 
     # Set form data for edit.
@@ -59,7 +60,8 @@ def main():
     sdata.setformdata(form1.name, p.getvalues())
 
     sys.stdout.write(template_pre % {'title': 'Successful Form Handling',
-                                     'uimsg': ''})
+                                     'uimsg': '',
+                                     'scripts': ''})
     sys.stdout.write(contents)
     sys.stdout.write(template_post)
 

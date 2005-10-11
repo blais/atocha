@@ -22,7 +22,7 @@ import types
 
 # atocha imports.
 import fields
-from messages import msg_registry
+from messages import msg_type, msg_registry
 from parse import FormParser
 # Note: Also to make sure that the _() function is setup.
 
@@ -279,8 +279,18 @@ class FormRenderer:
                 getattr(cls, 'render%s' % att)
             except AttributeError:
                 raise RuntimeError(
-                    'Class %s does not have required method %s' % (cls, att))
+                    'Renderer %s does not have required method %s' % (cls, att))
 
+        
+        for att in  ('do_render', 'do_render_container', 'do_render_table',
+                     'do_table', 'do_render_submit', 'do_render_scripts',
+                     'renderHidden',):
+            try:
+                getattr(cls, att)
+            except AttributeError:
+                raise RuntimeError(
+                    'Renderer %s does not have required method %s' % (cls, att))
+            
     validate_renderer = classmethod(validate_renderer)
 
 
@@ -368,8 +378,15 @@ class FormRenderer:
         An alternate set of submit buttons from the ones that is in the form can
         be specified.
         """
-        return self.do_render_submit(submit or self._form.submit)
+        return self.do_render_submit(submit or self._form.submit,
+                                     self._form.reset)
 
+    def render_scripts( self ):
+        """
+        Renders the scripts to be added to the meta headers.
+        """
+        scripts = self._form.getscripts()
+        return self.do_render_scripts(scripts)
 
     #---------------------------------------------------------------------------
     # Abstract methods that must get implemented by the derived class.
@@ -416,13 +433,19 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_render_submit( self, submit ):
+    def do_render_submit( self, submit, reset ):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm for the form container.
         """
         raise NotImplementedError
 
+    def do_render_scripts( self, scripts ):
+        """
+        Renders the scripts to be added to the meta headers (implementation).
+        """
+        raise NotImplementedError
+        
     def renderHidden( self, field, rvalue ):
         """
         You must override this method to render a hidden field.  Since all the

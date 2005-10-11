@@ -102,6 +102,10 @@ class Field:
     one value has been submitted (radio buttons, required listboxes).
     """
 
+    # List of JavaScript scripts (filename, notice) that may be used by a field.
+    # Override this in the derived class.
+    scripts = ()
+
     # Regular expression for valid variable names.
     varname_re = re.compile('[a-z0-9]')
 
@@ -624,6 +628,8 @@ class EmailField(StringField):
     types_data = (str,)
     css_class = 'email'
 
+    __email_re = re.compile('^.*@.*\.[a-zA-Z][a-zA-Z]+$')
+
     def __init__( self, name, label=None, hidden=None,
                   initial=None, required=None, accept_local=False ):
         StringField.__init__(self, name, label, hidden, initial, required,
@@ -647,10 +653,10 @@ class EmailField(StringField):
                              self.render_value(dvalue))
         else:
             # Check for local addresses.
-            if not self.accept_local and '@' not in addr:
+            if not self.accept_local and not EmailField.__email_re.match(addr):
                 raise ValueError(msg_registry['email-invalid'],
                                  self.render_value(dvalue))
-                # Note: if we had a little more balls, we would remove the
+                # Note: if we had a little more guts, we would remove the
                 # offending characters in the replacement value.
 
             # We throw away the name of the person and just keep the actual
@@ -1455,12 +1461,11 @@ class JSDateField(Field): # Is always required.
     css_class = 'jsdate'
 
     # Public data used for adding the script reference to the head.
-    script = 'calendarDateInput.js'
-    script_notice = """
-    Jason's Date Input Calendar- By Jason Moon http://www.jasonmoon.net/
-    Script featured on and available at http://www.dynamicdrive.com
-    Keep this notice intact for use.
-    """
+    scripts = (('calendarDateInput.js',
+               u"""Jason's Date Input Calendar- By Jason Moon
+               http://www.jasonmoon.net/ Script featured on and available at
+               http://www.dynamicdrive.com Keep this notice intact for use.
+               """),)
 
     __date_re = re.compile('(\d\d\d\d)(\d\d)(\d\d)')
 
@@ -1510,7 +1515,7 @@ class JSDateField(Field): # Is always required.
         # Convert the date object in a format suitable for being accepted by the
         # Javascript code. Note: this may not work before 1900.
         rvalue = dvalue.strftime('%Y%m%d')
-        return rvalue
+        return unicode(rvalue)
 
     def display_value( self, dvalue ):
         assert dvalue is not None

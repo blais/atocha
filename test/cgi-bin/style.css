@@ -1,0 +1,57 @@
+/* !css
+ * 
+ *  $Id$
+ * 
+ *  CSS style file for the test CGI scripts for Atocha form library.
+ */
+
+.formerror { color: red; font-size: smaller; }
+
+.formtable {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+td.formlabel {
+  padding-left: 1em;
+  padding-right: 1em;
+  background-color: #F4F4F8;
+}
+
+div#message {
+  background-color: #FCC;
+  border: medium solid red;
+  padding: 5px;
+  margin: 5px;
+}
+
+div#contents {
+  text-align: center;
+  width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #FAFDFA;
+}
+
+pre#values-repr {
+  background-color: white;
+  border: thin dashed black;
+  padding: 1em;
+  text-align: left;
+}
+
+span.formreq {
+  padding-left: 5px;
+  padding-right: 5px;
+  color: green;
+}
+
+#edit-button { 
+  display: block;
+  padding: 10px;
+  margin: 15px;
+  background-color: #CCF;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+}

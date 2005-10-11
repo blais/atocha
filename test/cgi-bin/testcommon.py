@@ -39,6 +39,8 @@ FormParser.redirect_func = staticmethod(do_redirect)
 # Setup normalizer for CGI scripts using Python's cgi module.
 FormParser.normalizer = CGINormalizer()
 
+# Setup form renderer for rendering scripts.
+TextFormRenderer.scriptsdir = 'scripts'
 
 #-------------------------------------------------------------------------------
 #
@@ -71,6 +73,7 @@ template_pre = """Content-type: text/html
 <html>
   <meta>
     <link href="style.css" rel="stylesheet" type="text/css"/>
+    %(scripts)s
   </meta>
 <body>
 <h1>%(title)s</h1>
@@ -83,8 +86,7 @@ template_post = """
 </body>
 </html>
 """
-
-
+    
 #-------------------------------------------------------------------------------
 #
 # Test form.
@@ -166,5 +168,5 @@ form1 = Form('test-form',
              # A file that can be uploaded.
              FileUploadField('photo', N_('Photograph')),
 
-             action='handle.cgi')
+             action='handle.cgi', reset=1)
 

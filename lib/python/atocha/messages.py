@@ -65,8 +65,9 @@ class TranslatorDict(dict):
 # Message registry: the single place where we store all forms of human-readable
 # strings that you may want to customize for your application.
 msg_registry = TranslatorDict({
-    # String that goes on the submit button by default.
+    # String that goes on the submit/reset buttons by default.
     'submit-button': N_('Submit'),
+    'reset-button': N_('Reset'),
   
     # Some error message strings that can be returned by the parse routine.
     'error-invalid-encoding':
