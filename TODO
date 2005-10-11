@@ -2,22 +2,15 @@
   atocha: TODO
 ================
 
-- COMMIT ALL THE WORK ASAP!
+- Rename atocha-tests.py to remove underscode
 
-- Rendering radio buttons that have no default value currently initializes
-  without a selection (invalid to submit).
+- Implement option for reset button to be present and rendered.
 
-
-- Finish testing all the widgets, implementing rtext.
 - Finish htmlout renderer and convert all my codebase to atocha.
 
 - Create builder.cgi builder, where you gradually store the form contents in the
   session data, where you can create fields and remove them too.  Also, simple
   test with a menu and a list of widget strings to eval would be nice and easy.
-
-- Document the types_* where a list is present.  Type assertions should use a
-  debugging function that can be noop'ed and that recurses into the lists.  Find
-  a way to do that.
 
 - Create a mod_python normalizer, and one for draco (my framework).
 
@@ -34,6 +27,11 @@
 Ideas and Eventually
 ====================
 
+- Document the types_* where a list is present.  Type assertions should use a
+  debugging function that can be noop'ed and that recurses into the lists for
+  better type checking and that can be noop'ed for efficiency.  Find a way to do
+  that.
+
 - Could our system support fields which have more than one varname?  I think so.
   Would that be useful?  If it does, look into doing this, creating fields which
   are comprised of multiple possibly-heterogeneous input widgets.  For example,
@@ -49,7 +47,7 @@ Ideas and Eventually
   I'm not sure about this, since the text form renderer already does take an
   option...
 
-- Implement DISABLED option for all the fields.
+- Implement DISABLED and READ-ONLY options for all the fields.
 
   * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It
     cannot be hidden/disabled.
@@ -60,13 +58,24 @@ Ideas and Eventually
     option than anything else.  IMO we should support disabled similar to
     hidden.
 
+- Support ACCESS-KEYS and TABINDEX for widgets that are not hidden?
+
+- Support general client-side scripting hooks (core events and input events)?
+  Can we integrate button input fields for client-side scripting?
+
+- Support images for submit buttons.
+
+
+
+
+
 New Widgets
 -----------
 
 - Other widgets:
 
    - Reset button, see Quixote for some examples.
-   - Agree button, bool checkbox that MUST be enabled by the user.
+   - General purpose buttons that would replace the submit one anywhere...?
 
 Parser
 ------

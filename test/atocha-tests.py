@@ -12,6 +12,8 @@ Run these tests using the codespeak py.test tool.
 
 # stdlib imports.
 import sys, os, datetime, StringIO, webbrowser
+from pprint import pprint, pformat
+
 
 # form imports.
 from atocha import *
@@ -277,9 +279,6 @@ class TestFields:
         # Simple tests.
         f = Form('test-form',
                  cls('coffee', ('latte', 'expresso', 'moccha'), **extra))
-
-        p = FormParser(f, {}, end=1)
-        assert p.haserrors() and 'coffee' in p.geterrors()
         
         p = FormParser(f, {'coffee': 'latte'}, end=1)
         assert not p.haserrors() and p['coffee'] == 'latte'
@@ -389,6 +388,12 @@ class TestFields:
 
         self._test_one(MenuField)
 
+        # Test errors on zero submitted args.
+        f = Form('test-form',
+                 MenuField('coffee', ('latte', 'expresso', 'moccha')))
+        p = FormParser(f, {}, end=1)
+        assert p.haserrors() and 'coffee' in p.geterrors()
+
     def test_checkboxes( self ):
         'CheckboxesField tests.'
 
@@ -398,6 +403,13 @@ class TestFields:
         'ListboxField tests.'
 
         self._test_one(ListboxField)
+
+        # Test zero selected values.
+        f = Form('test-form',
+                 ListboxField('coffee', ('latte', 'expresso', 'moccha')))
+        p = FormParser(f, {}, end=1)
+        assert not p.haserrors() and p['coffee'] is None           
+
         self._test_many(ListboxField, multiple=1)
 
     def test_jsdate( self ):
@@ -561,6 +573,7 @@ div#the-form {
                   'number': 17,
                   'description': u"A really nice guy. Guapo."}
         errors = {'name': u'Idiotic error'}
+
         p = TextFormRenderer(f, values, errors, incomplete=1)
         self.print_render(p.render())
 

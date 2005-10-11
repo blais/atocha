@@ -119,10 +119,9 @@ class FormRenderer:
 
             # If the field is hidden and the value is not set, we raise an
             # error. We should not be able to render hidden fields without a
-            # value, and we will not use the initial value for hidden fields.
-            # Also, hidden fields should not have errors.  Hidden fields should
-            # have an explicit value provided in the 'values' array.
-            if hidden:
+            # value.  Also, hidden fields should not have errors.  Hidden fields
+            # should have an explicit value provided in the 'values' array.
+            if hidden and field.initial is None:
                 raise RuntimeError(
                     "Error: Hidden field '%s' has no value." % field.name)
 
@@ -140,9 +139,24 @@ class FormRenderer:
                 # initial value.
                 dvalue = field.initial
         else:
-            # The value is present, get it.
-            dvalue = self._values[field.name]
+            # The value is present in the parsed values.
 
+            # But if there is also a replacement value, use that over the parsed
+            # value.  It is likely that the client code set an error on a
+            # validly parsed value, due to custom validation code, and if he set
+            # a replacement value, he indicates that he wants that to be used
+            # instead of the parsed value.
+            if error is not None:
+                # If the values field is not present, use the replacement value.
+                errmsg, repl_rvalue = error
+                if repl_rvalue is not None:
+                    rvalue = repl_rvalue
+                    dorender = False
+                    
+            # No replacement value was found, use the parsed valid value for
+            # render.
+            if dorender:
+                dvalue = self._values[field.name]
 
         # Convert the data value into a value suitable for rendering.
         #
@@ -193,6 +207,11 @@ class FormRenderer:
             return msg_registry['display-unset']
 
         # Have the value converted by the field for display.
+        #
+        # Note: if there is any translation to be done, we expect the
+        # display_value method to have done it before us.  This is so that
+        # combinations of translated values can be performed (e.g. see
+        # CheckboxesField).
         uvalue = field.display_value(dvalue)
 
         # Dispatch to renderer. Notice we hard-wire no-errors and not-hidden
@@ -254,6 +273,8 @@ class FormRenderer:
         implemented renderer is complete.
         """
         for att in fields.__all__:
+            if not isinstance(getattr(fields, att), fields.Field):
+                continue
             try:
                 getattr(cls, 'render%s' % att)
             except AttributeError:

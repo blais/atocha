@@ -8,7 +8,7 @@ Test handler for fields.
 """
 
 # stdlib imports
-import sys, os, shelve, StringIO
+import sys, os, StringIO
 from os.path import *
 from pprint import pprint, pformat
 import cgi, cgitb; cgitb.enable()
@@ -30,8 +30,16 @@ def main():
     """
 
     cargs = cgi.FieldStorage()
-    p = FormParser(form1, cargs, 'render.cgi', end=1)
+    p = FormParser(form1, cargs, 'render.cgi')
 
+    if 'merengue' in (p['dances'] or []):
+        repldances = list(p['dances'])
+        repldances.remove('merengue')
+        p.error(u'Please fix error in dances below. I thought you were cuban.',
+                dances=(u'No dominican dances here, please.', repldances))
+
+    p.end()
+    
     # On success, render as display, with a text rendition at the bottom.
     r = TextDisplayRenderer(form1, p.getvalues(), incomplete=1,
                             output_encoding='latin-1')
@@ -54,6 +62,7 @@ def main():
                                      'uimsg': ''})
     sys.stdout.write(contents)
     sys.stdout.write(template_post)
+
 
 if __name__ == '__main__':
     main()

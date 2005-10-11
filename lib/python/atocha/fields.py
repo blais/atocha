@@ -20,10 +20,10 @@ from messages import msg_registry, msg_type
 __all__ = [
     'Field',
     'StringField', 'TextAreaField', 'DateField', 'EmailField', 'URLField',
-    'IntField', 'FloatField', 'BoolField',
+    'IntField', 'FloatField', 'BoolField', 
     'RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',
-    'JSDateField',
     'FileUploadField',
+    'JSDateField',
     'ORI_HORIZONTAL', 'ORI_VERTICAL'
     ]
 
@@ -164,6 +164,11 @@ class Field:
 
     def parse_value( self, pvalue ):
         """
+        :Arguments:
+
+        - 'pvalue': the parse value to parse, in one of the types_parse types.
+          You field must be able to process all of the possible types.
+
         Convert the value coming from the browser into the data value.  The
         value from the browser is already decoded at the form parsing level and
         so 'pvalue' strings or strings contained within lists are actually
@@ -197,6 +202,13 @@ class Field:
 
     def render_value( self, dvalue ):
         """
+        :Arguments:
+
+        - 'dvalue': the data value to render, in one of the types_data types, or
+          can always be None as well, if the data value is not available (render
+          to some fixed default).  You field must be able to process all of the
+          possible types.
+
         Prepare the data value for rendering as part of a form rendering for an
         HTML input widget.  This is not meant for displaying the value read-only
         to the user (see special renderers to do that).  This will generally
@@ -212,6 +224,13 @@ class Field:
 
     def display_value( self, dvalue ):
         """
+        :Arguments:
+
+        - 'dvalue': the data value to display, in one of the types_data types,
+          or can always be None as well, if the data value is not available
+          (display to some fixed default).  You field must be able to process
+          all of the possible types.
+
         From a valid data value after having been succesfully parsed, convert
         the value from data type to unicode for user-friendly display.  This is
         meant to be used by the display renderers.
@@ -219,6 +238,12 @@ class Field:
         Note that this is different from the render_value method because that is
         meant to render in a form.  We are meant to render to visible text to
         the user, such as would be displayed in a read-only table.
+
+        Also, if you have strings that are to be translated, they should be
+        translated here because the renderer will not translate them itself-- it
+        is not possible, since some values can be combined, see CheckboxesField
+        for example, which produces a comma-separated list of its translated
+        strings for display.
         """
         raise NotImplementedError # return uvalue
 
@@ -706,7 +731,7 @@ class _NumericalField(Field, _OptRequired):
         self.maxval = maxval
         "Maximum value that is accepted."
 
-        self.format = unicode(format)
+        self.format = format and unicode(format) or None
         """Printf-like format for output display.  If this is not set the
         default string conversion routines are used.  Note that you should set
         an appropriate format for the relevant numerical type.  Also, this does
@@ -819,7 +844,9 @@ class _MultipleField(Field):
 
     The values are ascii str's only, they cannot be unicode (this is a
     limitation we impose ourselves, as a recognition that the values are to be
-    used internally only, and not as user-visible strings).
+    used internally only, and not as user-visible strings).  However, if the
+    values are integers, they will be automatically converted to strings, so
+    that values are always strings.
 
     One issue with the choices fields is that the set of valid values may be
     generated dynamically, and therefore sometimes we need to be able to create
@@ -1052,7 +1079,8 @@ class _OneChoiceField(_MultipleField):
         return dvalue
 
     def display_value( self, dvalue ):
-        return self.valueset[dvalue]
+        # Translate the label of the value before returning it.
+        return _(self.valueset[dvalue])
 
 
 #-------------------------------------------------------------------------------
@@ -1154,7 +1182,8 @@ class _ManyChoicesField(_MultipleField):
 
     def display_value( self, dvalue ):
         # Get labels and join them.
-        labels = [self.valueset[x] for x in dvalue]
+        # Note: Translate the labels of the value before returning it.
+        labels = [_(self.valueset[x]) for x in dvalue]
         return u', '.join(labels)
 
 
@@ -1182,16 +1211,18 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, _OptRequired):
     A listbox higher than one entry.  Either ''zero or one'' choices, OR ''zero
       or many'' choices can be made, thus, a listbox can be in one of two modes:
 
-    - SINGLE mode: it allows zero or one choices;
-    - MULTIPLE mode: it allows zero, one or many choices;
+    - SINGLE mode: it allows zero or one choices, returns a str or None;
+    - MULTIPLE mode: it allows zero, one or many choices, returns a list;
 
     If you want to provide a single mode where the listbox forces the user to
     provide at least one value, use the 'required' option.
 
     """
-    types_data = (list, str,) # Must include all possibilities for many or one.
-    types_parse = _ManyChoicesField.types_parse
-    types_render = _ManyChoicesField.types_render
+    # Must include all possibilities for many or one: list for many choices, str
+    # for a single choice, None for zero choice.
+    types_data = (list, str, NoneType,)
+    types_parse = _ManyChoicesField.types_parse + _OneChoiceField.types_parse
+    types_render = _ManyChoicesField.types_render + _OneChoiceField.types_render
 
     css_class = 'listbox'
 
@@ -1246,13 +1277,165 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, _OptRequired):
         if self.multiple:
             return _ManyChoicesField.parse_value(self, pvalue)
         else:
+            # Deal with the case where no value is selected. This is legal for a
+            # 'single' Listbox (and is what makes it unique and useful over a
+            # menu with an extra 'no-choice' item).
+            if pvalue is None:
+                return None
             return _OneChoiceField.parse_value(self, pvalue)
 
     def display_value( self, dvalue ):
         if self.multiple:
             return _ManyChoicesField.display_value(self, dvalue)
         else:
+            # Deal with the case where no value is selected. See comment above.
+            if dvalue is None:
+                return u''
             return _OneChoiceField.display_value(self, dvalue)
+
+
+#-------------------------------------------------------------------------------
+#
+class FileUploadField(Field, _OptRequired):
+    """
+    A file being sent by the client.  The returned value is an instance of the
+    FileUpload class.
+
+    There are lots of details about file upload mechanics at
+    http://www.cs.tut.fi/~jkorpela/forms/file.html
+
+    Note: depending on the web framework using this, it might be possible to get
+    access to the filename, to set it for as the replacement value.
+
+    Observer that this field type is treated a little bit specially in the
+    re-render loop: its values are removed automatically from the form-data (see
+    FormParser) and the display renderers ignore and do not render them.
+    """
+
+    types_data = (NoneType, types.InstanceType,)
+    types_parse = (NoneType, types.InstanceType, str,)
+    types_render = (unicode,)
+    css_class = 'file'
+
+    def __init__( self, name, label=None, hidden=None,
+                  initial=None, required=None,
+                  filtpattern=None ):
+        Field.__init__(self, name, label, hidden, initial)
+        _OptRequired.__init__(self, required)
+
+        self.filtpattern = filtpattern
+        """Filter string to initialize the browser dialog on the client-side
+        with. This corresponds to the 'accept' attribute of the corresponding
+        HTML input field."""
+
+    def parse_value( self, pvalue ):
+        """
+        Check the type of the object that is given to us.  Depending on the
+        framework which is using this library, the nature of the object can
+        vary, and we support various things here, and this could be extended.
+        If you have some type of object that is generic enough or part of a
+        widely popular framework, please contact the author for inclusion.
+
+        Note: The replacement value for file uploads is not supported in many
+        browser (e.g. see
+        http://www.cs.tut.fi/~jkorpela/forms/file.html#value), but is
+        supported by certain browsers.  Thus we will try to set the
+        replacement value to the value of the filename, if the filename is
+        available.  Otherwise, no biggie, the field's filename will be lost.
+
+        We expect that we will not build complex forms that include a file
+        upload field, and so this should not be a big problem in practice.
+
+        Note(2): we avoid code dependencies on the given objects by checking for
+        their types 'by name'.
+        """
+
+        # Check for not submitted.
+        if pvalue is None:
+            dvalue = None
+        # Check for strings.
+        elif isinstance(pvalue, str):
+            # We got data as a string, wrap around file-like object.
+            #
+            # Note: we need to accept string types, since from the mechanize
+            # library submit, that allows us to write tests, that's what we seem
+            # to get.
+            dvalue = StringIO.StringIO(pvalue)
+
+        elif isinstance(pvalue, types.InstanceType):
+            # Check for a mod_python Field class.
+            if pvalue.__class__.__name__ == 'Field':
+                # We wrap it in a FileUpload object from this module.
+                pvalue = FileUpload(pvalue)
+
+            # Here check if it's a FileUpload object that we just created above
+            # from a Field or a FileUpload object from the draco library that
+            # did the same.  The draco class is functionally the same as the one
+            # we provide.
+            if pvalue.__class__.__name__ == 'FileUpload':
+                # We need to check if the file is empty, because we still might
+                # get a file object if the user has not submitted anything (this
+                # may be a bug in draco or mod_python).
+                pvalue.file.seek(0, 2)
+                size = arg.file.tell()
+                if size > 0:
+                    # Success, rewind and use.
+                    pvalue.file.seek(0)
+                    dvalue = pvalue
+                else:
+                    # The file is empty, mark as such.
+                    dvalue = None
+            else:
+                # Check for anything that has a read() method.
+                if hasattr(pvalue, 'read'):
+                    dvalue = pvalue
+        else:
+            # Otherwise it's not an instance nor a string, we really don't know
+            # what to do.
+            raise RuntimeError(
+                "Internal error: type for file parsing unknown.")
+
+        # Check the required value, this forces at least one choice to be
+        # present. We don't delegate to the base class on purpose, this is a
+        # special case.
+        if self.required and pvalue is None:
+            # We indicate an error mentioning that this field was required.
+            raise ValueError(msg_registry['error-required-value'])
+
+        return dvalue
+
+    def render_value( self, dvalue ):
+        # Never render anything in there, it's not really used by browsers
+        # anyway (at least not without a warning, when it is, e.g. Opera).
+        return u''
+
+    def display_value( self, dvalue ):
+        # Nothing to display from this, it's a file, you'll have to do something
+        # special.
+        if dvalue is not None:
+            raise RuntimeError("Error: attempting to display a file upload.")
+        return u''
+
+class FileUpload:
+    """
+    Adapter class for the mod_python Field class that implements the file
+    interface.  This slightly changes the semantics of mod_python's Field
+    class. It imports the file operations from the temporary file to the current
+    class so it can be used as a file.
+    """
+
+    def __init__( self, field ):
+        self.field = field
+
+    def __getattr__( self, name ):
+        """
+        Aggregate file methods into the current object.
+        """
+        if hasattr(self.field.file, name):
+            attr = getattr(self.field.file, name)
+            if callable(attr):
+                return attr
+        return getattr(self.field, name)
 
 
 #-------------------------------------------------------------------------------
@@ -1332,143 +1515,4 @@ class JSDateField(Field): # Is always required.
     def display_value( self, dvalue ):
         assert dvalue is not None
         return DateField._time_to_string(dvalue)
-
-
-#-------------------------------------------------------------------------------
-#
-class FileUploadField(Field, _OptRequired):
-    """
-    A file being sent by the client.  The returned value is an instance of the
-    FileUpload class.
-
-    There are lots of details about file upload mechanics at
-    http://www.cs.tut.fi/~jkorpela/forms/file.html
-
-    Note: depending on the web framework using this, it might be possible to get
-    access to the filename, to set it for as the replacement value.  Check, this
-    is possible
-    """
-
-    types_data = (NoneType, types.InstanceType,)
-    types_parse = (NoneType, types.InstanceType, str,)
-    types_render = (unicode,)
-    css_class = 'file'
-
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None,
-                  filtpattern=None ):
-        Field.__init__(self, name, label, hidden, initial)
-        _OptRequired.__init__(self, required)
-
-        self.filtpattern = filtpattern
-        """Filter string to initialize the browser dialog on the client-side
-        with. This corresponds to the 'accept' attribute of the corresponding
-        HTML input field."""
-
-    def parse_value( self, pvalue ):
-        """
-        Check the type of the object that is given to us.  Depending on the
-        framework which is using this library, the nature of the object can
-        vary, and we support various things here, and this could be extended.
-        If you have some type of object that is generic enough or part of a
-        widely popular framework, please contact the author for inclusion.
-
-        Note: The replacement value for file uploads is not supported in many
-        browser (e.g. see
-        http://www.cs.tut.fi/~jkorpela/forms/file.html#value), but is
-        supported by certain browsers.  Thus we will try to set the
-        replacement value to the value of the filename, if the filename is
-        available.  Otherwise, no biggie, the field's filename will be lost.
-
-        We expect that we will not build complex forms that include a file
-        upload field, and so this should not be a big problem in practice.
-
-        Note(2): we avoid code dependencies on the given objects by checking for
-        their types 'by name'.
-        """
-
-        # Check for not submitted.
-        if pvalue is None:
-            dvalue = None
-        # Check for strings.
-        elif isinstance(pvalue, str):
-            # We got data as a string, wrap around file-like object.
-            #
-            # Note: we need to accept string types, since from the mechanize
-            # library submit, that allows us to write tests, that's what we seem
-            # to get.
-            dvalue = StringIO(arg)
-
-        elif isinstance(pvalue, types.InstanceType):
-            # Check for a mod_python Field class.
-            if pvalue.__class__.__name__ == 'Field':
-                # We wrap it in a FileUpload object from this module.
-                pvalue = FileUpload(pvalue)
-
-            # Here check if it's a FileUpload object that we just created above
-            # from a Field or a FileUpload object from the draco library that
-            # did the same.  The draco class is functionally the same as the one
-            # we provide.
-            if pvalue.__class__.__name__ == 'FileUpload':
-                # We need to check if the file is empty, because we still might
-                # get a file object if the user has not submitted anything (this
-                # may be a bug in draco or mod_python).
-                pvalue.file.seek(0, 2)
-                size = arg.file.tell()
-                if size > 0:
-                    # Success, rewind and use.
-                    pvalue.file.seek(0)
-                    dvalue = pvalue
-                else:
-                    # The file is empty, mark as such.
-                    dvalue = None
-            else:
-                # Check for anything that has a read() method.
-                if hasattr(pvalue, 'read'):
-                    dvalue = pvalue
-        else:
-            # Otherwise it's not an instance nor a string, we really don't know
-            # what to do.
-            raise RuntimeError(
-                "Internal error: type for file parsing unknown.")
-
-        # Check the required value, this forces at least one choice to be
-        # present. We don't delegate to the base class on purpose, this is a
-        # special case.
-        if self.required and pvalue is None:
-            # We indicate an error mentioning that this field was required.
-            raise ValueError(msg_registry['error-required-value'])
-
-        return dvalue
-
-    def render_value( self, dvalue ):
-        # Never render anything in there, it's not really used by browsers
-        # anyway (at least not without a warning, when it is, e.g. Opera).
-        return None
-
-    def display_value( self, dvalue ):
-        # Nothing to display from this, it's a file, you'll have to do something
-        # special.
-        raise RuntimeError("Error: attempting to display a file upload.")
-
-class FileUpload:
-    """
-    Adapter class for the mod_python Field class that implements the file
-    interface.  This slightly changes the semantics of mod_python's Field
-    class. It imports the file operations from the temporary file to the current
-    class so it can be used as a file.
-    """
-
-    def __init__( self, field ):
-        self.field = field
-
-    def __getattr__( self, name ):
-        """
-        Aggregate file methods into the current object.
-        """
-        if hasattr(self.field.file, name):
-            attr = getattr(self.field.file, name)
-            if callable(attr):
-                return attr
-        return getattr(self.field, name)
 

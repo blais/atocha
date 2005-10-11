@@ -11,6 +11,7 @@ See class FormParser (below).
 
 
 # atocha imports.
+from fields import FileUploadField
 from messages import msg_registry
 
 
@@ -522,6 +523,17 @@ class FormParser:
 
         rurl = redir or self._redirurl
         
+        # Make a copy of the values to be returned and remove all the file
+        # uploads parsed values, because we won't be able to fill the file
+        # widget with the uploaded data, it would not make sense.
+        values = self.getvalues().copy()
+        for field in self._form.fields():
+            if isinstance(field, FileUploadField):
+                try:
+                    del values[field.name]
+                except KeyError:
+                    pass
+
         return fun(rurl, self._form, self._status, self._message,
                    self.getvalues(), self._errors)
 

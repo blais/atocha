@@ -32,13 +32,14 @@ __all__ = ['msg_registry']
 # __builtin__ dictionary, which is a bit of a kludge, but makes writing i18n
 # programs so much easier.  We will also expect these functions to change
 # possibly everytime a request is made, as a result of setup for a specific user
-# session.
+# session, so we must call them at the very last moment, in the render, to be
+# able to support multi-lingual applications.
 #
 # If they're not set, we will set them to noop functions here, so that at least
 # we can run the tests outside the environment and so that this library still
 # works even if the app is not i18n'ed.
 if not hasattr(__builtin__, '_'):
-    __builtin__._ = lambda x: unicode(x)
+    __builtin__._ = lambda x: x.decode('iso-8859-1') # Input coding in latin-1.
 if not hasattr(__builtin__, 'N_'):
     __builtin__.N_ = lambda x: x
 

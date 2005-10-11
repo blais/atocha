@@ -12,7 +12,7 @@ import StringIO, codecs
 
 # atocha imports.
 from atocha.render import FormRenderer
-from atocha.fields import ORI_VERTICAL
+from atocha.fields import ORI_VERTICAL, FileUploadField
 from atocha.messages import msg_type
 
 
@@ -67,6 +67,12 @@ class TextRenderer(FormRenderer):
             sio = Writer(sio)
         return sio
 
+    def _get_label( self, field ):
+        """
+        Returns a printable label for the given field.
+        """
+        return (field.label and _(field.label)
+                or unicode(field.name.capitalize()))
 
     def do_table( self, pairs=(), extra=None ):
         # Use side-effect for efficiency if requested.
@@ -74,7 +80,6 @@ class TextRenderer(FormRenderer):
 
         print >> f, u'<table class=%s>' % self.css_table
         for label, inputs in pairs:
-            label = label and _(label) or u''
             assert isinstance(label, unicode)
             assert isinstance(inputs, unicode)
 
@@ -99,6 +104,7 @@ class TextRenderer(FormRenderer):
             return u''
 
 
+
 #-------------------------------------------------------------------------------
 #
 class TextFormRenderer(TextRenderer):
@@ -173,7 +179,7 @@ class TextFormRenderer(TextRenderer):
             if field.ishidden():
                 hidden.append(rendered)
             else:
-                label = _(field.label)
+                label = self._get_label(field)
                 if field.isrequired():
                     label += u'<span class="%s">*</a>' % self.css_required
                 visible.append( (label, rendered) )
@@ -181,7 +187,6 @@ class TextFormRenderer(TextRenderer):
         self.do_table(visible, '\n'.join(hidden))
 
         if self.ofile is None: return f.getvalue()
-
 
     def do_render_submit( self, submit ):
         # Use side-effect for efficiency if requested.
@@ -219,9 +224,7 @@ class TextFormRenderer(TextRenderer):
         return '\n'.join(inputs)
 
 
-    def _input( self,
-                htmltype, field, value, required,
-                checked=False, label=None ):
+    def _input( self, htmltype, field, value, checked=False, label=None ):
         """
         Render an html input.
         """
@@ -244,14 +247,13 @@ class TextFormRenderer(TextRenderer):
                  fargs)
         return o
             
-    def _single( self,
-                 htmltype, field, value, errmsg, required,
+    def _single( self, htmltype, field, value, errmsg,
                  checked=False, label=None ):
         """
         Render a single field.
         """
         return self._geterror(errmsg) + \
-               self._input(htmltype, field, value, required, checked, label)
+               self._input(htmltype, field, value, checked, label)
 
     def _orient( self, field, inputs ):
         """
@@ -268,7 +270,7 @@ class TextFormRenderer(TextRenderer):
             return u'\n'.join(inputs)
         
     def renderStringField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderTextAreaField( self, field, rvalue, errmsg, required ):
         s = self._geterror(errmsg)
@@ -278,30 +280,30 @@ class TextFormRenderer(TextRenderer):
                 u'<textarea name="%s" %s %s class="%s">%s</textarea>' %
                 (field.name, rowstr, colstr, field.css_class, rvalue or ''))
 
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderPasswordField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderDateField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderEmailField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderURLField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderIntField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderFloatField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg, required)
+        return self._single('text', field, rvalue, errmsg)
 
     def renderBoolField( self, field, rvalue, errmsg, required ):
         # The render type calls for any value and for the rvalue to determine
         # whether this will get checked or not.
-        return self._single('checkbox', field, u'1', errmsg, required, rvalue)
+        return self._single('checkbox', field, u'1', errmsg, rvalue)
 
     def renderRadioField( self, field, rvalue, errmsg, required ):
         assert rvalue is not None
@@ -309,132 +311,60 @@ class TextFormRenderer(TextRenderer):
         for vname, label in field.values:
             checked = bool(vname == rvalue)
             inputs.append(
-                self._input('radio', field, vname, required, checked, label))
+                self._input('radio', field, vname, checked, _(label)))
         output = self._orient(field, inputs)
         return self._geterror(errmsg) + output
 
+    def _renderMenu( self, field, rvalue, errmsg, required,
+                     multiple=None, size=None ):
+        "Render a SELECT menu. 'rvalue' is expected to be a list of values."
+
+        selopts = []
+        if size is not None and size > 1:
+            selopts.append('size="%d"' % field.size)
+        if multiple:
+            selopts.append('multiple="1"')
+
+        lines = []
+        lines.append(
+            u'<select name="%s" %s class="%s">' %
+            (field.name, ' '.join(selopts), field.css_class))
+        for vname, label in field.values:
+            selstr = u''
+            if vname in rvalue:
+                selstr = u'selected="selected"'
+            lines.append(u'<option value="%s" %s>%s</option>' %
+                         (vname, selstr, _(label)))
+        lines.append(u'</select>')
+        return self._geterror(errmsg) + u'\n'.join(lines)
+
     def renderMenuField( self, field, rvalue, errmsg, required ):
-##         assert rvalue is not None
-##         inputs = []
-##         lines = []
-##         lines.append(
-##             u'<select name="%s" class="%s">' % (field.name, field.css_class))
-##         for vname, label in field.values:
-##             checked = bool(vname == rvalue)
-##             inputs.append(
-##                 self._input('radio', field, vname, required, checked, label))
-##         lines.append(u'</select>')
-
-        return self._geterror(errmsg) + output
-
-## FIXME continue here
-        raise NotImplementedError
-
-#
-#          <select name='name'>
-#          <option value='1' />
-#          <option value='2' />
-#          <option value='3' />
-#          </select>
-#
-
-
-
+        return self._renderMenu(field, [rvalue], errmsg, required)
 
     def renderCheckboxesField( self, field, rvalue, errmsg, required ):
-        raise NotImplementedError
+        inputs = []
+        for vname, label in field.values:
+            checked = vname in rvalue
+            inputs.append(self._input('checkbox', field, vname, checked, _(label)))
+        output = self._orient(field, inputs)
+        return self._geterror(errmsg) + output
 
     def renderListboxField( self, field, rvalue, errmsg, required ):
-        raise NotImplementedError
-
-    def renderJSDateField( self, field, rvalue, errmsg, required ):
-        raise NotImplementedError
+        assert rvalue is not None
+        if not isinstance(rvalue, list):
+            rvalue = [rvalue] # May be a str if not multiple.
+        return self._renderMenu(field, rvalue, errmsg, required,
+                                field.multiple, field.size)
 
     def renderFileUploadField( self, field, rvalue, errmsg, required ):
+        return self._single('file', field, rvalue, errmsg)
+
+    def renderJSDateField( self, field, rvalue, errmsg, required ):
        raise NotImplementedError
 
 
 
-## FIXME: remove
-#     def render_MultipleField( self, field, value, type_ ):
-#         label = _(field.label)
-#
-#         inpu = '\n'
-#         for fvalue, flabel in field.values:
-#             vstr = ''
-#             if type(value) is types.ListType:
-#                 if fvalue in value:
-#                     vstr += 'checked="checked" '
-#             elif fvalue == value:
-#                 vstr += 'checked="checked" '
-#             inpu += ('<input name="%s" value="%s" type="%s" %s>%s' + \
-#                      '</input><br/>\n') % \
-#                      (field.name, fvalue, type_, vstr, flabel)
-#
-#         return self.__fieldfmt % {'label': label, 'inputs': inpu}
-#
-#     def render_RadioField( self, field, value ):
-#         return self.render_MultipleField(field, value, 'radio')
-#
-#     def render_ListField( self, field, value ):
-#         return self.render_MultipleField(field, value, 'checkbox')
-#
-#     def render_MenuField( self, field, value ):
-#         label = _(field.label)
-#
-#         mulstr = field.multiple and 'multiple="1"' or ''
-#         mulstr += ' size="%d"' % (field.size or 1)
-#         inpu = '\n<select name="%s" %s>\n' % (field.name, mulstr)
-#         for fvalue, flabel in field.values:
-#             selstr = ''
-#             if type(value) is types.ListType:
-#                 if fvalue in value:
-#                     selstr = 'selected="selected"'
-#             elif fvalue == value:
-#                 selstr = 'selected="selected"'
-#
-#             inpu += '  <option value="%s" %s>%s</option>\n' % \
-#                     (fvalue, selstr, flabel)
-#
-#         inpu += '\n</select>'
-#
-#         return self.__fieldfmt % {'label': label, 'inputs': inpu}
-#
-#     def render_DateField( self, field, value ):
-#         return self.render_Field(field, value, 'text')
-#
-#     def render_FileUploadField( self, field, value ):
-#         return self.render_Field(field, value, 'file')
-#
-
-
-# - Include this text in the simple rendering code (maybe in the fields
-#   themselves):
-#
-#      Choices
-#      -------
-#
-#
-#      0 or many: checkboxes  OR  menu (with multiple option)
-#          <input name='name' type='checkbox' value='1'/>
-#          <input name='name' type='checkbox' value='2'/>
-#          <input name='name' type='checkbox' value='3'/>
-#
-#          <select name='name' multiple='1' size='3'>
-#              <!-- size has to be >1 if multiple is used -->
-#          <option value='1' />
-#          <option value='2' />
-#          <option value='3' />
-#          </select>
-
-
-
-
-
-
-
-
-
+
 #-------------------------------------------------------------------------------
 #
 class TextDisplayRenderer(TextRenderer):
@@ -471,8 +401,16 @@ class TextDisplayRenderer(TextRenderer):
 
         visible = []
         for field in fields:
+            # Don't display hidden fields.
+            if field.ishidden():
+                continue
+
+            # Never display a file upload. Don't even try.
+            if isinstance(field, FileUploadField):
+                continue
+            
             rendered = self._display_field(field)
-            visible.append( (_(field.label), _(rendered)) )
+            visible.append( (self._get_label(field), rendered) )
             
         self.do_table(visible)
 
@@ -509,5 +447,8 @@ class TextDisplayRenderer(TextRenderer):
     renderCheckboxesField = _simple
     renderListboxField = _simple
     renderJSDateField = _simple
-    renderFileUploadField = _simple
+
+    def renderFileUploadField( self, field, value, errmsg, required ):
+        # Never display a file upload. Don't even try.
+        return u''
 

@@ -49,6 +49,9 @@ mind:
 #. Fields may render to multiple input widgets and are consolidated in a single
    value automatically;
 
+#. Extensible: it is easy to create and add new field types without having to
+   modify the framework.
+
 Essentially, I wanted functionality closer to what desktop UI toolkits provide,
 which is often not present in web form parsing toolkits.
 

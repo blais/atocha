@@ -70,50 +70,7 @@ template_pre = """Content-type: text/html
 
 <html>
   <meta>
-    <style type="text/css"/><!--
-
-.formerror { color: red; font-size: smaller; }
-
-.formtable {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-td.formlabel {
-  padding-left: 1em;
-  padding-right: 1em;
-  background-color: #F4F4F8;
-}
-
-div#message {
-  background-color: #FCC;
-  border: medium solid red;
-  padding: 5px;
-  margin: 5px;
-}
-
-div#contents {
-  text-align: center;
-  width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #FAFDFA;
-}
-
-pre#values-repr {
-  background-color: white;
-  border: thin dashed black;
-  padding: 1em;
-  text-align: left;
-}
-
-span.formreq {
-  padding-left: 5px;
-  padding-right: 5px;
-  color: green;
-}
-
---></style>
+    <link href="style.css" rel="stylesheet" type="text/css"/>
   </meta>
 <body>
 <h1>%(title)s</h1>
@@ -132,21 +89,82 @@ template_post = """
 #
 # Test form.
 form1 = Form('test-form',
+
+             # Normal unicode string.
              StringField('name', N_("Person's name")),
-             StringField('secret_code', N_("Secret code"), encoding='ascii'),
+
+             # Ascii string.
+             StringField('postal', N_("Postal code"), encoding='ascii'),
+
+             # Hidden field.
+             StringField('secret', hidden=1, initial='zanzibar',
+                         encoding='latin-1'),
+
+             # A text area.
              TextAreaField('description', N_("Description"), rows=10, cols=60),
+
+             # Simple date.
              DateField('birthday', N_("Birthday")),
+
+             # Email address and URL fields.
              EmailField('email', N_("Email")),
              URLField('homepage', N_("Home Page")),
+
+             # Numerical fields.
              IntField('number', N_("Age")),
              FloatField('height', N_("Height"), format='%.7f'),
-             BoolField('confirm', N_("Are you sure?"),),
+
+             # Boolean checkbox.
+             BoolField('veggie', N_("Vegetarian?"),),
+
+             # Radio buttons.
              RadioField('sex', [('m', N_('Male')),
                                 ('f', N_('Female')),
-                                ('x', N_('Maybe'))], N_('Sex'), orient=ORI_HORIZONTAL),
+                                ('x', N_('Maybe'))],
+                        N_('Sex'), orient=ORI_HORIZONTAL,
+                        initial='x'),
+
+             # A single-choice menu.
+             MenuField('marital', [(1, N_('Single')),
+                                   (2, N_('Married')),
+                                   (3, N_('Divorced')),
+                                   (0, N_('(Other...)'))],
+                       N_('Marital Status'),
+                       initial=3),
+
+             # A list of options.
+             CheckboxesField('dances', [('salsa', N_('Salsa')),
+                                        ('tango', N_('Tango')),
+                                        ('rumba', N_('Rumba')),
+                                        ('chacha', N_('Cha-cha-chá')),
+                                        ('merengue', N_('Merengue')),],
+                             N_('Favourite Dances'),
+                             initial=['rumba', 'salsa']),
+
+             # A list of options (single).
+             ListboxField('beer', [('heineken', N_('Heineken')),
+                                   ('kro', N_('Kronenbourg')),
+                                   ('corona', N_('Corona')),
+                                   ('budweiser', N_('Budweiser')),
+                                   ('paulaner', N_('Paulaner')),],
+                          N_('The Best Beer, if any'),
+                          ),
+
+             # A list of options (multiple).
+             ListboxField('yogas', [('ash', N_('Ashtanga')),
+                                    ('iyen', N_('Iyengar')),
+                                    ('kri', N_('Kripalu')),
+                                    ('bik', N_('Bikram')),
+                                    ('kun', N_('Kundalini'))],
+                          N_('Yogas Practiced'),
+                          initial=['ash', 'kun'], multiple=1
+                          ),
+
+             # A file that can be uploaded.
+             FileUploadField('photo', N_('Photograph')),
+
              action='handle.cgi')
 
-##     'RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',
-##     'JSDateField',
-##     'FileUploadField',
+## 'CheckboxesField', 'ListboxField',
+## 'JSDateField', 'FileUploadField',
 
