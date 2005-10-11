@@ -3,7 +3,6 @@
 ================
 
 - Finish htmlout renderer and convert all my codebase to atocha.
-
 - Create a mod_python normalizer, and one for draco (my framework).
 
 - Provide examples for:
@@ -95,7 +94,10 @@ Parser
 Tests
 =====
 
-- Automate tests for four cases: hidden, valid, invalid, empty
+- Automate tests for four cases: hidden, valid, invalid, empty.
+- Automate tests using branch coverage.
+
+
 
 
 
@@ -129,7 +131,7 @@ hidden fields now require an explicit 'hidden=1' option.
 
 form_parser: Needs a concrete implementation for hume:
 
-# FIXME: change this to use the errors to check if there are errors
+# change this to use the errors to check if there are errors
         if self._status:
             if not self._messages:
                 setStatus(self._status, self.__generic_message)
