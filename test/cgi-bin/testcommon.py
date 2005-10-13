@@ -24,9 +24,10 @@ from atocha import *
 # Parser setup
 #
 def do_redirect( url, form, status, message, values, errors ):
-    # Get form data.
-    sdata = SessionData()
-    sdata.setformdata(form1.name, values, errors, message)
+    # Store form data for later retrieval in session data.
+    db = getdb()
+    db['session-%s' % form1.name] = values, errors, message
+
 
     print 'Location: %s' % url
     print
@@ -42,28 +43,17 @@ FormParser.normalizer = CGINormalizer()
 # Setup form renderer for rendering scripts.
 TextFormRenderer.scriptsdir = 'scripts'
 
+
 #-------------------------------------------------------------------------------
 #
-class SessionData:
+def getdb():
     """
-    Simulate getting session data for the given form.
-
-    We don't bother with cookies or form-specific storage for session
-    data, since this is just a test and we will work locally.
+    Returns an open object with a dict interface to store data in a DB.
+    This is used to store both the final data and the session form data.
     """
-    def __init__( self ):
-        fn = '/tmp/atocha-test-session-data.db'
-        self.shelf = shelve.open(fn, 'c')
-
-    def getformdata( self, formname ):
-        try:
-            values, errors, msg = self.shelf[formname]
-        except KeyError:
-            values, errors, msg = None, None, None
-        return values, errors, msg
-
-    def setformdata( self, formname, values, errors=None, msg=None ):
-        self.shelf[formname] = values, errors, msg
+    fn = '/tmp/atocha-test-session-data.db'
+    shelf = shelve.open(fn, 'c')
+    return shelf
 
 
 #-------------------------------------------------------------------------------
