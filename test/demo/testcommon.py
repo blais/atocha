@@ -15,7 +15,7 @@ import sys, shelve
 from os.path import *
 
 # atocha imports.
-root = dirname(dirname(dirname(sys.argv[0])))
+root = dirname(dirname(dirname(dirname(sys.argv[0]))))
 sys.path.append(join(root, 'lib', 'python'))
 from atocha import *
 
