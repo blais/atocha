@@ -5,6 +5,12 @@
 - Convert all my codebase to Atocha.
 
 
+- Auto generate documentation for all the fields using their docstrings and a
+  simple script.
+
+
+
+
 - Implement a menu that redirects on change based on this:
   http://cscie12.dce.harvard.edu/lecture_notes/20050316/slide50.html
 
