@@ -11,7 +11,7 @@ CGI handler for rendering a query form to allow the user to enter input.
 import sys, cgi, cgitb; cgitb.enable()
 
 # atocha imports.
-from testcommon import *
+from common import *
 from atocha import *
 
 

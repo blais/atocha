@@ -11,7 +11,7 @@ Handler for form submission.
 import sys, cgi, cgitb; cgitb.enable()
 
 # atocha imports.
-from testcommon import *
+from common import *
 from atocha import *
 
 

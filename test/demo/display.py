@@ -14,7 +14,7 @@ from os.path import *
 import cgi, cgitb; cgitb.enable()
 
 # atocha imports.
-from testcommon import *
+from common import *
 from atocha import *
 
 

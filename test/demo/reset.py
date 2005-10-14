@@ -11,7 +11,7 @@ Handler that resets the form data stored in the local DB.
 import sys, cgi, cgitb; cgitb.enable()
 
 # atocha imports.
-from testcommon import *
+from common import *
 
 
 # Set form data for edit.
