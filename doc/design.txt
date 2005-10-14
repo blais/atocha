@@ -1,0 +1,17 @@
+========================
+  atocha: Design Notes
+========================
+
+.. contents::
+
+
+Fields vs. Widgets
+==================
+
+In Atocha, each field does not necessarily correspond to a single input
+widget. A field is designed to produce a value, which may require input from
+multiple HTML inputs.  For example, a specialized date field might use three
+text inputs for the year, month and day.
+
+
+

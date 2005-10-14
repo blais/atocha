@@ -7,7 +7,14 @@
    A short and sweet overview and tutorial to teach the flavour of what the
    Atocha library provides for the web developer.
 
-:FIXME: Complete this before release!
+.. contents::
+
+Introduction
+------------
+
+This document presents a quick overview and tutorial about the Atocha web form
+rendering and handling library.  This is meant to quickly provide a sense of
+what the library does.
 
 
 Form Definition
@@ -18,56 +25,172 @@ form.  The form consists of "fields", which are akin to desktop application
 widgets, which automatically return an appropriate data type for the value
 entered by the user::
 
-  (FIXME add example.)
+   myform = Form(
+       'person-form',
+   
+       # Normal unicode string.
+       StringField('firstname', N_("First name")),
+       StringField('lastname', N_("Last name")),
+
+       # Email address and URL fields.
+       EmailField('email', N_("Email")),
+
+       # Simple date.
+       DateField('birthday', N_("Birthday")),
+
+       # Radio buttons.
+       RadioField('sex', [('m', N_('Male')),
+                          ('f', N_('Female')),
+                          ('x', N_('Maybe'))],
+                  N_('Gender'), orient=ORI_HORIZONTAL,
+                  initial='x'),
+   
+       action='/person/handler')
+
+This form can be created at global module level, and does not have to be
+recreated on every request.
+
 
 Form Rendering
 --------------
 
-You then use this form object, in collboration with a ``FormRenderer`` to render
-the page to the user::
+You can then use this form object, in collboration with a ``FormRenderer`` to
+render the form on a page for the user to fill in::
 
-  (FIXME add example.)
+   # In resource: /person/edit...
 
-This can be heavily customized by breaking down the process in its component
-phases, which lets you decide on the particular layout of the widgets if
-desired::
+   rdr = TextFormRenderer(myform, values, errors)
+   
+   # Print some HTML
+   #...
 
-  (FIXME add example.)
+   # Render the form.
+   sys.stdout.write( rdr.render(action='handle.cgi') ) 
 
-The form rendering process is decoupled from the form definition so it is
-possible to create custom form renderers for your particular system or with
-specific layout characteristics, without changing the library.
+   # Complete the page rendering.
+   # ...   
+
+
+Note that a set of initial values and errors is specified for the renderer to
+use, and usually will come from session data to provide error feedback if the
+form is being re-rendered for errors from user input.
+  
+Breaking down the Rendering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One problem with automatic rendering of form is that it breaks down quite
+rapidly as soon as you want to render fancy forms, which always end up requiring
+Hand-customization.  The basic automatic rendering provides a reasonably good
+looking table, for more commercial-grade websites, you will certainly want to do
+some hand design.
+
+For this purpose, the renderer interface contains a lower-level interface that
+allows you to render form components individually.  The rendering can be heavily
+customized this way by breaking down the process in its component phases, which
+lets you decide on the particular layout of the widgets by embedding the inputs
+wherever you want within your system::
+
+   rdr = TextFormRenderer(myform, values, errors,
+                        output_encoding='latin-1')
+         
+   print rdr.render_container(action='/edit/handler2')
+         
+   print "<div id="email">
+   print "<p>Your email, please:</p>
+   print rdr.render_field('email')     # Render just the email field.
+   print "</div>
+
+You could easily use this system to embed Atocha in your favourite templating
+system.  Atocha does not bind to a templating system and is entirely orthogonal
+to any web application framework.
+
+The form rendering code is completely decoupled from the form definition, so it
+becomes possible to create custom form renderers for your particular system or
+with specific layout characteristics, without changing the library (more below).
+For example, two form renderers are provided with the library: a renderer that
+outputs unicode text, and a renderer that builds a tree of nodes using my
+htmlout library.  You could easily implemnent one using Stan (from Nevow) if you
+liked.
 
 
 Form Handling
 -------------
 
-A ``FormParser`` is used to oversee the process of parsing and validating
-user-submitted inputs.  Most of the basic validation is automatic, and depends
-on the types of the fields in the form.  Since part of the validation can only
-be implemented on the client-side--there is always some kind of custom code that
-needs be used there--, the parser allows you to invoke methods to signal errors
-and to indicate completion of the parsing.  This establishes a protocol in which
-you can customize validation (another pattern involves attaching validators to
-the widgets, but we think it is more limited and complicated than the simple
-protocol that we offer)
+A ``FormParser`` instance is used to oversee the process of parsing and
+validating user-submitted inputs.  The basic validation of the data types output
+from the fields is automatic, and the particular types depend on the types of
+the fields in the form.
+
+Most often the validation can only be implemented on the client-side.  There is
+always custom code that needs be setup there to verify the constraints of the
+widgets or between widgets.  Rather than forcing you to implement custom
+validator classes for every handler page, the parser allows you to invoke
+methods to signal errors and to indicate completion of the parsing, so you can
+validate in any order that is most convenient::
+
+
+   # In resource, e.g. /person/handle that gets called from a form...
+   # The resource receives the arguments 'args'.
+   parser = FormParser(myform, args, '/person/edit')
+   
+   if p['sex'] == 'x':
+       p.error(u'Please fix error in gender below.',
+               dances=(u'What do you mean, maybe?', 'm'))
+   
+   # ... more validation code...
+
+   # Indicate the end of parsing.  Redirection may occur here if there
+   # are errors.
+   p.end()
+   
+   # Set final data in database and remove session data.
+   #...
+
+   
+This pattern establishes a protocol in which you can customize validation
+(another pattern involves attaching validators to the widgets, but we think it
+is more limited and complicated than the simple protocol that we offer)
 
 When the parsing is complete, the parser either redirects automatically to the
 submitter resource if necessary, with the accumulated errors for rendering the
 annotated form back to the user, or contains the final parsed values for client
-perusal::
+perusal.  At this point you can use the data to store it or do whatever else you
+want with it.
 
-  (FIXME add example.)
+
+Display Renderers
+-----------------
+
+The form object can also be used to display parsed values in a nice-looking
+table, without editing capabilities.  This is simply accomplished by using a
+special kind of renderer, that I call "display renderers", and which instead of
+rendering inputs outputs a table with rendered values. 
+
+This is useful because much information about presentation of a form's data is
+already present in the form definition::
+
+   # Create display renderer to display the data.
+   rdr = TextDisplayRenderer(myform, values)
+         
+   print "<div id="person">
+   print "<p>Person Profile:</p>
+   print rdr.render()  # Renders a table.
+   print "</div>
 
 
-Form Values Display
--------------------
+Options
+-------
 
-The form object can also be used to display parsed values in a table, without
-editing.  This is simply accomplished by using a special display-only renderer
-on the form, instead of the normal renderer which renders inputs. This is useful
-because much of the presentation information is already present in the form
-definition::
+The ``Form``, ``FormRenderer`` and ``FormParser`` and ``Field`` classes support
+many options for various parameters depending on their specific application.
+Visit the source code to find out what the specific options are.
 
-  (FIXME add example.)
+
+Online Demo
+-----------
+
+Try the `online demo`__ which features an instance of most of the fields, to
+quickly see what the library can do.
+
+__ ../test/demo/cgi-bin/display.cgi
 

@@ -16,11 +16,13 @@ scrips or to incorporate it in your favourite web application framework
 Motivation
 ----------
 
-Just before I decided to write this (2005-10-08), I had the following problems:
+Just before I decided to write this software (2005-09-30), I had the following
+problems:
 
-- There was no both *decent* and *simple* library that could parse input from
-  widgets and perform automatic types conversions reliably, that was not tied to
-  a specific web application framework;
+- There was no library that could parse input from widgets and perform automatic
+  types conversions reliably, that was both decent and **simple**, or that was
+  not tied to a specific web application framework.  (A few options were
+  starting to sprout and mature around that time, such as FormEncode_);
 
 - I was having lots of trouble in the various data paths of my handlers with
   type conversions, often having unicode encoding problems;
@@ -30,19 +32,19 @@ Just before I decided to write this (2005-10-08), I had the following problems:
 
 At the time, I had written my own web application framework, and a small form
 library I had copied from somewhere had grown into a messy monster. So I decided
-to attack the problem and rewrite it separately, with the following goals in
-mind:
+to attack the problem directly and rewrite my forms handling generically, with
+the following goals in mind:
 
 #. Reuse the form definition for parsing submitted arguments as well as
    rendering and displaying data (leverage the knowledge stored in the form
    definition as much as possible);
 
-#. Robustness: an emphasis on strict type checking and robustness via tests;
+#. Robustness: an emphasis on **strict type checking** and robustness via tests;
 
 #. Fields automatically perform appropriate type conversion when returning the
-   parsed value to the user; Like desktop toolkit widgets, fields may return all
-   sorts of data types;
-
+   parsed value to the user; Like desktop UI toolkit widgets, fields may return
+   all sorts of data types.  Also, fields can use multiple HTML input widgets,
+   the notion of input and its mechanism are separate.
 
 Essentially, I wanted functionality closer to what desktop UI toolkits provide,
 which is often not present in web form parsing toolkits.
@@ -57,20 +59,23 @@ give you a taste for what the library can do for you.
 
 Some documents:
 
-- `Data Flow and Data Paths <doc/handpath.html>`_
 - `Overview and Tutorial <doc/tutorial.html>`_
+- `Design Notes <doc/design.html>`_
+- `Data Flow and Data Paths <doc/handpath.html>`_
 
 
 Features
 ========
 
-.. FIXME complete this list...
-
-- **Generic** library that is able to reused in many frameworks and
-  applications;
+- **Generic** library that is possible to reused in many frameworks and
+  applications.  It is not tied to any storage model or domain model, this
+  library provides the data, and you must then store the data yourself. This
+  makes sense, as user-interfaces may change but the underlying data model
+  remain the same;
 
 - **Extensible**: it is easy to create and add new field types without having to
-  modify the framework.
+  modify the framework.  It is also possible to create renderers for your
+  favourite output library (e.g. Stan)
 
 - Fields may render to **multiple input widgets** and are consolidated in a
   single value automatically;
@@ -91,7 +96,7 @@ Online Demo
 
 You can try an online demo of a form with all the available widgets, that was
 implemented using simple CGI scripts.  You can visit the source code from the
-demo web pages too. 
+demo web pages too.
 
 - `Online Demo -- Try It Now! <test/demo/cgi-bin/display.cgi>`_
 
@@ -111,11 +116,52 @@ update and run the tests.
 Reporting Bugs
 ==============
 
-Send email to the author: Martin Blais <blais@furius.ca>.
+Bugs
+----
+
+If you find bugs, send email to the author: Martin Blais <blais@furius.ca>.  I
+share my source code in the hope that other users will provide feedback to
+improve stability.  Contributions are also welcome.
+
+Support and Stability
+---------------------
+
+I am actively using this library to build a commercial-grade web application and
+will actively improve and support the library.  There is a test suite that runs
+through the basic features of the library.
 
 
-.. Links
-.. =====
+Links
+=====
+
+- Another similar project is the FormEncode library (author: Ian Bicking):
+  http://formencode.org/.
+
+  FormEncode_ is a nice effort, which aims at solving the very same problem as
+  this project.  My comments on FormEncode_, in comparison to Atocha:
+
+  * I don't like having to write validator classes tied to forms, I like to put
+    the validation code inside my resource handler code, because it is pretty
+    much always different for every form, so there is not much opportunity for
+    reuse anyway.  For the few cases where I do validate results the same way, I
+    simply write a function that uses the parser object;
+
+  * I find all the metaclass stuff in FormEncode_entirely unnecessary and
+    distracting.  I like code that is lean and simple;
+
+  * I need to use an HTML output library that is a tree of nodes (htmlout) and
+    so I really needed to have decoupled renderer code that produces nodes
+    rather than text.  I had real web application to fix up that uses that
+    system already;
+
+  * I don't know if the kind of per-error message with replacement value can be
+    produced as easily as with Atocha.
+
+  That being said, I did not really make an effort to try to use FormEncode_, at
+  the time when I discovered it I had already pretty much finished my library.
+
+
+.. _FormEncode: http://formencode.org/
 
 
 Installation and Dependencies
