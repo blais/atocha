@@ -152,19 +152,19 @@ through the basic features of the library.</p>
 <p><a class="reference" href="http://formencode.org/">FormEncode</a> is a nice effort, which aims at solving the very same problem as
 this project.  My comments on <a class="reference" href="http://formencode.org/">FormEncode</a>, in comparison to Atocha:</p>
 <ul class="simple">
-<li>I don't like having to write validator classes tied to forms, I like to put
-the validation code inside my resource handler code, because it is pretty
-much always different for every form, so there is not much opportunity for
-reuse anyway.  For the few cases where I do validate results the same way, I
-simply write a function that uses the parser object;</li>
-<li>I find all the metaclass stuff in FormEncode_entirely unnecessary and
+<li>I don't like having to write validator classes, I like to put my validation
+code inside my resource handler code, because it is pretty much always
+different for every form, so there is not much opportunity for reuse anyway.
+For the few cases where I do validate results the same way, I simply write a
+function that uses the parser object;</li>
+<li>I find all the metaclass stuff in <a class="reference" href="http://formencode.org/">FormEncode</a> entirely unnecessary and very
 distracting.  I like code that is lean and simple;</li>
 <li>I need to use an HTML output library that is a tree of nodes (htmlout) and
-so I really needed to have decoupled renderer code that produces nodes
-rather than text.  I had real web application to fix up that uses that
-system already;</li>
-<li>I don't know if the kind of per-error message with replacement value can be
-produced as easily as with Atocha.</li>
+so I really needed to have decoupled renderer code that produces only nodes
+rather than text;</li>
+<li>I don't know if the kind of per-error message with the ability to specify an
+invalid replacement value for re-rendering can be produced as easily as with
+Atocha (I would need to study FormEncode to find out).</li>
 </ul>
 <p>That being said, I did not really make an effort to try to use <a class="reference" href="http://formencode.org/">FormEncode</a>, at
 the time when I discovered it I had already pretty much finished my library.</p>

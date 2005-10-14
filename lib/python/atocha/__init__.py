@@ -71,7 +71,7 @@ Notes
 
 """
 
-# form imports.
+# atocha imports.
 from form import *
 from fields import *
 from messages import *
@@ -80,10 +80,11 @@ from render import *
 from norm import *
 from renderers.rtext import *
 
+# Try to import htmlout, if it is not present, tough tits.
+# I might decide to open-source htmlout at some point.
 try:
-    #from renderers.rhtmlout import *
-    # FIXME: add this when done.
-    pass
+    import htmlout
+    from renderers.rhtmlout import *
 except ImportError:
     pass
 

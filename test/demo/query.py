@@ -32,16 +32,26 @@ if 'session-%s' % form1.name in db:
         values.update(sessvalues)
 
 # Create a renderer.
-r = TextFormRenderer(form1, values, errors,
-                     output_encoding='latin-1')
+_text = False
+if _text:
+    r = TextFormRenderer(form1, values, errors,
+                         output_encoding='latin-1')
+    rendered = r.render(action='handle.cgi')
+    scripts = r.render_scripts()
+else:
+    r = HoutFormRenderer(form1, values, errors)
+    from htmlout import tostring
+    rendered = tostring(r.render(action='handle.cgi'), encoding='latin-1')
+    scripts = [tostring(x, encoding='latin-1') for x in r.render_scripts()]
+    scripts = '\n'.join(scripts)
 
 # Render the page (see template in other module).
 uimsg = message and '<div id="message">%s</div>' % message or ''
 sys.stdout.write(template_pre % {'title': 'Form Render and Handling',
                                  'uimsg': uimsg,
-                                 'scripts': r.render_scripts()})
+                                 'scripts': scripts})
 
 # Here, we use the form render:
-sys.stdout.write( r.render(action='handle.cgi') )
+sys.stdout.write(rendered)
 sys.stdout.write(template_post)
 

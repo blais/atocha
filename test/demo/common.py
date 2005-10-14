@@ -17,6 +17,7 @@ from os.path import *
 # atocha imports.
 root = dirname(dirname(dirname(dirname(sys.argv[0]))))
 sys.path.append(join(root, 'lib', 'python'))
+sys.path.append('../../../../hume/app/lib/hume') # for htmlout testing.
 from atocha import *
 
 
@@ -130,6 +131,9 @@ FormParser.normalizer = CGINormalizer()
 
 # Setup form renderer for rendering scripts.
 TextFormRenderer.scriptsdir = 'scripts'
+
+if 'HoutFormRenderer' in globals():
+    HoutFormRenderer.scriptsdir = 'scripts'
 
 
 #-------------------------------------------------------------------------------

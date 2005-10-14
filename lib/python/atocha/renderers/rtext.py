@@ -68,13 +68,6 @@ class TextRenderer(FormRenderer):
             sio = Writer(sio)
         return sio
 
-    def _get_label( self, field ):
-        """
-        Returns a printable label for the given field.
-        """
-        return (field.label and _(field.label)
-                or unicode(field.name.capitalize()))
-
     def do_table( self, pairs=(), extra=None ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
@@ -120,13 +113,9 @@ class TextFormRenderer(TextRenderer):
     css_required = u'formreq'
     css_vertical = u'formminitable'
 
-    _emptyin = u'<input name="%s" type="%s" value="%s" class="%s" />'
-    _in = u'<input name="%s" type="%s" value="%s" class="%s">%s</input>'
-
     scriptsdir = None
 
     def do_render( self, fields, action, submit ):
-        form = self._form
         try:
             # File object that gets set as a side-effect.
             self.ofile = f = self._create_buffer()
@@ -190,7 +179,7 @@ class TextFormRenderer(TextRenderer):
             else:
                 label = self._get_label(field)
                 if field.isrequired():
-                    label += u'<span class="%s">*</a>' % self.css_required
+                    label += u'<span class="%s">*</span>' % self.css_required
                 visible.append( (label, rendered) )
 
         self.do_table(visible, '\n'.join(hidden))
@@ -289,7 +278,7 @@ class TextFormRenderer(TextRenderer):
             s = StringIO.StringIO()
             s.write(u'<table class="%s">\n' % self.css_vertical)
             for i in inputs:
-                s.write(u'<tr><td>%s</td></td>\n' % i)
+                s.write(u'<tr><td>%s</td></tr>\n' % i)
             s.write(u'</table>\n')
             return s.getvalue()
         else:
@@ -299,14 +288,11 @@ class TextFormRenderer(TextRenderer):
         return self._single('text', field, rvalue, errmsg)
 
     def renderTextAreaField( self, field, rvalue, errmsg, required ):
-        s = self._geterror(errmsg)
         rowstr = field.rows and u' rows="%d"' % field.rows or u''
         colstr = field.cols and u' cols="%d"' % field.cols or u''
         return (self._geterror(errmsg) +
                 u'<textarea name="%s" %s %s class="%s">%s</textarea>' %
                 (field.name, rowstr, colstr, field.css_class, rvalue or ''))
-
-        return self._single('text', field, rvalue, errmsg)
 
     def renderPasswordField( self, field, rvalue, errmsg, required ):
         return self._single('text', field, rvalue, errmsg)
@@ -410,7 +396,8 @@ class TextFormRenderer(TextRenderer):
         # possible that we get asked to render something using values that have
         # not been parsed previously (for example, during the automated form
         # parsing errors).
-        noscript = u'<input name="%s" value="%s"/>' % fargs
+        noscript = (u'<input name="%s" value="%s"/>' %
+                    (field.name, rvalue or ''))
 
         return self._script(field, errmsg, script, noscript)
 
