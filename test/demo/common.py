@@ -112,13 +112,22 @@ form1 = Form(
 
 
 #-------------------------------------------------------------------------------
-# Parser setup
+# Parser setup.
 #
+# Here we define a function that will get used by the FormParser class whenever
+# it needs to perform a redirect. Form data, errors and message are meant to be
+# passed to the routine where we're redirecting to.
+#
+# This needs only be setup once for the whole application, and is necessary to
+# insure that Atocha not make assumptions about your web application framework.
+# If you don't define the redirection mechanism, you can check the return value
+# of FormParser.end() and do the redirect by hand, but you need to be careful
+# not to forget to check everytimeq if you do that.
+
 def do_redirect( url, form, status, message, values, errors ):
     # Store form data for later retrieval in session data.
     db = getdb()
     db['session-%s' % form1.name] = values, errors, message
-
 
     print 'Location: %s' % url
     print
@@ -151,7 +160,7 @@ def getdb():
 
 
 #-------------------------------------------------------------------------------
-#
+# HTML page templates for our test CGI scripts.
 
 template_pre = """Content-type: text/html
 
