@@ -37,7 +37,7 @@ r = TextFormRenderer(form1, values, errors,
 
 # Render the page (see template in other module).
 uimsg = message and '<div id="message">%s</div>' % message or ''
-sys.stdout.write(template_pre % {'title': 'Test Form Query/Render',
+sys.stdout.write(template_pre % {'title': 'Form Render and Handling',
                                  'uimsg': uimsg,
                                  'scripts': r.render_scripts()})
 

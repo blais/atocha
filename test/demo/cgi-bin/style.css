@@ -5,6 +5,8 @@
  *  CSS style file for the test CGI scripts for Atocha form library.
  */
 
+@import url("../../../style.css");
+
 .formerror { color: red; font-size: smaller; }
 
 .formtable {
@@ -25,9 +27,8 @@ div#message {
   margin: 5px;
 }
 
-div#contents {
+div#test-form {
   text-align: center;
-  width: 800px;
   margin-left: auto;
   margin-right: auto;
   background-color: #FAFDFA;
@@ -62,6 +63,7 @@ span.formreq {
 }
 
 #source { 
+  margin-top: 50px;
   font-size: smaller;
 }
 
@@ -72,4 +74,10 @@ span.formreq {
 
 #buttons { 
   margin: 20px;
+}
+
+#back { 
+  margin: 20px;
+  font-size: small;
+  text-align: right;
 }

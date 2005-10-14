@@ -155,9 +155,17 @@ template_pre = """Content-type: text/html
     %(scripts)s
   </meta>
 <body>
-<h1>%(title)s</h1>
+
+<div id="project-header">
+  <a href="/"><img src="/home/project-header.png" id="logo"></a>
+  <div id="project-home"><a href="/atocha">Project Home</a></div>
+</div>
+
+<h1 class="title">atocha demo: %(title)s</h1>
 %(uimsg)s
-<div id="contents">
+<div class="document">
+<div id="test-form">
+
 """
 
 sourcelink = join('%s.txt' % splitext(basename(sys.argv[0]))[0])
@@ -174,6 +182,8 @@ View Source Code:
 <a href="reset.txt" class="button">Reset</a>
 </div>
 </center>
+
+</div>
 
 </body>
 </html>

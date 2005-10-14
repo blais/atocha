@@ -34,6 +34,10 @@ print >> s, '<div id="buttons">'
 print >> s, '<a href="query.cgi" id="edit" class="button">EDIT VALUES</a>'
 print >> s, '<a href="reset.cgi" id="edit" class="button">RESET</a>'
 print >> s, '</div>'
+
+print >> s, '</div>'
+print >> s, '<div>'
+print >> s, '<h2>Repr of Parsed Accepted Values</h2>'
 print >> s, '<pre id="values-repr">'
 for name, value in values.iteritems():
     print >> s, '%s: %s' % (name, repr(value))
@@ -41,7 +45,7 @@ print >> s, '</pre>'
 contents += s.getvalue()
 
 # Set form data for edit.
-sys.stdout.write(template_pre % {'title': 'Successful Form Handling',
+sys.stdout.write(template_pre % {'title': 'Form Display',
                                  'uimsg': '',
                                  'scripts': ''})
 sys.stdout.write(contents)

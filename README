@@ -86,6 +86,20 @@ Features
 - Supports a UI message and status for the re-rendering a form with errors;
 
 
+Online Demo
+===========
+
+You can try an online demo of a form with all the available widgets, that was
+implemented using simple CGI scripts.  You can visit the source code from the
+demo web pages too. 
+
+- `Online Demo -- Try It Now! <test/demo/cgi-bin/display.cgi>`_
+
+.. note:: This simple demo does not use session management, so if many people
+          access it at the same time you may be surprised by other people's
+          values appearing in the results.
+
+
 Download
 ========
 
