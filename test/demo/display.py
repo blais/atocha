@@ -23,11 +23,16 @@ db = getdb()
 values = db.get('data-%s' % form1.name, {})
 
 # Create display renderer to display the data.
-r = TextDisplayRenderer(form1, values or {}, incomplete=1,
-                        show_hidden=1,
-                        output_encoding='latin-1')
-contents = r.render()
-assert isinstance(contents, str) # Sanity check while we're developing.
+if 'rtype' in db and db['rtype'] == 'text':
+    r = TextDisplayRenderer(form1, values or {}, incomplete=1,
+                            show_hidden=1,
+                            output_encoding='latin-1')
+    contents = r.render()
+else:
+    from htmlout import tostring
+    r = HoutDisplayRenderer(form1, values or {}, incomplete=1,
+                            show_hidden=1)
+    contents = tostring(r.render(), encoding='latin-1')
 
 s = StringIO.StringIO()
 print >> s, '<div id="buttons">'

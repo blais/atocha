@@ -21,7 +21,6 @@ sys.path.append('../../../../hume/app/lib/hume') # for htmlout testing.
 from atocha import *
 
 
-
 #-------------------------------------------------------------------------------
 #
 # Definition of test form.
@@ -38,6 +37,9 @@ form1 = Form(
     # Hidden field.
     StringField('secret', hidden=1, initial='zanzibar',
                 encoding='latin-1'),
+
+    # Password field.
+    PasswordField('passwd', N_("Password")),
 
     # A text area.
     TextAreaField('description', N_("Description"), rows=10, cols=60),

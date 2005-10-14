@@ -31,16 +31,15 @@ if 'session-%s' % form1.name in db:
     if sessvalues:
         values.update(sessvalues)
 
-# Create a renderer.
-_text = False
-if _text:
+# Create a form renderert to render the form..
+if 'rtype' in db and db['rtype'] == 'text':
     r = TextFormRenderer(form1, values, errors,
                          output_encoding='latin-1')
     rendered = r.render(action='handle.cgi')
     scripts = r.render_scripts()
 else:
-    r = HoutFormRenderer(form1, values, errors)
     from htmlout import tostring
+    r = HoutFormRenderer(form1, values, errors)
     rendered = tostring(r.render(action='handle.cgi'), encoding='latin-1')
     scripts = [tostring(x, encoding='latin-1') for x in r.render_scripts()]
     scripts = '\n'.join(scripts)

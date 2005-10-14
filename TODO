@@ -2,7 +2,18 @@
   atocha: TODO
 ================
 
-- Finish htmlout renderer and convert all my codebase to atocha.
+- Convert all my codebase to Atocha.
+
+
+- Implement a menu that redirects on change based on this:
+  http://cscie12.dce.harvard.edu/lecture_notes/20050316/slide50.html
+
+  Using that, implement a change of renderer.
+
+- Look at widgets from FormEncode and see if some of them can be adapted to my
+  framework.
+
+
 - Create a mod_python normalizer, and one for draco (my framework).
 
 - Provide examples for:
@@ -12,8 +23,6 @@
 
   Examples should also be runnable code, use the same files (maybe with symlinks
   to remove the extensions).
-
-
 
 
 
@@ -67,6 +76,16 @@ Ideas and Eventually
 
 - Implement a ``ButtonForm`` class that will render a form with a single submit
   button, just to redirect somewhere, no table.
+
+
+- Implement 'noempty' in the renderers (previous code: it isn't used much apart
+  from the profile and cannot be guaranteed to make sense anymore.  We are
+  better work around it in the client code.)
+  
+  This is actually not quite right: in the display renderer, it does make sense
+  to not want to render fields for which there is no value set.  It only makes
+  sense for the display-only renderer.  Maybe that renderer could take an option
+  in its constructor?
 
 
 

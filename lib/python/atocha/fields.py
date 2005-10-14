@@ -19,7 +19,8 @@ from messages import msg_registry, msg_type
 
 __all__ = [
     'Field',
-    'StringField', 'TextAreaField', 'DateField', 'EmailField', 'URLField',
+    'StringField', 'TextAreaField', 'PasswordField',
+    'DateField', 'EmailField', 'URLField',
     'IntField', 'FloatField', 'BoolField', 
     'RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',
     'FileUploadField',
@@ -514,7 +515,7 @@ class PasswordField(StringField):
 
     def display_value( self, dvalue ):
         # Never display passwords in any case ever!
-        return '*' * len(dvalue)
+        return u'*' * len(dvalue)
 
 #-------------------------------------------------------------------------------
 #

@@ -295,7 +295,7 @@ class TextFormRenderer(TextRenderer):
                 (field.name, rowstr, colstr, field.css_class, rvalue or ''))
 
     def renderPasswordField( self, field, rvalue, errmsg, required ):
-        return self._single('text', field, rvalue, errmsg)
+        return self._single('password', field, rvalue, errmsg)
 
     def renderDateField( self, field, rvalue, errmsg, required ):
         return self._single('text', field, rvalue, errmsg)
