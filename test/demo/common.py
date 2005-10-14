@@ -20,6 +20,94 @@ sys.path.append(join(root, 'lib', 'python'))
 from atocha import *
 
 
+
+#-------------------------------------------------------------------------------
+#
+# Definition of test form.
+#
+form1 = Form(
+    'test-form',
+
+    # Normal unicode string.
+    StringField('name', N_("Person's name")),
+
+    # Ascii string.
+    StringField('postal', N_("Postal code"), encoding='ascii'),
+
+    # Hidden field.
+    StringField('secret', hidden=1, initial='zanzibar',
+                encoding='latin-1'),
+
+    # A text area.
+    TextAreaField('description', N_("Description"), rows=10, cols=60),
+
+    # Simple date.
+    DateField('birthday', N_("Birthday")),
+
+    # A fancier date input widget.
+    JSDateField('barmitz', N_("Bar Mitzvah")),
+    
+    # Email address and URL fields.
+    EmailField('email', N_("Email")),
+    URLField('homepage', N_("Home Page")),
+
+    # Numerical fields.
+    IntField('number', N_("Age")),
+    FloatField('height', N_("Height"), format='%.7f'),
+
+    # Boolean checkbox.
+    BoolField('veggie', N_("Vegetarian?"),),
+
+    # Radio buttons.
+    RadioField('sex', [('m', N_('Male')),
+                       ('f', N_('Female')),
+                       ('x', N_('Maybe'))],
+               N_('Sex'), orient=ORI_HORIZONTAL,
+               initial='x'),
+
+    # A single-choice menu.
+    MenuField('marital', [(1, N_('Single')),
+                          (2, N_('Married')),
+                          (3, N_('Divorced')),
+                          (0, N_('(Other...)'))],
+              N_('Marital Status'),
+              initial=3),
+
+    # A list of options.
+    CheckboxesField('dances', [('salsa', N_('Salsa')),
+                               ('tango', N_('Tango')),
+                               ('rumba', N_('Rumba')),
+                               ('chacha', N_('Cha-cha-chá')),
+                               ('merengue', N_('Merengue')),],
+                    N_('Favourite Dances'),
+                    initial=['rumba', 'salsa']),
+
+    # A list of options (single).
+    ListboxField('beer', [('heineken', N_('Heineken')),
+                          ('kro', N_('Kronenbourg')),
+                          ('corona', N_('Corona')),
+                          ('budweiser', N_('Budweiser')),
+                          ('paulaner', N_('Paulaner')),],
+                 N_('The Best Beer, if any'),
+                 ),
+
+    # A list of options (multiple).
+    ListboxField('yogas', [('ash', N_('Ashtanga')),
+                           ('iyen', N_('Iyengar')),
+                           ('kri', N_('Kripalu')),
+                           ('bik', N_('Bikram')),
+                           ('kun', N_('Kundalini'))],
+                 N_('Yogas Practiced'),
+                 initial=['ash', 'kun'], multiple=1
+                 ),
+
+    # A file that can be uploaded.
+    FileUploadField('photo', N_('Photograph')),
+
+    action='handle.cgi', reset=1)
+
+
+
 #-------------------------------------------------------------------------------
 # Parser setup
 #
@@ -58,6 +146,7 @@ def getdb():
 
 #-------------------------------------------------------------------------------
 #
+
 template_pre = """Content-type: text/html
 
 <html>
@@ -71,92 +160,22 @@ template_pre = """Content-type: text/html
 <div id="contents">
 """
 
+sourcelink = join('%s.txt' % splitext(basename(sys.argv[0]))[0])
 template_post = """
 </div>
+
+<center>
+<div id="source">
+View Source Code:
+<a href="common.txt" class="button">Form Definition and Setup</a>
+<a href="query.txt" class="button">Query</a>
+<a href="handle.txt" class="button">Handle</a>
+<a href="display.txt" class="button">Display</a>
+<a href="reset.txt" class="button">Reset</a>
+</div>
+</center>
+
 </body>
 </html>
 """
-    
-#-------------------------------------------------------------------------------
-#
-# Test form.
-form1 = Form('test-form',
-
-             # Normal unicode string.
-             StringField('name', N_("Person's name")),
-
-             # Ascii string.
-             StringField('postal', N_("Postal code"), encoding='ascii'),
-
-             # Hidden field.
-             StringField('secret', hidden=1, initial='zanzibar',
-                         encoding='latin-1'),
-
-             # A text area.
-             TextAreaField('description', N_("Description"), rows=10, cols=60),
-
-             # Simple date.
-             DateField('birthday', N_("Birthday")),
-
-             # A fancier date input widget.
-             JSDateField('barmitz', N_("Bar Mitzvah")),
-             
-             # Email address and URL fields.
-             EmailField('email', N_("Email")),
-             URLField('homepage', N_("Home Page")),
-
-             # Numerical fields.
-             IntField('number', N_("Age")),
-             FloatField('height', N_("Height"), format='%.7f'),
-
-             # Boolean checkbox.
-             BoolField('veggie', N_("Vegetarian?"),),
-
-             # Radio buttons.
-             RadioField('sex', [('m', N_('Male')),
-                                ('f', N_('Female')),
-                                ('x', N_('Maybe'))],
-                        N_('Sex'), orient=ORI_HORIZONTAL,
-                        initial='x'),
-
-             # A single-choice menu.
-             MenuField('marital', [(1, N_('Single')),
-                                   (2, N_('Married')),
-                                   (3, N_('Divorced')),
-                                   (0, N_('(Other...)'))],
-                       N_('Marital Status'),
-                       initial=3),
-
-             # A list of options.
-             CheckboxesField('dances', [('salsa', N_('Salsa')),
-                                        ('tango', N_('Tango')),
-                                        ('rumba', N_('Rumba')),
-                                        ('chacha', N_('Cha-cha-chá')),
-                                        ('merengue', N_('Merengue')),],
-                             N_('Favourite Dances'),
-                             initial=['rumba', 'salsa']),
-
-             # A list of options (single).
-             ListboxField('beer', [('heineken', N_('Heineken')),
-                                   ('kro', N_('Kronenbourg')),
-                                   ('corona', N_('Corona')),
-                                   ('budweiser', N_('Budweiser')),
-                                   ('paulaner', N_('Paulaner')),],
-                          N_('The Best Beer, if any'),
-                          ),
-
-             # A list of options (multiple).
-             ListboxField('yogas', [('ash', N_('Ashtanga')),
-                                    ('iyen', N_('Iyengar')),
-                                    ('kri', N_('Kripalu')),
-                                    ('bik', N_('Bikram')),
-                                    ('kun', N_('Kundalini'))],
-                          N_('Yogas Practiced'),
-                          initial=['ash', 'kun'], multiple=1
-                          ),
-
-             # A file that can be uploaded.
-             FileUploadField('photo', N_('Photograph')),
-
-             action='handle.cgi', reset=1)
 

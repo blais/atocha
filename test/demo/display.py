@@ -30,8 +30,10 @@ contents = r.render()
 assert isinstance(contents, str) # Sanity check while we're developing.
 
 s = StringIO.StringIO()
-print >> s, '<a href="query.cgi" id="edit-button">EDIT VALUES</a>'
-print >> s, '<a href="reset.cgi" id="edit-button">RESET</a>'
+print >> s, '<div id="buttons">'
+print >> s, '<a href="query.cgi" id="edit" class="button">EDIT VALUES</a>'
+print >> s, '<a href="reset.cgi" id="edit" class="button">RESET</a>'
+print >> s, '</div>'
 print >> s, '<pre id="values-repr">'
 for name, value in values.iteritems():
     print >> s, '%s: %s' % (name, repr(value))

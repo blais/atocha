@@ -46,12 +46,30 @@ span.formreq {
   color: green;
 }
 
-#edit-button { 
-  display: block;
-  padding: 10px;
-  margin: 15px;
-  background-color: #CCF;
+
+.button { 
+  display: inline;
+  padding: 5px;
+  margin: 5px;
   margin-left: auto;
   margin-right: auto;
   width: 20%;
+  border: thin solid black;
+}
+
+#edit { 
+  background-color: #CCF;
+}
+
+#source { 
+  font-size: smaller;
+}
+
+#source a { 
+  font-style: italic;
+  background-color: #CFA;
+}
+
+#buttons { 
+  margin: 20px;
 }
