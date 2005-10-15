@@ -13,6 +13,13 @@ parsed, and then returned for parsing.
 """
 
 
+# stdlib imports.
+import sys, cgi
+
+# atocha imports.
+from fields import FileUpload
+
+
 __all__ = ['CGINormalizer']
 
 
@@ -38,11 +45,21 @@ class CGINormalizer(FormNormalizer):
     def normalize( self, form ):
         args = {}
         for varname in form.keys():
-            values = form.getlist(varname)
-            if len(values) == 1:
-                value = values[0]
+            value = form[varname]
+
+            if (isinstance(value, cgi.FieldStorage) and
+                isinstance(value.file, file)):
+
+                ovalue = FileUpload(value, value.filename)
+
             else:
-                value = values
-            args[varname] = value
+                value = form.getlist(varname)
+                if len(value) == 1:
+                    ovalue = value[0]
+                else:
+                    ovalue = value
+
+            args[varname] = ovalue
+
         return args
 

@@ -204,7 +204,7 @@ class Form:
         elif isinstance(field, FileUploadField):
             # If a FileUpload field is added, make sure that we modify the
             # enctype for the form appropriately.
-            self._enctype = self.__def_enctype
+            self.enctype = self.__def_enctype_file
 
         if field.name in self._fieldsmap:
             raise RuntimeError(

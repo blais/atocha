@@ -16,7 +16,7 @@ from common import *
 
 # Set form data for edit.
 db = getdb()
-for n in 'data', 'session':
+for n in 'data', 'photo', 'photofn', 'session':
     try:
         del db['%s-%s' % (n, form1.name)]
     except Exception:

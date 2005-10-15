@@ -21,7 +21,7 @@ from atocha import *
 
 # Disable implicit unicode conversions, at least for these automated tests.
 # In this library we try not to use the default encoding anywhere but explicitly.
-## reload(sys); sys.setdefaultencoding('undefined')
+reload(sys); sys.setdefaultencoding('undefined')
 
 
 #-------------------------------------------------------------------------------

@@ -244,23 +244,23 @@ class TextFormRenderer(TextRenderer):
         """
         Render an html input.
         """
+        opts = [('name', field.name),
+                ('type', htmltype),
+                ('class', field.css_class),]
         if checked:
-            checkstr = u'checked="1"'
-        else:
-            checkstr = u''
+            opts.append( ('checked', '1') )
+        if hasattr(field, 'size'):
+            opts.append( ('size', field.size) )
+        if hasattr(field, 'maxlen'):
+            opts.append( ('maxlength', field.maxlen) )
 
-        fargs = (field.name.decode('ascii'),
-                 htmltype.decode('ascii'),
-                 value or u'',
-                 field.css_class.decode('ascii'),
-                 checkstr)
-
+        o = u'<input ' + ' '.join(['%s="%s"' % x for x in opts]).decode('ascii')
+        if value:
+            o += u'value="%s"' % value
         if label is not None:
-            o = (u'<input name="%s" type="%s" value="%s" class="%s" %s>'
-                 u'%s</input>') % (fargs + (label,))
+            o += u'>%s</input>' % label
         else:
-            o = (u'<input name="%s" type="%s" value="%s" class="%s" %s/>' %
-                 fargs)
+            o += u'/>'
         return o
 
     def _single( self, htmltype, field, value, errmsg,

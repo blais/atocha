@@ -32,7 +32,7 @@ if 'session-%s' % form1.name in db:
         values.update(sessvalues)
 
 # Create a form renderert to render the form..
-if 'rtype' in db and db['rtype'] == 'text':
+if rtype == 'text':
     r = TextFormRenderer(form1, values, errors,
                          output_encoding='latin-1')
     rendered = r.render(action='handle.cgi')

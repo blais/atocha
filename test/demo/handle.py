@@ -9,6 +9,7 @@ Handler for form submission.
 
 # stdlib imports
 import sys, cgi, cgitb; cgitb.enable()
+from pprint import pformat
 
 # atocha imports.
 from common import *
@@ -28,7 +29,17 @@ p.end()
 
 # Set final data in database and remove session data.
 db = getdb()
-db['data-%s' % form1.name] = p.getvalues()
+values = p.getvalues(1)
+
+# Handle file upload.
+if p['photo']:
+    # Read in photograph file, if there is one.
+    db['photo-%s' % form1.name] = p['photo'].read()
+    db['photofn-%s' % form1.name] = p['photo'].filename
+else:
+    db['photo-%s' % form1.name] = db['photofn-%s' % form1.name] = None
+
+db['data-%s' % form1.name] = values
 
 
 # On success, redirect to render page.  You could decide to display results

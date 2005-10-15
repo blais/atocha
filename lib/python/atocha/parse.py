@@ -340,7 +340,7 @@ class FormParser:
         except KeyError:
             return None
 
-    def getvalues( self ):
+    def getvalues( self, cullfiles=True ):
         """
         Returns the parsed arguments (dict).  This is intended as a convenience
         if you need to store or pass around the arguments, rather than having to
@@ -353,12 +353,29 @@ class FormParser:
         removes those items which are None.  This is meant to minimize the
         amount of formdata that gets stored between requests, if there is an
         error.
-        """
-        # Note: we don't return a copy for efficiency and because we think that
-        # at that point the user will not use the parser anymore, so sharing the
-        # object should be fine.
-        return self._values
 
+        If 'cullfiles' is True, the files resulting from a FileUpload are culled
+        automatically. This is meant to be useful for passing around formdata
+        that can be potentially be serialized.
+        """
+        # Make a copy of the values to be returned and remove all the file
+        # uploads parsed values, because we won't be able to fill the file
+        # widget with the uploaded data, it would not make sense.
+        if not cullfiles:
+            # Note: we don't return a copy for efficiency and because we think that
+            # at that point the user will not use the parser anymore, so sharing the
+            # object should be fine.
+            return self._values
+        else:
+            vcopy = self._values.copy()
+            for field in self._form.fields():
+                if isinstance(field, FileUploadField):
+                    try:
+                        del vcopy[field.name]
+                    except KeyError:
+                        pass
+            return vcopy
+        
     def geterrors( self ):
         """
         Returns the accumulated errors, a dict of (message, repl_rvalue) tuples
@@ -522,20 +539,9 @@ class FormParser:
             fun = self.do_redirect
 
         rurl = redir or self._redirurl
-        
-        # Make a copy of the values to be returned and remove all the file
-        # uploads parsed values, because we won't be able to fill the file
-        # widget with the uploaded data, it would not make sense.
-        values = self.getvalues().copy()
-        for field in self._form.fields():
-            if isinstance(field, FileUploadField):
-                try:
-                    del values[field.name]
-                except KeyError:
-                    pass
 
         return fun(rurl, self._form, self._status, self._message,
-                   self.getvalues(), self._errors)
+                   self.getvalues(False), self._errors)
 
     def do_redirect( url, form, status, message, values, errors ):
         """

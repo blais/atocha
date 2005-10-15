@@ -301,7 +301,7 @@ class _OptRequired:
         Check that the field is present.  Fields which derive from this one do
         not accept None if the value is required.
         """
-        if self.required and pvalue is None or pvalue == u'' or pvalue == []:
+        if self.required and pvalue in (None, u'', '', []):
             # We indicate an error mentioning that this field was required.
             raise FieldError(msg_registry['error-required-value'])
 
@@ -434,10 +434,13 @@ class StringField(_TextField):
 
     def __init__( self, name,
                   label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, encoding=None,
+                  minlen=None, maxlen=None, size=None, encoding=None,
                   strip=False ):
         _TextField.__init__(self, name, label, hidden, initial, required,
                             minlen, maxlen, encoding)
+
+        self.size = size or maxlen
+        """Suggested rendering size of the field."""
 
         self.strip = strip
         """Whether the string should be stripped before rendering and during
@@ -517,9 +520,10 @@ class PasswordField(StringField):
 
     def __init__( self, name,
                   label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, encoding=None, hidepw=True ):
+                  minlen=None, maxlen=None, size=None, encoding=None,
+                  hidepw=True ):
         StringField.__init__(self, name, label, hidden, initial, required,
-                             minlen, maxlen, encoding, strip=False)
+                             minlen, maxlen, size, encoding, strip=False)
 
         self.hidepw = hidepw
         "Specifies whether the password should be hidden on rendering."
@@ -562,7 +566,7 @@ class DateField(StringField):
     def __init__( self, name, label=None, hidden=None,
                   initial=None, required=None ):
         StringField.__init__(self, name, label, hidden,
-                             initial, required, strip=True)
+                             initial, required, size=20, strip=True)
 
     def parse_value( self, pvalue ):
         value = StringField.parse_value(self, pvalue)
@@ -658,7 +662,7 @@ class EmailField(StringField):
     def __init__( self, name, label=None, hidden=None,
                   initial=None, required=None, accept_local=False ):
         StringField.__init__(self, name, label, hidden, initial, required,
-                             encoding='ascii', strip=True)
+                             size=None, encoding='ascii', strip=True)
 
         self.accept_local = accept_local
         """True if we accept local email addresses (i.e. without a @)."""
@@ -718,7 +722,7 @@ class URLField(StringField):
     def __init__( self, name, label=None, hidden=None,
                   initial=None, required=None ):
         StringField.__init__(self, name, label, hidden, initial, required,
-                             encoding='ascii', strip=True)
+                             size=None, encoding='ascii', strip=True)
 
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
@@ -1341,8 +1345,23 @@ class FileUploadField(Field, _OptRequired):
     There are lots of details about file upload mechanics at
     http://www.cs.tut.fi/~jkorpela/forms/file.html
 
-    Note: depending on the web framework using this, it might be possible to get
-    access to the filename, to set it for as the replacement value.
+    To peruse the results of a file upload object, you will be given access to a
+    FileUpload class, on which you will be able to read() the contents or access
+    the .filename attribute, e.g.
+
+       binary_image = parser['photo'].read()
+       client_filename = parser['photo'].filename
+
+    Depending on the web framework using this, it might not be possible to get
+    access to the filename, this depends on your backend.  In any case, the
+    filename that comes from the client side is not very useful anyway, apart
+    maybe to initialize a file upload field on query, and even then, most
+    browsers do not allow this to happen (it could be a security problem).
+
+    Note that the parser's getvalue() method will cull the results from
+    FileUpload fields, because of the way these values are usually meant to be
+    used--that is, as form data to be pickled or passed around.  You are
+    supposed to handle file upload data manually.
 
     Observer that this field type is treated a little bit specially in the
     re-render loop: its values are removed automatically from the form-data (see
@@ -1390,6 +1409,7 @@ class FileUploadField(Field, _OptRequired):
         # Check for not submitted.
         if pvalue is None:
             dvalue = None
+
         # Check for strings.
         elif isinstance(pvalue, str):
             # We got data as a string, wrap around file-like object.
@@ -1397,7 +1417,10 @@ class FileUploadField(Field, _OptRequired):
             # Note: we need to accept string types, since from the mechanize
             # library submit, that allows us to write tests, that's what we seem
             # to get.
-            dvalue = StringIO.StringIO(pvalue)
+            if pvalue:
+                dvalue = StringIO.StringIO(pvalue)
+            else:
+                dvalue = None
 
         elif isinstance(pvalue, types.InstanceType):
             # Check for a mod_python Field class.
@@ -1414,7 +1437,7 @@ class FileUploadField(Field, _OptRequired):
                 # get a file object if the user has not submitted anything (this
                 # may be a bug in draco or mod_python).
                 pvalue.file.seek(0, 2)
-                size = arg.file.tell()
+                size = pvalue.file.tell()
                 if size > 0:
                     # Success, rewind and use.
                     pvalue.file.seek(0)
@@ -1461,18 +1484,26 @@ class FileUpload:
     class so it can be used as a file.
     """
 
-    def __init__( self, field ):
-        self.field = field
+    def __init__( self, obj, filename=None ):
+        self.obj = obj
+        """The object that contains a 'file' member, from which the contents of
+        the upload can be read."""
+
+        self.filename = filename
+        """The name of the file that is uploaded, if available."""
+
+    def __nonzero__( self ):
+        return True # To be able to test with parser['filefield'].
 
     def __getattr__( self, name ):
         """
         Aggregate file methods into the current object.
         """
-        if hasattr(self.field.file, name):
-            attr = getattr(self.field.file, name)
+        if hasattr(self.obj.file, name):
+            attr = getattr(self.obj.file, name)
             if callable(attr):
                 return attr
-        return getattr(self.field, name)
+        return getattr(self.obj, name)
 
 
 #-------------------------------------------------------------------------------

@@ -23,6 +23,10 @@ from atocha import *
 
 #-------------------------------------------------------------------------------
 #
+rtype = 'htmlout' # Renderer type for demo/tests.
+
+#-------------------------------------------------------------------------------
+#
 # Definition of test form.
 #
 form1 = Form(
@@ -39,7 +43,7 @@ form1 = Form(
                 encoding='latin-1'),
 
     # Password field.
-    PasswordField('passwd', N_("Password")),
+    PasswordField('passwd', N_("Password"), size=12, maxlen=8),
 
     # A text area.
     TextAreaField('description', N_("Description"), rows=10, cols=60),
@@ -108,7 +112,6 @@ form1 = Form(
     FileUploadField('photo', N_('Photograph')),
 
     action='handle.cgi', reset=1)
-
 
 
 #-------------------------------------------------------------------------------

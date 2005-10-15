@@ -61,7 +61,7 @@ class HoutRenderer(FormRenderer):
         table = TABLE(CLASS=self.css_table)
         for label, inputs in pairs:
             assert isinstance(label, (unicode, list))
-            assert isinstance(inputs, list)
+            assert isinstance(inputs, (unicode, list))
 
             if self.label_semicolon:
                 label.tail += ':'
@@ -194,13 +194,19 @@ class HoutFormRenderer(HoutRenderer):
         """
         Render an html input.
         """
-        inpu = INPUT(name=field.name, type=htmltype, value=value or u'',
-                      CLASS=field.css_class)
+        inpu = INPUT(name=field.name, type=htmltype, CLASS=field.css_class)
 
+        if value:
+            inpu.attrib['value'] = value
         if label is not None:
             inpu.text = label
         if checked:
             inpu.attrib['checked'] = '1'            
+        if hasattr(field, 'size') and field.maxlen is not None:
+            inpu.attrib['size'] = str(field.size)
+        if hasattr(field, 'maxlen') and field.maxlen is not None:
+            inpu.attrib['maxlength'] = str(field.maxlen)
+
         return inpu
 
     def _single( self, htmltype, field, value, errmsg,
