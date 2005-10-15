@@ -12,7 +12,8 @@ Form definition and exceptions.
 import types, re, datetime, StringIO
 
 # atocha imports.
-from fields import *
+from field import Field, FieldError
+from fields.uploads import FileUploadField
 from messages import msg_registry, msg_type
 
 

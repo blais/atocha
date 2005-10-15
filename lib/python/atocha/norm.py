@@ -17,7 +17,7 @@ parsed, and then returned for parsing.
 import sys, cgi
 
 # atocha imports.
-from fields import FileUpload
+from fields.uploads import FileUpload
 
 
 __all__ = ['CGINormalizer']

@@ -11,7 +11,7 @@ See class FormParser (below).
 
 
 # atocha imports.
-from fields import FileUploadField
+from fields.uploads import FileUploadField
 from messages import msg_registry
 
 

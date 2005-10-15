@@ -21,10 +21,10 @@ if sys.version_info[:2] < (2, 4):
 import types
 
 # atocha imports.
+from field import Field
 import fields
-from messages import msg_type, msg_registry
+from messages import msg_type, msg_registry # Used for _() setup.
 from parse import FormParser
-# Note: Also to make sure that the _() function is setup.
 
 
 __all__ = ['FormRenderer']
@@ -88,7 +88,7 @@ class FormRenderer:
         If 'hide' is specified, we force the rendering of this field as if it
         was a hidden field, with the same conditions.
         """
-        assert isinstance(field, fields.Field)
+        assert isinstance(field, Field)
 
         # Figure out if this field should be rendered as hidden or not.
         hidden = hide or field.ishidden()
@@ -190,7 +190,7 @@ class FormRenderer:
 
         This always returns a unicode string, ready to be printed.
         """
-        assert isinstance(field, fields.Field)
+        assert isinstance(field, Field)
 
         # If there is an error for the field, return a constant error string. We
         # do not print replacement values for the display, the value has to be
@@ -280,7 +280,7 @@ class FormRenderer:
         implemented renderer is complete.
         """
         for att in fields.__all__:
-            if not isinstance(getattr(fields, att), fields.Field):
+            if not isinstance(getattr(fields, att), Field):
                 continue
             try:
                 getattr(cls, 'render%s' % att)

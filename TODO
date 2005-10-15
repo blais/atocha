@@ -2,12 +2,8 @@
   atocha: TODO
 ================
 
-- Fix file upload and CGI: test with htmlout renderer
+- Run import checker on root dir
 
-
-- Remove test code, in norm.py, query.py
-
-- Password is required?
 
 
 - Convert all my codebase to Atocha.

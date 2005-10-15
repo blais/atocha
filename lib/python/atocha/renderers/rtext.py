@@ -13,7 +13,8 @@ from os.path import join
 
 # atocha imports.
 from atocha.render import FormRenderer
-from atocha.fields import ORI_VERTICAL, FileUploadField
+from atocha.field import ORI_VERTICAL
+from atocha.fields.uploads import FileUploadField
 from atocha.messages import msg_type
 
 
