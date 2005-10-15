@@ -160,7 +160,7 @@ class TextFormRenderer(TextRenderer):
         if form.enctype is not None:
             opts.append(('enctype', form.enctype))
 
-        print >> f, (u'<form %s>' % ' '.join(['%s="%s"' % x for x in opts]))
+        print >> f, (u'<form %s>' % u' '.join([u'%s="%s"' % x for x in opts]))
 
         if self.ofile is None: return f.getvalue()
 

@@ -19,6 +19,11 @@ from pprint import pprint, pformat
 from atocha import *
 
 
+# Disable implicit unicode conversions, at least for these automated tests.
+# In this library we try not to use the default encoding anywhere but explicitly.
+reload(sys); sys.setdefaultencoding('undefined')
+
+
 #-------------------------------------------------------------------------------
 #
 class TestSimple:
@@ -125,7 +130,7 @@ class TestFields:
         args = {'name': ' Martin  '}
         p = FormParser(f, args, end=1)
         assert not p.haserrors()
-        assert p['name'] == 'Martin'
+        assert p['name'] == u'Martin'
 
     def test_textarea( self ):
         'Textarea tests.'
@@ -595,3 +600,4 @@ def create_demo_form():
          action='handler')
 
     return f
+

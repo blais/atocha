@@ -267,7 +267,7 @@ class FormRenderer:
         Returns a printable label for the given field.
         """
         return (field.label and _(field.label)
-                or unicode(field.name.capitalize()))
+                or field.name.capitalize().decode('ascii'))
 
     def validate_renderer( cls ):
         """

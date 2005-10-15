@@ -18,7 +18,7 @@ from messages import msg_registry, msg_type
 
 
 __all__ = [
-    'Field',
+    'Field', 'FieldError',
     'StringField', 'TextAreaField', 'PasswordField',
     'DateField', 'EmailField', 'URLField',
     'IntField', 'FloatField', 'BoolField', 
@@ -180,15 +180,15 @@ class Field:
         already given as unicode objects.
 
         This method MUST return one of the valid data types or raise a
-        ValueError.
+        FieldError.
 
         Error Protocol
         --------------
 
         If there is an error in parsing, due to output THAT THE USER MAY HAVE
-        ENTERED, the protocol is to raise a ValueError, like this::
+        ENTERED, the protocol is to raise a FieldError, like this::
 
-           raise ValueError(message, rvalue)
+           raise FieldError(message, rvalue)
 
         The exception is initialized with an message that indicates what the
         error is, and two optional representations for the erroneous value that
@@ -199,8 +199,8 @@ class Field:
         cannot specify both 'dvalue' and 'rvalue'
 
         Note that if there is an unexpected value or an error, which is NOT DUE
-        TO USER INPUT, you should NOT raise a ValueError, but rather fail with
-        an assert or a RuntimeError.  Raising ValueError is reserved for
+        TO USER INPUT, you should NOT raise a FieldError, but rather fail with
+        an assert or a RuntimeError.  Raising FieldError is reserved for
         signaling user input error.
         """
         raise NotImplementedError # return dvalue
@@ -253,6 +253,16 @@ class Field:
         raise NotImplementedError # return uvalue
 
 
+#-------------------------------------------------------------------------------
+#
+class FieldError(Exception):
+    """
+    Error that is raised when user-input results in an invalid field.
+    This class is used in the field parsing protocol
+    (see class Field for details).
+    """
+
+    
 #------------------------------------------------------------------------------
 #
 class _OptRequired:
@@ -293,7 +303,7 @@ class _OptRequired:
         """
         if self.required and pvalue is None or pvalue == u'' or pvalue == []:
             # We indicate an error mentioning that this field was required.
-            raise ValueError(msg_registry['error-required-value'])
+            raise FieldError(msg_registry['error-required-value'])
 
         return pvalue
 
@@ -359,17 +369,17 @@ class _TextField(Field, _OptRequired):
                         self.encoding, 'replace').decode(self.encoding)
                 else:
                     rvalue = pvalue
-                raise ValueError(msg_registry['text-invalid-chars'], rvalue)
+                raise FieldError(msg_registry['text-invalid-chars'], rvalue)
         else:
             # Otherwise we simply use the unicode value.
             dvalue = pvalue
 
         # Check the minimum and maximum lengths.
         if self.minlen is not None and self.minlen > len(dvalue):
-            raise ValueError(msg_registry['text-minlen'],
+            raise FieldError(msg_registry['text-minlen'],
                              self.render_value(dvalue))
         if self.maxlen is not None and len(dvalue) > self.maxlen:
-            raise ValueError(msg_registry['text-maxlen'],
+            raise FieldError(msg_registry['text-maxlen'],
                              self.render_value(dvalue))
 
         # Make sure that the value does not contain control chars.
@@ -377,7 +387,7 @@ class _TextField(Field, _OptRequired):
         for ch in dvalue:
             o = ord(ch)
             if o < 0x20 and o != 10 and o != 13:
-                v = ValueError(msg_registry['text-invalid-chars'])
+                v = FieldError(msg_registry['text-invalid-chars'])
             else:
                 # We're also building a clean version of the string for
                 # rendering back when the error returns.
@@ -437,8 +447,12 @@ class StringField(_TextField):
         dvalue = _TextField.parse_value(self, pvalue)
 
         # Check that the value contains no newlines.
-        if '\n' in dvalue or '\r' in dvalue:
-            raise ValueError(msg_registry['text-invalid-chars'],
+        if ((isinstance(dvalue, unicode) and
+             (u'\n' in dvalue or u'\r' in dvalue)) or
+            (isinstance(dvalue, str) and
+             ('\n' in dvalue or '\r' in dvalue))):
+
+            raise FieldError(msg_registry['text-invalid-chars'],
                              self.render_value(dvalue))
 
         if self.strip:
@@ -561,24 +575,28 @@ class DateField(StringField):
             if mo:
                 break
         else:
-            raise ValueError(msg_registry['date-invalid-format'] % value, value)
+            raise FieldError(msg_registry['date-invalid-format'] % value, value)
 
         year, day = map(int, mo.group('year', 'day'))
         try:
             month = int(mo.group('month'))
-        except IndexError:
+        except IndexError, e:
             # Get abbreviated and full month names.
-            abmons = map(locale.nl_langinfo, self._abmon_list)
-            mons = map(locale.nl_langinfo, self._mon_list)
+            enc = locale.getpreferredencoding()
+            abmons = [locale.nl_langinfo(x).decode(enc)
+                      for x in self._abmon_list]
+            mons = [locale.nl_langinfo(x).decode(enc)
+                    for x in self._mon_list]
 
             nmonth = mo.group('nmonth')
+
             try:
                 month = abmons.index(nmonth.capitalize()) + 1
-            except ValueError:
+            except ValueError, e:
                 try:
                     month = mons.index(nmonth.capitalize()) + 1
-                except ValueError:
-                    raise ValueError(
+                except ValueError, e:
+                    raise FieldError(
                         msg_registry['date-invalid-month'] % nmonth, value)
 
         assert type(month) is int
@@ -587,7 +605,7 @@ class DateField(StringField):
         try:
             dvalue = datetime.date(year, month, day)
         except ValueError, e:
-            raise ValueError(msg_registry['date-invalid'] % value,
+            raise FieldError(msg_registry['date-invalid'] % value,
                              value)
 
         return dvalue
@@ -597,7 +615,7 @@ class DateField(StringField):
             return u''
 
         # Convert the date object in a format suitable for rendering it.
-        rvalue = unicode(dvalue.isoformat())
+        rvalue = dvalue.isoformat().decode('ascii')
         return rvalue
 
     def display_value( self, dvalue ):
@@ -614,7 +632,10 @@ class DateField(StringField):
             # Use simplistic format for old dates.
             return u'%d-%d-%d' % (date.year, date.month, date.day)
         else:
-            return unicode(date.strftime(DateField.__def_display_format))
+            # Note: what encoding does the time module return the format in?
+            # i.e. We never use the default encoding in this library.
+            return date.strftime(DateField.__def_display_format).decode(
+                locale.getpreferredencoding())
     _time_to_string = staticmethod(_time_to_string)
 
 #-------------------------------------------------------------------------------
@@ -650,12 +671,12 @@ class EmailField(StringField):
         # Parse the email address using the appropriate Python module.
         name, addr = email.Utils.parseaddr(dvalue)
         if not addr:
-            raise ValueError(msg_registry['email-invalid'],
+            raise FieldError(msg_registry['email-invalid'],
                              self.render_value(dvalue))
         else:
             # Check for local addresses.
             if not self.accept_local and not EmailField.__email_re.match(addr):
-                raise ValueError(msg_registry['email-invalid'],
+                raise FieldError(msg_registry['email-invalid'],
                                  self.render_value(dvalue))
                 # Note: if we had a little more guts, we would remove the
                 # offending characters in the replacement value.
@@ -702,7 +723,7 @@ class URLField(StringField):
 
         # Check for embedded spaces.
         if ' ' in dvalue:
-            raise ValueError(msg_registry['url-invalid'],
+            raise FieldError(msg_registry['url-invalid'],
                              self.render_value(dvalue.replace(' ', '?')))
 
         # Note: eventually, we want to parse using urlparse or something.
@@ -738,7 +759,7 @@ class _NumericalField(Field, _OptRequired):
         self.maxval = maxval
         "Maximum value that is accepted."
 
-        self.format = format and unicode(format) or None
+        self.format = format and format.decode('ascii') or None
         """Printf-like format for output display.  If this is not set the
         default string conversion routines are used.  Note that you should set
         an appropriate format for the relevant numerical type.  Also, this does
@@ -758,27 +779,33 @@ class _NumericalField(Field, _OptRequired):
         try:
             dvalue = self._numtype(pvalue)
         except ValueError:
-            raise ValueError(msg_registry['numerical-invalid'] % pvalue,
+            raise FieldError(msg_registry['numerical-invalid'] % pvalue,
                              pvalue)
 
         # Check bounds.
         if self.minval is not None and dvalue < self.minval:
-            raise ValueError(msg_registry['numerical-minval'] % self.minval,
-                             self.render_value(dvalue))
+            rvalue = self.render_value(dvalue)
+            raise FieldError(msg_registry['numerical-minval'] % rvalue, rvalue)
         if self.maxval is not None and dvalue > self.maxval:
-            raise ValueError(msg_registry['numerical-maxval'] % self.maxval,
-                             self.render_value(dvalue))
+            rvalue = self.render_value(dvalue)
+            raise FieldError(msg_registry['numerical-maxval'] % rvalue, rvalue)
 
         return dvalue
 
     def render_value( self, dvalue ):
         if dvalue is None:
             return u''
-        # Simply convert from the numerical type into a string.
+        return self._format_value(dvalue)
+    
+    def _format_value( self, dvalue ):
+        """
+        Simply convert from the numerical type into a string.
+        """
         if self.format:
             return self.format % dvalue
         else:
-            return unicode(dvalue)
+            enc = locale.getpreferredencoding()
+            return str(dvalue).decode(enc)
 
     display_value = render_value
 
@@ -1052,7 +1079,7 @@ class _OneChoiceField(_MultipleField):
             # one value, in which case it is not really the user's fault, and
             # the right thing to do is to return an error to the user so that he
             # can make the desired choice.
-            raise ValueError(msg_registry['one-choice-required'])
+            raise FieldError(msg_registry['one-choice-required'])
 
         if isinstance(pvalue, list):
             # We really should not be receiving more than one value here.
@@ -1407,7 +1434,7 @@ class FileUploadField(Field, _OptRequired):
         # special case.
         if self.required and pvalue is None:
             # We indicate an error mentioning that this field was required.
-            raise ValueError(msg_registry['error-required-value'])
+            raise FieldError(msg_registry['error-required-value'])
 
         return dvalue
 
@@ -1487,7 +1514,7 @@ class JSDateField(Field): # Is always required.
             # No value submitted... this is strange, since this field should
             # always send us a value, always, even without user edits. Raise a
             # strange user error.
-            raise ValueError(msg_registry['date-invalid'] % '')
+            raise FieldError(msg_registry['date-invalid'] % u'')
 
         # Encode value into ascii.
         try:
@@ -1505,7 +1532,7 @@ class JSDateField(Field): # Is always required.
         try:
             dvalue = datetime.date(*map(int, mo.groups()))
         except ValueError, e:
-            raise ValueError(msg_registry['date-invalid'] % pvalue)
+            raise FieldError(msg_registry['date-invalid'] % pvalue)
 
         return dvalue
 
@@ -1516,7 +1543,7 @@ class JSDateField(Field): # Is always required.
         # Convert the date object in a format suitable for being accepted by the
         # Javascript code. Note: this may not work before 1900.
         rvalue = dvalue.strftime('%Y%m%d')
-        return unicode(rvalue)
+        return rvalue.decode('ascii')
 
     def display_value( self, dvalue ):
         assert dvalue is not None

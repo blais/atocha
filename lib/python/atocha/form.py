@@ -398,7 +398,7 @@ class Form:
             # expected types.
             assert isinstance(parsed_dvalue, fi.types_data)
 
-        except ValueError, e:
+        except FieldError, e:
             # There was an error parsing the field, i.e. the parsing raised
             # an invalid condition for that field. This is the receiving
             # part of the protocol for the fields to signal a user error.
@@ -471,7 +471,7 @@ class Form:
             for sv in submit_values:
                 if sv in args:
                     if found is not None:
-                        raise ValueError(
+                        raise RuntimeError(
                             "Error: Multiple values for submits.")
                     found = sv
                     # Note: don't break, keep checking.
