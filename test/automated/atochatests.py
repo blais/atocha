@@ -21,7 +21,7 @@ from atocha import *
 
 # Disable implicit unicode conversions, at least for these automated tests.
 # In this library we try not to use the default encoding anywhere but explicitly.
-reload(sys); sys.setdefaultencoding('undefined')
+## reload(sys); sys.setdefaultencoding('undefined')
 
 
 #-------------------------------------------------------------------------------
@@ -513,7 +513,7 @@ class TestRender:
 
     #---------------------------------------------------------------------------
 
-    harness = """
+    harness = u"""
 <html>
   <meta>
     <style type="text/css"/><!--
@@ -556,7 +556,7 @@ div#the-form {
         Renderer supporting the inspection of test HTML output.
         """
         f = StringIO.StringIO()
-        print >> f, self.harness % text
+        f.write(self.harness % text)
         html = f.getvalue()
 
         # Print output to stdout.
@@ -565,7 +565,7 @@ div#the-form {
         print
         
         # Also print output to a file that a browser can point at.
-        file(self.tmpfilename, 'w').write(html)
+        file(self.tmpfilename, 'w').write(html.encode('utf-8'))
 
 ##         # Open it automatically in the web browser.
 ##         webbrowser.open(self.tmpfilename)

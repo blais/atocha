@@ -72,20 +72,21 @@ class TextRenderer(FormRenderer):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
-        print >> f, u'<table class=%s>' % self.css_table
+        f.write(u'<table class=%s>' % self.css_table)
         for label, inputs in pairs:
             assert isinstance(label, unicode)
             assert isinstance(inputs, unicode)
 
             if self.label_semicolon:
                 label += ':'
-            print >> f, ((u'<tr><td class="%s">%s</td>\n'
-                          u'    <td class="%s">%s</td></tr>') %
-                         (self.css_label, label, self.css_input, inputs or u''))
+            f.write((u'<tr><td class="%s">%s</td>\n'
+                     u'    <td class="%s">%s</td></tr>\n') %
+                    (self.css_label, label, self.css_input, inputs or u''))
         if extra:
             assert isinstance(extra, unicode)
-            print >> f, extra
-        print >> f, u'</table>'
+            f.write(extra)
+            f.write(u'\n')
+        f.write(u'</table>\n')
 
         if self.ofile is None: return f.getvalue()
 
@@ -159,8 +160,9 @@ class TextFormRenderer(TextRenderer):
             opts.append(('accept-charset', form.accept_charset))
         if form.enctype is not None:
             opts.append(('enctype', form.enctype))
-
-        print >> f, (u'<form %s>' % u' '.join([u'%s="%s"' % x for x in opts]))
+        
+        f.write(u'<form %s>\n' %
+                ' '.join(['%s="%s"' % x for x in opts]).decode('ascii'))
 
         if self.ofile is None: return f.getvalue()
 
@@ -182,7 +184,7 @@ class TextFormRenderer(TextRenderer):
                     label += u'<span class="%s">*</span>' % self.css_required
                 visible.append( (label, rendered) )
 
-        self.do_table(visible, '\n'.join(hidden))
+        self.do_table(visible, u'\n'.join(hidden))
 
         if self.ofile is None: return f.getvalue()
 
@@ -191,16 +193,15 @@ class TextFormRenderer(TextRenderer):
         f = self.ofile or self._create_buffer()
 
         if isinstance(submit, msg_type):
-            print >> f, (u'<input type="submit" value="%s" />' % _(submit))
+            f.write(u'<input type="submit" value="%s" />\n' % _(submit))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
-                print >> f, \
-                      (u'<input type="submit" name="%s" value="%s" />' %
-                       (name, _(value)))
+                f.write(u'<input type="submit" name="%s" value="%s" />\n' %
+                        (name, _(value)))
 
         if reset:
-            print >> f, (u'<input type="reset" value="%s" />' % _(reset))
+            f.write(u'<input type="reset" value="%s" />\n' % _(reset))
 
         if self.ofile is None: return f.getvalue()
 
@@ -216,7 +217,7 @@ class TextFormRenderer(TextRenderer):
                     u'type="text/javascript">\n')
             if notice:
                 f.write(notice)
-                f.write('\n')
+                f.write(u'\n')
             f.write(u'</script>\n')
         return f.getvalue()
 
@@ -227,16 +228,16 @@ class TextFormRenderer(TextRenderer):
 
         if isinstance(rvalue, unicode):
             inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                          (field.name, rvalue))
+                          (field.name.decode('ascii'), rvalue))
         elif isinstance(rvalue, list):
             for rval in rvalue:
                 inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                              (field.name, rval))
+                              (field.name.decode('ascii'), rval))
         else:
             raise RuntimeError("Error: unexpected type '%s' for rendering." %
                                type(rvalue))
 
-        return '\n'.join(inputs)
+        return u'\n'.join(inputs)
 
 
     def _input( self, htmltype, field, value, checked=False, label=None ):
@@ -248,15 +249,15 @@ class TextFormRenderer(TextRenderer):
         else:
             checkstr = u''
 
-        fargs = (field.name,
-                 htmltype,
+        fargs = (field.name.decode('ascii'),
+                 htmltype.decode('ascii'),
                  value or u'',
-                 field.css_class,
+                 field.css_class.decode('ascii'),
                  checkstr)
 
         if label is not None:
-            o = ((u'<input name="%s" type="%s" value="%s" '
-                  u'class="%s" %s>%s</input>') % (fargs + (label,)))
+            o = (u'<input name="%s" type="%s" value="%s" class="%s" %s>'
+                 u'%s</input>') % (fargs + (label,))
         else:
             o = (u'<input name="%s" type="%s" value="%s" class="%s" %s/>' %
                  fargs)
@@ -292,7 +293,8 @@ class TextFormRenderer(TextRenderer):
         colstr = field.cols and u' cols="%d"' % field.cols or u''
         return (self._geterror(errmsg) +
                 u'<textarea name="%s" %s %s class="%s">%s</textarea>' %
-                (field.name, rowstr, colstr, field.css_class, rvalue or ''))
+                (field.name.decode('ascii'), rowstr, colstr,
+                 field.css_class.decode('ascii'), rvalue or u''))
 
     def renderPasswordField( self, field, rvalue, errmsg, required ):
         return self._single('password', field, rvalue, errmsg)
@@ -384,7 +386,7 @@ class TextFormRenderer(TextRenderer):
                 u'<noscript class="%s">' % field.css_class,
                 noscript,
                 u'</noscript>'])
-        return self._geterror(errmsg) + '\n'.join(lines)
+        return self._geterror(errmsg) + u'\n'.join(lines)
 
     def renderJSDateField( self, field, rvalue, errmsg, required ):
         fargs = (field.name, rvalue and ", '%s'" % rvalue or '')
@@ -438,7 +440,7 @@ class TextDisplayRenderer(TextRenderer):
             self.do_render_table(fields)
 
             # Close the form (the container rendering only outputs the header.
-            print >> f, '</form>'
+            f.write('</form>\n')
         finally:
             self.ofile = None
 

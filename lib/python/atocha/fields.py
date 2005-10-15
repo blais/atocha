@@ -494,9 +494,12 @@ class TextAreaField(_TextField):
     def render_value( self, dvalue ):
         rvalue = _TextField.render_value(self, dvalue)
 
-        # Make sure the DOS CR-LF are converted into simple Unix newlines for
-        # the browser, in case some data value is set wrongly.
-        return rvalue.replace('\r\n', '\n')
+        if self.encoding:
+            # Make sure the DOS CR-LF are converted into simple Unix newlines
+            # for the browser, in case some data value is set wrongly.
+            return rvalue.replace('\r\n', '\n')
+        else:
+            return rvalue.replace(u'\r\n', u'\n')
 
     display_value = render_value
 
