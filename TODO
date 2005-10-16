@@ -2,14 +2,6 @@
   atocha: TODO
 ================
 
-- Provide examples for:
-
-  * Parsing with user checks
-  * Customized rendering
-
-  Examples should also be runnable code, use the same files (maybe with symlinks
-  to remove the extensions).
-
 - Convert all my codebase to Atocha.
 
 - Create a mod_python normalizer, and one for draco (my framework).

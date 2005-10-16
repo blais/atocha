@@ -9,8 +9,9 @@
 
 .. contents::
 
+
 Introduction
-------------
+============
 
 This document presents a quick overview and tutorial about the Atocha web form
 rendering and handling library.  This is meant to quickly provide a sense of
@@ -18,7 +19,7 @@ what the library does.
 
 
 Form Definition
----------------
+===============
 
 You create a single ``Form`` instance for both rendering and handling of the
 form.  The form consists of "fields", which are akin to desktop application
@@ -52,7 +53,7 @@ recreated on every request.
 
 
 Form Rendering
---------------
+==============
 
 You can then use this form object, in collboration with a ``FormRenderer`` to
 render the form on a page for the user to fill in::
@@ -76,7 +77,7 @@ use, and usually will come from session data to provide error feedback if the
 form is being re-rendered for errors from user input.
   
 Breaking down the Rendering
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 One problem with automatic rendering of form is that it breaks down quite
 rapidly as soon as you want to render fancy forms, which always end up requiring
@@ -102,7 +103,15 @@ wherever you want within your system::
 
 You could easily use this system to embed Atocha in your favourite templating
 system.  Atocha does not bind to a templating system and is entirely orthogonal
-to any web application framework.
+to any web application framework.  
+
+You could create some kind of syntax in HTML for your templating system for
+specifying that a field's inputs should be rendered in-place, e.g.::
+
+    <div>
+       Too much fun? <div id="atocha:fun" />
+    ...
+
 
 The form rendering code is completely decoupled from the form definition, so it
 becomes possible to create custom form renderers for your particular system or
@@ -113,8 +122,33 @@ htmlout library.  You could easily implemnent one using Stan (from Nevow) if you
 liked.
 
 
+Dynamically Generated Choices
+-----------------------------
+
+If you need to render menus, listboxes, radio buttons, checkbox lists that are
+generated dynamically, you can simply set the list of valid choices on the field
+before rendering or parsing, in the renderer::
+
+ 
+   form['matches'].setchoices(found_matches)
+   ...
+   rdr.render_field('matches')
+   ...
+
+
+And in the parser (only needed if the choice field has "choice checking"
+enabled)::
+
+   form['matches'].setchoices(found_matches)
+   ...
+   p = FormParser(f, args)
+   rdr.render_field('matches')
+   ...
+
+
+
 Form Handling
--------------
+=============
 
 A ``FormParser`` instance is used to oversee the process of parsing and
 validating user-submitted inputs.  The basic validation of the data types output
@@ -159,7 +193,7 @@ want with it.
 
 
 Display Renderers
------------------
+=================
 
 The form object can also be used to display parsed values in a nice-looking
 table, without editing capabilities.  This is simply accomplished by using a
@@ -179,7 +213,7 @@ already present in the form definition::
 
 
 Options
--------
+=======
 
 The ``Form``, ``FormRenderer`` and ``FormParser`` and ``Field`` classes support
 many options for various parameters depending on their specific application.
@@ -187,7 +221,7 @@ Visit the source code to find out what the specific options are.
 
 
 Online Demo
------------
+===========
 
 Try the `online demo`__ which features an instance of most of the fields, to
 quickly see what the library can do.

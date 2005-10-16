@@ -331,7 +331,7 @@ class TextFormRenderer(TextRenderer):
     def renderRadioField( self, field, rvalue, errmsg, required ):
         assert rvalue is not None
         inputs = []
-        for vname, label in field.values:
+        for vname, label in field.choices:
             checked = bool(vname == rvalue)
             inputs.append(
                 self._input('radio', field, vname, checked, _(label)))
@@ -352,7 +352,7 @@ class TextFormRenderer(TextRenderer):
         lines.append(
             u'<select name="%s" %s class="%s">' %
             (field.varnames[0], ' '.join(selopts), field.css_class))
-        for vname, label in field.values:
+        for vname, label in field.choices:
             selstr = u''
             if vname in rvalue:
                 selstr = u'selected="selected"'
@@ -366,7 +366,7 @@ class TextFormRenderer(TextRenderer):
 
     def renderCheckboxesField( self, field, rvalue, errmsg, required ):
         inputs = []
-        for vname, label in field.values:
+        for vname, label in field.choices:
             checked = vname in rvalue
             inputs.append(self._input('checkbox', field, vname, checked, _(label)))
         output = self._orient(field, inputs)

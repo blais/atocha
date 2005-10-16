@@ -69,6 +69,14 @@ class AgreeField(BoolField):
     def __init__( self, name, label=None, hidden=None ):
         BoolField.__init__(self, name, label, hidden, False)
         
+    def isrequired( self ):
+        """
+        Override to place a marker that this field is required.
+        Note: this field is not 'optionally required', it is ALWAYS required.
+        That is its sole purpose, to force the user to sign it.
+        """
+        return True
+
     def render_value( self, dvalue ):
         # Always render False, to be accepted.
         return False

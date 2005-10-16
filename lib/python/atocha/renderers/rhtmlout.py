@@ -141,7 +141,7 @@ class HoutFormRenderer(HoutRenderer):
             else:
                 label = self._get_label(field)
                 if field.isrequired():
-                    label = [label, SPAN(CLASS=self.css_required)]
+                    label = [label, SPAN('*', CLASS=self.css_required)]
                 visible.append( (label, rendered) )
 
         return self.do_table(visible, hidden)
@@ -275,7 +275,7 @@ class HoutFormRenderer(HoutRenderer):
     def renderRadioField( self, field, rvalue, errmsg, required ):
         assert rvalue is not None
         inputs = []
-        for vname, label in field.values:
+        for vname, label in field.choices:
             checked = bool(vname == rvalue)
             inputs.append(
                 self._input('radio', field, vname, checked, _(label)))
@@ -292,7 +292,7 @@ class HoutFormRenderer(HoutRenderer):
         if multiple:
             select.attrib['multiple'] = '1'
 
-        for vname, label in field.values:
+        for vname, label in field.choices:
             option = OPTION(_(label), value=vname)
             if vname in rvalue:
                 option.attrib['selected'] = "selected"
@@ -304,7 +304,7 @@ class HoutFormRenderer(HoutRenderer):
 
     def renderCheckboxesField( self, field, rvalue, errmsg, required ):
         inputs = []
-        for vname, label in field.values:
+        for vname, label in field.choices:
             checked = vname in rvalue
             inputs.append(self._input('checkbox', field, vname, checked, _(label)))
         output = self._orient(field, inputs)
