@@ -14,7 +14,7 @@ library.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
-savedglo = set(globals().keys())
+_savedglo = set(globals().keys())
 
 # atocha fields imports.
 from bools import *
@@ -26,4 +26,4 @@ from uploads import *
 
 
 # Export just the stuff defined in the local package.
-__all__ = list(set(globals().keys()) - savedglo)
+__all__ = list(set(globals().keys()) - _savedglo) 

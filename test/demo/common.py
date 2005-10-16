@@ -19,7 +19,7 @@ root = dirname(dirname(dirname(dirname(sys.argv[0]))))
 sys.path.append(join(root, 'lib', 'python'))
 sys.path.append('../../../../hume/app/lib/hume') # for htmlout testing.
 from atocha import *
-
+from atocha.norms.ncgi import CGINormalizer
 
 #-------------------------------------------------------------------------------
 #
@@ -109,9 +109,29 @@ form1 = Form(
                  ),
 
     # A file that can be uploaded.
-    FileUploadField('photo', N_('Photograph')),
+    FileUploadField('donation', N_('Donation (Send File)')),
+
+    # A file that can be sent or reset.
+    SetFileField('photo', N_('Photograph')),
+
+    # Agree checkbox.
+    AgreeField('terms', N_("Agree to Terms"),),
 
     action='handle.cgi', reset=1)
+
+
+
+
+#-------------------------------------------------------------------------------
+#
+# Definition of test form.
+#
+## form1 = Form(
+##     'test-form',
+##     SetFileField('photo', N_('Photograph')),
+##     action='handle.cgi', reset=1)
+
+
 
 
 #-------------------------------------------------------------------------------

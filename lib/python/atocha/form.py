@@ -9,11 +9,12 @@ Form definition and exceptions.
 
 
 # stdlib imports
-import types, re, datetime, StringIO
+import re
+from types import NoneType
 
 # atocha imports.
 from field import Field, FieldError
-from fields.uploads import FileUploadField
+from fields.uploads import FileUploadField, FileUpload
 from messages import msg_registry, msg_type
 
 
@@ -101,7 +102,7 @@ class Form:
         reset = kwds.get('reset', None)
         if reset and isinstance(reset, (bool, int)):
             reset = msg_registry.get_notrans('reset-button')
-        assert isinstance(reset, (types.NoneType, msg_type))
+        assert isinstance(reset, (NoneType, msg_type))
         self.reset = reset
         """Whether a reset button should be provided. The value can be either a
         string to be translated later or a bool/int, where we will use the
@@ -207,10 +208,19 @@ class Form:
             # enctype for the form appropriately.
             self.enctype = self.__def_enctype_file
 
+        # Check name collisions.
         if field.name in self._fieldsmap:
             raise RuntimeError(
                 'Error: Field name %s is already used.' % field.name)
 
+        # Check variable name collisions.
+        for fi in self._fields:
+            for varname in field.varnames:
+                if varname in fi.varnames:
+                    raise RuntimeError(
+                        'Error: Collision in varnames between %s and %s.' %
+                        (fi.name, field.name))
+        
         self._fields.append(field)
         self._fieldsmap[field.name] = field
 
@@ -307,7 +317,7 @@ class Form:
         assert isinstance(fi.varnames, list) # Sanity check.
 
         # Accumulate the parsed value of each of the varnames for the field.
-        pvalues = []
+        pvalues = {}
         for varname in fi.varnames:
             try:
                 argvalue = args[varname]
@@ -335,7 +345,7 @@ class Form:
                 # No decoding necessary for missing values.
                 pvalue = None
 
-            elif isinstance(fi, FileUploadField):
+            elif isinstance(argvalue, FileUpload):
                 # Do nothing for file uploads, its encoding is separate.
                 pvalue = argvalue
 
@@ -369,12 +379,14 @@ class Form:
                     'Internal error with types: unexpected type: %s.' %
                     type(argvalue))
 
-            pvalues.append(pvalue)
+            pvalues[varname] = pvalue
 
         # If there is a single pvalue, unwrap it form the list.
         if len(pvalues) == 1:
-            pvalue = pvalues[0]
+            # Use last set pvalue from the loop above.
+            pass
         else:
+            # Pass the dict to the field for parsing.
             pvalue = pvalues
 
         # Now we check that we're always giving the field an expected value

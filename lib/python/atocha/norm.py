@@ -4,23 +4,24 @@
 #
 
 """
-Argument normalization classes.
+Argument normalization interface.
 
-These classes are used to convert between the various formats for the arguments
-that the different web frameworks or libraries provide.  The arguments are
-normalized first, without any knowledge of the form in which they will get
-parsed, and then returned for parsing.
+Interface for calling the argument normalizers, which act as a layer to adapt
+from the incoming web framework arguments to a dict with expected data types.
+
+Note that we do not include all the possible normalizers on purpose, because the
+normalizers will necessarily have dependencies that will not be present on all
+systems.  The normalizers should be imported individually and typically only
+once during the interpreter environment setup to setup the FormParser class with
+an appropriate normalizer instance.
 """
 
 
 # stdlib imports.
-import sys, cgi
-
-# atocha imports.
-from fields.uploads import FileUpload
+import cgi
 
 
-__all__ = ['CGINormalizer']
+__all__ = ['FormNormalizer']
 
 
 #-------------------------------------------------------------------------------
@@ -35,31 +36,4 @@ class FormNormalizer:
         arguments for parsing.
         """
         raise NotImplementedError
-
-#-------------------------------------------------------------------------------
-#
-class CGINormalizer(FormNormalizer):
-    """
-    Normalizer for Python's cgi library.
-    """
-    def normalize( self, form ):
-        args = {}
-        for varname in form.keys():
-            value = form[varname]
-
-            if (isinstance(value, cgi.FieldStorage) and
-                isinstance(value.file, file)):
-
-                ovalue = FileUpload(value, value.filename)
-
-            else:
-                value = form.getlist(varname)
-                if len(value) == 1:
-                    ovalue = value[0]
-                else:
-                    ovalue = value
-
-            args[varname] = ovalue
-
-        return args
 

@@ -112,4 +112,8 @@ msg_registry = TranslatorDict({
     'date-invalid-month': N_("Invalid month name for date: '%s'."),
     'date-invalid': N_("Invalid date: '%s'."),
 
+    'setfile-reset': N_("Remove"),
+
+    'agree-required': N_("Please indicate agreement."),
+    'agree-display': N_("Agreed."),
     })

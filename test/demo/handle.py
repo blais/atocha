@@ -17,6 +17,7 @@ from atocha import *
 
 
 cargs = cgi.FieldStorage()
+
 p = FormParser(form1, cargs, 'query.cgi')
 
 if 'merengue' in (p['dances'] or []):
@@ -31,13 +32,15 @@ p.end()
 db = getdb()
 values = p.getvalues(1)
 
-# Handle file upload.
-if p['photo']:
+# Handle setfile upload.
+if p['photo'] is False:
+    # Reset photo.
+    db['photo-%s' % form1.name] = db['photofn-%s' % form1.name] = None
+
+elif p['photo']:
     # Read in photograph file, if there is one.
     db['photo-%s' % form1.name] = p['photo'].read()
     db['photofn-%s' % form1.name] = p['photo'].filename
-else:
-    db['photo-%s' % form1.name] = db['photofn-%s' % form1.name] = None
 
 db['data-%s' % form1.name] = values
 

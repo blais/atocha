@@ -4,7 +4,7 @@
 #
 
 """
-Fields ...
+Time and Date Fields
 """
 
 # stdlib imports

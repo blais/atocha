@@ -4,7 +4,7 @@
 #
 
 """
-Fields ...
+Numeric Fields
 """
 
 # stdlib imports

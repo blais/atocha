@@ -2,24 +2,6 @@
   atocha: TODO
 ================
 
-- Run import checker on root dir
-
-
-
-- Convert all my codebase to Atocha.
-
-- I think we will have to separate the normalizers to avoid unnecessary imports.
-
-- Mention something about AJAX on README, possibilty, an example exists.
-
-- Auto generate documentation for all the fields using their docstrings and a
-  simple script.
-
-
-
-
-- Create a mod_python normalizer, and one for draco (my framework).
-
 - Provide examples for:
 
   * Parsing with user checks
@@ -28,15 +10,32 @@
   Examples should also be runnable code, use the same files (maybe with symlinks
   to remove the extensions).
 
+- Convert all my codebase to Atocha.
+
+- Create a mod_python normalizer, and one for draco (my framework).
 
 
 
-New Field Types
-===============
 
-- Derive from FileUpload and implement a Photograph field that reads the value
-  entirely and can print it and display it.  That field could also have some
-  Javascript to reset that field automatically.
+
+
+
+
+
+
+
+
+Future New Field Types
+======================
+
+- Complete the SetFileField with some JavaScript to hide the file input field
+  when the reset button is checked.
+
+- Implement a CaptchaField which generates a captcha image automatically.
+
+- Maybe derive from FileUpload and implement a Photograph field that reads the
+  value entirely and can print it and display it.  That field could also have
+  some Javascript to reset that field automatically.
 
 - Implement a BoolField that requires being checked (AgreeField).
 
@@ -46,13 +45,18 @@ New Field Types
 - Implement a menu that redirects on change based on this:
   http://cscie12.dce.harvard.edu/lecture_notes/20050316/slide50.html
 
+- Something to fix eventually: the JSDateField script has hardcoded paths for
+  its accompanying images... not sure what to do about this yet. I suppose the
+  user has to copy the files anyway, so it might be ok to assume he might edit
+  the scripts somewhat.
+
+- General purpose buttons that would be a form in themselves... we need to
+  provide some mechanism for easily rendering those rather than to have to
+  define an empty form.
 
 
-
-
-
-Ideas and Eventually
-====================
+Ideas
+=====
 
 - Document the types_* where a list is present.  Type assertions should use a
   debugging function that can be noop'ed and that recurses into the lists for
@@ -104,85 +108,20 @@ Ideas and Eventually
 - Implement 'noempty' in the renderers (previous code: it isn't used much apart
   from the profile and cannot be guaranteed to make sense anymore.  We are
   better work around it in the client code.)
-  
+
   This is actually not quite right: in the display renderer, it does make sense
   to not want to render fields for which there is no value set.  It only makes
   sense for the display-only renderer.  Maybe that renderer could take an option
   in its constructor?
 
 
+- For the parser: Maybe we could eventually provide a way to at least decode the
+  args which have no corresponding field in the form (if that never becomes
+  necessary, don't do so).
 
 
-New Widgets
------------
-
-- Other widgets:
-
-   - Reset button, see Quixote for some examples.
-   - General purpose buttons that would replace the submit one anywhere...?
-
-- Something to fix eventually: the JSDateField script has hardcoded paths for
-  its accompanying images... not sure what to do about this yet. I suppose the
-  user has to copy the files anyway, so it might be ok to assume he might edit
-  the scripts somewhat.
-
-Parser
-------
-
-- Maybe we could eventually provide a way to at least decode the args which
-  have no corresponding field in the form (if that never becomes necessary,
-  don't do so).
-
-
-Tests
-=====
+More Tests
+==========
 
 - Automate tests for four cases: hidden, valid, invalid, empty.
-- Automate tests using branch coverage.
-
-
-
-
-
-
-
-
-
-Changes to adapt existing hume code with
-----------------------------------------
-
-default=  becomes  initial=
-notnull=  becomes  required=
-
-Field.prepare_value becomes render_value
-Field.parse becomes Field.parse_value
-Form.addField becomes Field.addfield
-
-Remove method calls on former FormError class:
-    def formerrors( self ):
-    def errlabels( self ):
-    def errnames( self ):
-    def errfields( self ):
-
-- Orientation for radio fields has become an int, change from 'minitable'.
-
-ActiveDateField become JSDateField
-
-ListField becomes CheckboxesField
-
-hidden fields now require an explicit 'hidden=1' option.
-
-form_parser: Needs a concrete implementation for hume:
-
-# change this to use the errors to check if there are errors
-        if self._status:
-            if not self._messages:
-                setStatus(self._status, self.__generic_message)
-            else:
-                setStatus(self._status, '  '.join(self._messages))
-
-            if len(self):
-                setFormData(self._form.name, self)
-            if self._errors:
-                setFormErrors(self._form.name, self._errors)
 

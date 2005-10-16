@@ -52,6 +52,134 @@ class TestForm:
     Test form functionalities.
     """
 
+    # FIXME: we need to check the basic stuff here.
+
+
+#-------------------------------------------------------------------------------
+#
+class TestRender:
+    """
+    Tests for rendering.
+    """
+
+    def test_validity( self ):
+        "Test the completeness of a renderer's implementation."
+        f = Form('test-form')
+        TextFormRenderer.validate_renderer()
+        # Note: test the htmlout renderer here too.
+
+    def test_hidden( self ):
+        'Test rendering hidden fields.'
+
+        # Expect an error on trying to render a hidden field without a value.
+        f = Form('test-form', StringField('name', hidden=1))
+        args = {}
+        p = FormRenderer(f, incomplete=1)
+        try:
+            p.render()
+            assert False
+        except RuntimeError:
+            pass
+
+    def test_incomplete( self ):
+        'Test rendering incompletely.'
+
+        # Expect an error on trying to render a hidden field without a value.
+        f = Form('test-form', StringField('name'))
+        args = {}
+##         p = FormRenderer(f, incomplete=1)
+##         p.render('name')
+# FIXME: todo, bring this back when we will have the simple renderer class.
+        
+        # Note: we cannot really test the destructor failure, because the
+        # exception is ignored from there, due to its presence in the __del__()
+        # call, and all it does is output a message to stderr.
+
+    def test_nonexistent( self ):
+        'Test rendering fields that do not exist.'
+
+        # Expect an error on trying to render a hidden field without a value.
+        f = Form('test-form', StringField('name', hidden=1))
+        args = {}
+        p = FormRenderer(f, incomplete=1)
+        try:
+            p.render(only='notexist')
+            assert False
+        except RuntimeError:
+            pass
+
+    def test_encoding( self ):
+        'Test output encoding for text renderer.'
+
+        f = Form('test-form',
+                 StringField('name', hidden=1),
+                 action='handle.cgi')
+        args = {'name': u'Mélanie'}
+        r = TextFormRenderer(f, args)
+        assert isinstance(r.render(), unicode)
+
+        r = TextFormRenderer(f, args, output_encoding='latin-1')
+        assert isinstance(r.render(), str)
+
+
+    #---------------------------------------------------------------------------
+
+    harness = u"""
+<html>
+<body>
+<div id="the-form">
+%s
+</div>
+</body>
+</html>
+"""
+    
+    tmpfilename = '/tmp/test.html'
+    
+    def print_render( self, text ):
+        """
+        Renderer supporting the inspection of test HTML output.
+        """
+        f = StringIO.StringIO()
+        f.write(self.harness % text)
+        html = f.getvalue()
+
+        if 0:
+            # Print output to stdout.
+            print
+            print html
+            print
+        
+        if 0:
+            # Also print output to a file that a browser can point at.
+            file(self.tmpfilename, 'w').write(html.encode('utf-8'))
+
+            # Open it automatically in the web browser.
+            webbrowser.open(self.tmpfilename)
+
+    def test_visual( self ):
+        'Visual tests examining the output of the renderer.'
+        
+        f = Form('test-form',
+             StringField('name', N_("Person's name")),
+             TextAreaField('description', N_("Description"), rows=10, cols=60),
+             DateField('birthday', N_("Birthday")),
+             EmailField('email', N_("Email")),
+             URLField('homepage', N_("Home Page")),
+             IntField('number', N_("Age")),
+             IntField('height', N_("Height")),
+             BoolField('confirm', N_("Are you sure?")),
+             action='handler')
+
+        values = {'name': u'Martin Blais',
+                  'number': 17,
+                  'description': u"A really nice guy. Guapo."}
+        errors = {'name': u'Idiotic error'}
+
+        p = TextFormRenderer(f, values, errors, incomplete=1)
+        self.print_render(p.render())
+
+
 
 #-------------------------------------------------------------------------------
 #
@@ -444,160 +572,41 @@ class TestFields:
         except AssertionError: pass
         p.end()
 
-#-------------------------------------------------------------------------------
-#
-class TestRender:
-    """
-    Tests for rendering.
-    """
-
-    def test_validity( self ):
-        "Test the completeness of a renderer's implementation."
-        f = Form('test-form')
-        TextFormRenderer.validate_renderer()
-        # Note: test the htmlout renderer here too.
-
-    def test_hidden( self ):
-        'Test rendering hidden fields.'
-
-        # Expect an error on trying to render a hidden field without a value.
-        f = Form('test-form', StringField('name', hidden=1))
-        args = {}
-        p = FormRenderer(f, incomplete=1)
-        try:
-            p.render()
-            assert False
-        except RuntimeError:
-            pass
-
-    def test_incomplete( self ):
-        'Test rendering incompletely.'
-
-        # Expect an error on trying to render a hidden field without a value.
-        f = Form('test-form', StringField('name'))
-        args = {}
-##         p = FormRenderer(f, incomplete=1)
-##         p.render('name')
-# Bring this back when we will have the simple renderer class.
+    def test_fileupload( self ):
+        'FileUpload tests.'
         
-        # Note: we cannot really test the destructor failure, because the
-        # exception is ignored from there, due to its presence in the __del__()
-        # call, and all it does is output a message to stderr.
+        contents = 'FILE CONTENTS'
+        class Obj: pass
+        def crfile():
+            o = Obj()
+            o.file = StringIO.StringIO(contents)
+            return FileUpload(o)
 
-    def test_nonexistent( self ):
-        'Test rendering fields that do not exist.'
+        f = Form('test-form', FileUploadField('myfile', 'My File'))
 
-        # Expect an error on trying to render a hidden field without a value.
-        f = Form('test-form', StringField('name', hidden=1))
-        args = {}
-        p = FormRenderer(f, incomplete=1)
-        try:
-            p.render(only='notexist')
-            assert False
-        except RuntimeError:
-            pass
+        p = FormParser(f, {}, end=1)
+        assert p['myfile'] is None
 
-    def test_encoding( self ):
-        'Test output encoding for text renderer.'
+        p = FormParser(f, {'myfile': crfile()}, end=1)
+        assert isinstance(p['myfile'], FileUpload)
+        assert p['myfile'].read() == contents
 
-        f = Form('test-form',
-                 StringField('name', hidden=1),
-                 action='handle.cgi')
-        args = {'name': u'Mélanie'}
-        r = TextFormRenderer(f, args)
-        assert isinstance(r.render(), unicode)
+        #
+        # Test the SetFile field.
+        #
 
-        r = TextFormRenderer(f, args, output_encoding='latin-1')
-        assert isinstance(r.render(), str)
+        f = Form('test-form', SetFileField('setfile', 'Set File'))
 
+        p = FormParser(f, {}, end=1)
+        assert p['setfile'] is None
 
-    #---------------------------------------------------------------------------
+        p = FormParser(f, {'setfile': crfile()}, end=1)
+        assert isinstance(p['setfile'], FileUpload)
+        assert p['setfile'].read() == contents
 
-    harness = u"""
-<html>
-  <meta>
-    <style type="text/css"/><!--
+        p = FormParser(f, {'setfile_reset': '1'}, end=1)
+        assert p['setfile'] is False
 
-.form-error { color: red; font-size: smaller; }
-
-.form-table { 
-  margin-left: auto;
-  margin-right: auto;
-}
-
-td.form-label {
-  padding-left: 1em;
-  padding-right: 1em;
-  background-color: #F4F4F8;
-}
-
-div#the-form {
-  text-align: center;
-  width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #FAFDFA;
-}
-
---></style>
-  </meta>
-<body>
-<div id="the-form">
-%s
-</div>
-</body>
-</html>
-"""
-    
-    tmpfilename = '/tmp/test.html'
-    
-    def print_render( self, text ):
-        """
-        Renderer supporting the inspection of test HTML output.
-        """
-        f = StringIO.StringIO()
-        f.write(self.harness % text)
-        html = f.getvalue()
-
-        # Print output to stdout.
-        print
-        print html
-        print
-        
-        # Also print output to a file that a browser can point at.
-        file(self.tmpfilename, 'w').write(html.encode('utf-8'))
-
-##         # Open it automatically in the web browser.
-##         webbrowser.open(self.tmpfilename)
-
-    def test_visual( self ):
-        'Visual tests examining the output of the renderer.'
-        
-        f = create_demo_form()
-        values = {'name': u'Martin Blais',
-                  'number': 17,
-                  'description': u"A really nice guy. Guapo."}
-        errors = {'name': u'Idiotic error'}
-
-        p = TextFormRenderer(f, values, errors, incomplete=1)
-        self.print_render(p.render())
-
-#-------------------------------------------------------------------------------
-#
-def create_demo_form():
-    """
-    Create a form for demo/test.
-    """
-    f = Form('test-form',
-         StringField('name', N_("Person's name")),
-         TextAreaField('description', N_("Description"), rows=10, cols=60),
-         DateField('birthday', N_("Birthday")),
-         EmailField('email', N_("Email")),
-         URLField('homepage', N_("Home Page")),
-         IntField('number', N_("Age")),
-         IntField('height', N_("Height")),
-         BoolField('confirm', N_("Are you sure?")),
-         action='handler')
-
-    return f
+        p = FormParser(f, {'setfile': crfile(), 'setfile_reset': '1'}, end=1)
+        assert p['setfile'] is False
 

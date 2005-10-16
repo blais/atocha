@@ -8,7 +8,7 @@ Form fields (widgets) definitions.
 """
 
 # stdlib imports
-import sys, types, re, datetime, StringIO, email.Utils, locale
+import re
 from types import NoneType
 
 # atocha imports.

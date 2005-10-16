@@ -8,7 +8,7 @@
 Description
 ===========
 
-*Atocha* is a Python library for *parsing* and *rendering* data from web forms.
+Atocha is a Python library for *parsing* and *rendering* data from web forms.
 It is framework-agnostic, generic, and it should be possible to use it with CGI
 scrips or to incorporate it in your favourite web application framework
 
@@ -60,8 +60,10 @@ give you a taste for what the library can do for you.
 Some documents:
 
 - `Overview and Tutorial <doc/tutorial.html>`_
+- `Fields Reference List <doc/fields.html>`_
 - `Design Notes <doc/design.html>`_
 - `Data Flow and Data Paths <doc/handpath.html>`_
+- `Developer's Guide <doc/develop.html>`_
 
 
 Features
@@ -90,6 +92,7 @@ Features
 
 - Supports a UI message and status for the re-rendering a form with errors;
 
+- Could easily be extended to support widgets with JavaScript/AJAX code.
 
 Online Demo
 ===========
@@ -108,10 +111,10 @@ demo web pages too.
 Download
 ========
 
-Snapshots of the latest pipexcel source code can be found in the `Download Area
-</downloads/atocha>`_.  If you make any modification to the source, please
-update and run the tests.
+Snapshots of the latest pipexcel source code can be found in the Download_ area.
+If you make any modification to the source, please update and run the tests.
 
+.. _Download: /downloads/atocha
 
 Reporting Bugs
 ==============

@@ -1,0 +1,72 @@
+=============================
+  atocha: Developer's Guide
+=============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-10-16
+:Abstract:
+
+   Notes for developers about procedures for Atocha.
+
+
+Snapshots
+=========
+
+Snapshots of the latest development releases will always be available in the
+download area.
+
+
+Source Code Repository
+======================
+
+I do not have a shared source code repository yet, no time to set one up and it
+would take a lot of time to validate security issues on my server.  Maybe this
+will be available in the future-- if you would really like to have this to
+monitor the latest version, you can help by sending step-by-step instructions on
+how to setup a Subversion server on a Linux machine, and a summary of all the
+potential security issues related to this.  Otherwise I will need to do this
+myself to set this up and I really have very little time.
+
+
+Contributions
+=============
+
+Please send patches to the author, I will be happy to review and include them.
+You **need** to submit an accompanying automated test (at least some minimum).
+
+
+Adding Widgets
+==============
+
+Please be careful with the data, parse and render types that the fields declare,
+read the comments in the Field class, because otherwise you will have difficulty
+integrating new fields in the code.  The codebase is made really anal about
+strict type checking on purpose, and this forces you to really think about all
+the possible cases, which is a good thing.
+
+
+Running Tests
+=============
+
+A suite of automated tests is available in the ``/test/automated`` directory.
+Use ``make`` to run it.  You will need the pydev ``py.test`` program to run the
+tests, or run can add some simple invocation in the script to run them directly.
+
+Implicit Conversions
+--------------------
+
+Implicit ``unicode`` to ``str`` and ``str`` to ``unicode`` conversions are
+disabled on purpose in the automated tests.  This forces you to think about
+where conversion occur and to take appropriate explicit action.
+
+
+Demo Testing
+============
+
+Under ``/test/demo/`` are a set of scripts that are used to interactively test
+the library without the overhead of a framework and isolates the library from
+the effect of other codes.  It uses CGI scripts, and all you have to do to use
+it is to setup an Apache web server (on your development machine) to point to
+the ``/test/demo/cgi-bin`` subdirectory, with ``ExecCGI`` option enabled.  This
+is how I interactively test and isolated version of the fields/widgets.
+

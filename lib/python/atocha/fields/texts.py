@@ -4,7 +4,7 @@
 #
 
 """
-Fields ...
+Text Fields
 """
 
 # stdlib imports
@@ -257,8 +257,8 @@ class PasswordField(StringField):
 #
 class EmailField(StringField):
     """
-    Field for an email address.  The user can enter a full name with <> but the
-    name is automatically thrown away.
+    Field for an email address.  The user can also enter a full name with <> but
+    the name is automatically thrown away.
 
     Encoding is fixed to 'ascii', data is stripped automatically.
     """

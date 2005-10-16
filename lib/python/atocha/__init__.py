@@ -73,6 +73,7 @@ Notes
 
 # atocha imports.
 from form import *
+from field import *
 from fields import *
 from messages import *
 from parse import *

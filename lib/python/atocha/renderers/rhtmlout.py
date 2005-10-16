@@ -8,7 +8,6 @@ Renderer for forms using htmlout.
 """
 
 # stdlib imports.
-import StringIO, codecs, types
 from os.path import join
 
 # atocha imports.
@@ -176,14 +175,16 @@ class HoutFormRenderer(HoutRenderer):
 
     def renderHidden( self, field, rvalue ):
         inputs = []
+        # Use the first variable name.
+        varname = field.varnames[0]
 
         if isinstance(rvalue, unicode):
             inputs.append(
-                INPUT(name=field.name, type="hidden", value=rvalue))
+                INPUT(name=varname, type="hidden", value=rvalue))
         elif isinstance(rvalue, list):
             for rval in rvalue:
                 inputs.append(
-                    INPUT(name=field.name, type="hidden", value=rval))
+                    INPUT(name=varname, type="hidden", value=rval))
         else:
             raise RuntimeError("Error: unexpected type '%s' for rendering." %
                                type(rvalue))
@@ -191,11 +192,15 @@ class HoutFormRenderer(HoutRenderer):
         return inputs
 
 
-    def _input( self, htmltype, field, value, checked=False, label=None ):
+    def _input( self, htmltype, field, value, checked=False, label=None,
+                varname=None ):
         """
         Render an html input.
         """
-        inpu = INPUT(name=field.name, type=htmltype, CLASS=field.css_class)
+        if varname is None:
+            varname = field.varnames[0]
+
+        inpu = INPUT(name=varname, type=htmltype, CLASS=field.css_class)
 
         if value:
             inpu.attrib['value'] = value
@@ -211,13 +216,13 @@ class HoutFormRenderer(HoutRenderer):
         return inpu
 
     def _single( self, htmltype, field, value, errmsg,
-                 checked=False, label=None ):
+                 checked=False, label=None, varname=None ):
         """
         Render a single field.
         Returns a list.
         """
         return self._geterror(errmsg) + \
-               [self._input(htmltype, field, value, checked, label)]
+               [self._input(htmltype, field, value, checked, label, varname)]
 
     def _orient( self, field, inputs ):
         """
@@ -235,7 +240,7 @@ class HoutFormRenderer(HoutRenderer):
         return self._single('text', field, rvalue, errmsg)
 
     def renderTextAreaField( self, field, rvalue, errmsg, required ):
-        text = TEXTAREA(rvalue, name=field.name, CLASS=field.css_class)
+        text = TEXTAREA(rvalue, name=field.varnames[0], CLASS=field.css_class)
         if field.rows:
             text.attrib['rows'] = str(field.rows)
         if field.cols:
@@ -265,6 +270,8 @@ class HoutFormRenderer(HoutRenderer):
         # whether this will get checked or not.
         return self._single('checkbox', field, u'1', errmsg, rvalue)
 
+    renderAgreeField = renderBoolField
+
     def renderRadioField( self, field, rvalue, errmsg, required ):
         assert rvalue is not None
         inputs = []
@@ -279,7 +286,7 @@ class HoutFormRenderer(HoutRenderer):
                      multiple=None, size=None ):
         "Render a SELECT menu. 'rvalue' is expected to be a list of values."
 
-        select = SELECT(name=field.name, CLASS=field.css_class)
+        select = SELECT(name=field.varnames[0], CLASS=field.css_class)
         if size is not None and size > 1:
             select.attrib['size'] = str(field.size)
         if multiple:
@@ -313,17 +320,26 @@ class HoutFormRenderer(HoutRenderer):
     def renderFileUploadField( self, field, rvalue, errmsg, required ):
         return self._single('file', field, rvalue, errmsg)
 
+    def renderSetFileField( self, field, rvalue, errmsg, required ):
+        filew = self._single('file', field, rvalue, errmsg)
+        resetw = self._single('checkbox', field, u'1', errmsg, rvalue,
+                              varname=field.varnames[1])
+        return [filew, _(field.remlabel), resetw]
+
     def _script( self, field, errmsg, script, noscript=None ):
         "Render a script widget."
+        varname = field.varnames[0]
         # Note: setting 'name' on a SCRIPT tag is not standard, but it allows us
         # to render the errors later on.
-        lines = [ SCRIPT(script, name=field.name, CLASS=field.css_class) ]
+        lines = [ SCRIPT(script, name=varname, CLASS=field.css_class) ]
         if noscript:
-            lines.append( NOSCRIPT(noscript, CLASS=field.css_class) )
+            lines.append( NOSCRIPT(noscript, name=varname,
+                                   CLASS=field.css_class) )
         return [self._geterror(errmsg)] + lines
 
     def renderJSDateField( self, field, rvalue, errmsg, required ):
-        fargs = (field.name, rvalue and ", '%s'" % rvalue or '')
+        varname = field.varnames[0]
+        fargs = (varname, rvalue and ", '%s'" % rvalue or '')
         script = (u"DateInput('%s', true, 'YYYYMMDD'%s);"
                   u"hideInputs(this);") % fargs
 
@@ -332,7 +348,7 @@ class HoutFormRenderer(HoutRenderer):
         # possible that we get asked to render something using values that have
         # not been parsed previously (for example, during the automated form
         # parsing errors).
-        noscript = INPUT(name=field.name, value=rvalue or '')
+        noscript = INPUT(name=varname, value=rvalue or '')
 
         return self._script(field, errmsg, script, noscript)
 
@@ -422,6 +438,7 @@ class HoutDisplayRenderer(HoutRenderer):
     renderIntField = _simple
     renderFloatField = _simple
     renderBoolField = _simple
+    renderAgreeField = renderBoolField
     renderRadioField = _simple
     renderMenuField = _simple
     renderCheckboxesField = _simple
@@ -430,6 +447,8 @@ class HoutDisplayRenderer(HoutRenderer):
     def renderFileUploadField( self, field, value, errmsg, required ):
         # Never display a file upload. Don't even try.
         return []
+
+    renderSetFileField = renderFileUploadField
 
     renderJSDateField = _simple
 

@@ -14,38 +14,40 @@
   
 </div>
 
+<div id="download-link"><a href="/downloads/atocha">Download</a></div>
+
 <div class="document" id="atocha-web-forms-library">
 <h1 class="title">atocha: Web Forms Library</h1>
 <div class="contents topic">
 <p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
-<li><a class="reference" href="#description" id="id2" name="id2">Description</a><ul>
-<li><a class="reference" href="#motivation" id="id3" name="id3">Motivation</a></li>
+<li><a class="reference" href="#description" id="id3" name="id3">Description</a><ul>
+<li><a class="reference" href="#motivation" id="id4" name="id4">Motivation</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#documentation" id="id4" name="id4">Documentation</a></li>
-<li><a class="reference" href="#features" id="id5" name="id5">Features</a></li>
-<li><a class="reference" href="#online-demo" id="id6" name="id6">Online Demo</a></li>
-<li><a class="reference" href="#download" id="id7" name="id7">Download</a></li>
-<li><a class="reference" href="#reporting-bugs" id="id8" name="id8">Reporting Bugs</a><ul>
-<li><a class="reference" href="#bugs" id="id9" name="id9">Bugs</a></li>
-<li><a class="reference" href="#support-and-stability" id="id10" name="id10">Support and Stability</a></li>
+<li><a class="reference" href="#documentation" id="id5" name="id5">Documentation</a></li>
+<li><a class="reference" href="#features" id="id6" name="id6">Features</a></li>
+<li><a class="reference" href="#online-demo" id="id7" name="id7">Online Demo</a></li>
+<li><a class="reference" href="#download" id="id8" name="id8">Download</a></li>
+<li><a class="reference" href="#reporting-bugs" id="id9" name="id9">Reporting Bugs</a><ul>
+<li><a class="reference" href="#bugs" id="id10" name="id10">Bugs</a></li>
+<li><a class="reference" href="#support-and-stability" id="id11" name="id11">Support and Stability</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#links" id="id11" name="id11">Links</a></li>
-<li><a class="reference" href="#installation-and-dependencies" id="id12" name="id12">Installation and Dependencies</a></li>
-<li><a class="reference" href="#copyright-and-license" id="id13" name="id13">Copyright and License</a></li>
-<li><a class="reference" href="#acknowledgements" id="id14" name="id14">Acknowledgements</a></li>
-<li><a class="reference" href="#author" id="id15" name="id15">Author</a></li>
+<li><a class="reference" href="#links" id="id12" name="id12">Links</a></li>
+<li><a class="reference" href="#installation-and-dependencies" id="id13" name="id13">Installation and Dependencies</a></li>
+<li><a class="reference" href="#copyright-and-license" id="id14" name="id14">Copyright and License</a></li>
+<li><a class="reference" href="#acknowledgements" id="id15" name="id15">Acknowledgements</a></li>
+<li><a class="reference" href="#author" id="id16" name="id16">Author</a></li>
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id2" id="description" name="description">Description</a></h1>
-<p><em>Atocha</em> is a Python library for <em>parsing</em> and <em>rendering</em> data from web forms.
+<h1><a class="toc-backref" href="#id3" id="description" name="description">Description</a></h1>
+<p>Atocha is a Python library for <em>parsing</em> and <em>rendering</em> data from web forms.
 It is framework-agnostic, generic, and it should be possible to use it with CGI
 scrips or to incorporate it in your favourite web application framework</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id3" id="motivation" name="motivation">Motivation</a></h2>
+<h2><a class="toc-backref" href="#id4" id="motivation" name="motivation">Motivation</a></h2>
 <p>Just before I decided to write this software (2005-09-30), I had the following
 problems:</p>
 <ul class="simple">
@@ -77,19 +79,21 @@ which is often not present in web form parsing toolkits.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id4" id="documentation" name="documentation">Documentation</a></h1>
+<h1><a class="toc-backref" href="#id5" id="documentation" name="documentation">Documentation</a></h1>
 <p>Ultimately, you'll have to delve into the heavily documented code to find out
 about all the gory details, but the simple introduction in this section will
 give you a taste for what the library can do for you.</p>
 <p>Some documents:</p>
 <ul class="simple">
 <li><a class="reference" href="doc/tutorial.html">Overview and Tutorial</a></li>
+<li><a class="reference" href="doc/fields.html">Fields Reference List</a></li>
 <li><a class="reference" href="doc/design.html">Design Notes</a></li>
 <li><a class="reference" href="doc/handpath.html">Data Flow and Data Paths</a></li>
+<li><a class="reference" href="doc/develop.html">Developer's Guide</a></li>
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id5" id="features" name="features">Features</a></h1>
+<h1><a class="toc-backref" href="#id6" id="features" name="features">Features</a></h1>
 <ul class="simple">
 <li><strong>Generic</strong> library that is possible to reused in many frameworks and
 applications.  It is not tied to any storage model or domain model, this
@@ -107,10 +111,11 @@ customized);</li>
 <li>Supports hidden widgets for <strong>multiple-page forms</strong>;</li>
 <li>Supports <strong>per-field errors</strong>, to be rendered next to the erroneous widgets;</li>
 <li>Supports a UI message and status for the re-rendering a form with errors;</li>
+<li>Could easily be extended to support widgets with JavaScript/AJAX code.</li>
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id6" id="online-demo" name="online-demo">Online Demo</a></h1>
+<h1><a class="toc-backref" href="#id7" id="online-demo" name="online-demo">Online Demo</a></h1>
 <p>You can try an online demo of a form with all the available widgets, that was
 implemented using simple CGI scripts.  You can visit the source code from the
 demo web pages too.</p>
@@ -125,27 +130,27 @@ values appearing in the results.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id7" id="download" name="download">Download</a></h1>
-<p>Snapshots of the latest pipexcel source code can be found in the <a class="reference" href="/downloads/atocha">Download Area</a>.  If you make any modification to the source, please
-update and run the tests.</p>
+<h1><a class="toc-backref" href="#id8" id="download" name="download">Download</a></h1>
+<p>Snapshots of the latest pipexcel source code can be found in the <a class="reference" href="/downloads/atocha">Download</a> area.
+If you make any modification to the source, please update and run the tests.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id8" id="reporting-bugs" name="reporting-bugs">Reporting Bugs</a></h1>
+<h1><a class="toc-backref" href="#id9" id="reporting-bugs" name="reporting-bugs">Reporting Bugs</a></h1>
 <div class="section">
-<h2><a class="toc-backref" href="#id9" id="bugs" name="bugs">Bugs</a></h2>
+<h2><a class="toc-backref" href="#id10" id="bugs" name="bugs">Bugs</a></h2>
 <p>If you find bugs, send email to the author: Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;.  I
 share my source code in the hope that other users will provide feedback to
 improve stability.  Contributions are also welcome.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id10" id="support-and-stability" name="support-and-stability">Support and Stability</a></h2>
+<h2><a class="toc-backref" href="#id11" id="support-and-stability" name="support-and-stability">Support and Stability</a></h2>
 <p>I am actively using this library to build a commercial-grade web application and
 will actively improve and support the library.  There is a test suite that runs
 through the basic features of the library.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id11" id="links" name="links">Links</a></h1>
+<h1><a class="toc-backref" href="#id12" id="links" name="links">Links</a></h1>
 <ul>
 <li><p class="first">Another similar project is the FormEncode library (author: Ian Bicking):
 <a class="reference" href="http://formencode.org/">http://formencode.org/</a>.</p>
@@ -172,18 +177,18 @@ the time when I discovered it I had already pretty much finished my library.</p>
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id12" id="installation-and-dependencies" name="installation-and-dependencies">Installation and Dependencies</a></h1>
+<h1><a class="toc-backref" href="#id13" id="installation-and-dependencies" name="installation-and-dependencies">Installation and Dependencies</a></h1>
 <ul class="simple">
 <li>Python &gt;=2.3</li>
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id13" id="copyright-and-license" name="copyright-and-license">Copyright and License</a></h1>
+<h1><a class="toc-backref" href="#id14" id="copyright-and-license" name="copyright-and-license">Copyright and License</a></h1>
 <p>Copyright (C) 2005  Martin Blais.
 This code is distributed under the <a class="reference" href="COPYING">GNU General Public License</a>.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id14" id="acknowledgements" name="acknowledgements">Acknowledgements</a></h1>
+<h1><a class="toc-backref" href="#id15" id="acknowledgements" name="acknowledgements">Acknowledgements</a></h1>
 <p>The Atocha library has evolved a lot from my original use of the form.py file in
 the <a class="reference" href="http://draco.boskant.nl/">draco framework</a> written by Geert Jansen.  I originally copied and
 modified the file quite a bit, and at some point I got really frustrated in my
@@ -192,7 +197,7 @@ whole thing completely, with a particular emphasis on identifying and checking
 the types which flow throughout the life of a request.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id15" id="author" name="author">Author</a></h1>
+<h1><a class="toc-backref" href="#id16" id="author" name="author">Author</a></h1>
 <p>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</p>
 </div>
 </div>

@@ -226,14 +226,16 @@ class TextFormRenderer(TextRenderer):
 
     def renderHidden( self, field, rvalue ):
         inputs = []
+        # Use the first variable name.
+        varname = field.varnames[0]
 
         if isinstance(rvalue, unicode):
             inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                          (field.name.decode('ascii'), rvalue))
+                          (varname.decode('ascii'), rvalue))
         elif isinstance(rvalue, list):
             for rval in rvalue:
                 inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                              (field.name.decode('ascii'), rval))
+                              (varname.decode('ascii'), rval))
         else:
             raise RuntimeError("Error: unexpected type '%s' for rendering." %
                                type(rvalue))
@@ -241,11 +243,15 @@ class TextFormRenderer(TextRenderer):
         return u'\n'.join(inputs)
 
 
-    def _input( self, htmltype, field, value, checked=False, label=None ):
+    def _input( self, htmltype, field, value, checked=False, label=None,
+                varname=None ):
         """
         Render an html input.
         """
-        opts = [('name', field.name),
+        if varname is None:
+            varname = field.varnames[0]
+
+        opts = [('name', varname),
                 ('type', htmltype),
                 ('class', field.css_class),]
         if checked:
@@ -265,12 +271,12 @@ class TextFormRenderer(TextRenderer):
         return o
 
     def _single( self, htmltype, field, value, errmsg,
-                 checked=False, label=None ):
+                 checked=False, label=None, varname=None ):
         """
         Render a single field.
         """
         return self._geterror(errmsg) + \
-               self._input(htmltype, field, value, checked, label)
+               self._input(htmltype, field, value, checked, label, varname)
 
     def _orient( self, field, inputs ):
         """
@@ -294,7 +300,7 @@ class TextFormRenderer(TextRenderer):
         colstr = field.cols and u' cols="%d"' % field.cols or u''
         return (self._geterror(errmsg) +
                 u'<textarea name="%s" %s %s class="%s">%s</textarea>' %
-                (field.name.decode('ascii'), rowstr, colstr,
+                (field.varnames[0].decode('ascii'), rowstr, colstr,
                  field.css_class.decode('ascii'), rvalue or u''))
 
     def renderPasswordField( self, field, rvalue, errmsg, required ):
@@ -320,6 +326,8 @@ class TextFormRenderer(TextRenderer):
         # whether this will get checked or not.
         return self._single('checkbox', field, u'1', errmsg, rvalue)
 
+    renderAgreeField = renderBoolField
+
     def renderRadioField( self, field, rvalue, errmsg, required ):
         assert rvalue is not None
         inputs = []
@@ -343,7 +351,7 @@ class TextFormRenderer(TextRenderer):
         lines = []
         lines.append(
             u'<select name="%s" %s class="%s">' %
-            (field.name, ' '.join(selopts), field.css_class))
+            (field.varnames[0], ' '.join(selopts), field.css_class))
         for vname, label in field.values:
             selstr = u''
             if vname in rvalue:
@@ -374,23 +382,31 @@ class TextFormRenderer(TextRenderer):
     def renderFileUploadField( self, field, rvalue, errmsg, required ):
         return self._single('file', field, rvalue, errmsg)
 
+    def renderSetFileField( self, field, rvalue, errmsg, required ):
+        filew = self._single('file', field, rvalue, errmsg)
+        resetw = self._single('checkbox', field, u'1', errmsg, rvalue,
+                              varname=field.varnames[1])
+        return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
+                
     def _script( self, field, errmsg, script, noscript=None ):
         "Render a script widget."
+        varname = field.varnames[0]
         # Note: setting 'name' on a SCRIPT tag is not standard, but it allows us
         # to render the errors later on.
         lines = [
-            u'<script name="%s" class="%s">' % (field.name, field.css_class),
+            u'<script name="%s" class="%s">' % (varname, field.css_class),
             script,
             u'</script>']
         if noscript:
             lines.extend([
-                u'<noscript class="%s">' % field.css_class,
+                u'<noscript name="%s" class="%s">' % (varname, field.css_class),
                 noscript,
                 u'</noscript>'])
         return self._geterror(errmsg) + u'\n'.join(lines)
 
     def renderJSDateField( self, field, rvalue, errmsg, required ):
-        fargs = (field.name, rvalue and ", '%s'" % rvalue or '')
+        varname = field.varnames[0]
+        fargs = (varname, rvalue and ", '%s'" % rvalue or '')
         script = (u"DateInput('%s', true, 'YYYYMMDD' %s);"
                   u"hideInputs(this);") % fargs
 
@@ -400,7 +416,7 @@ class TextFormRenderer(TextRenderer):
         # not been parsed previously (for example, during the automated form
         # parsing errors).
         noscript = (u'<input name="%s" value="%s"/>' %
-                    (field.name, rvalue or ''))
+                    (varname, rvalue or ''))
 
         return self._script(field, errmsg, script, noscript)
 
@@ -509,6 +525,7 @@ class TextDisplayRenderer(TextRenderer):
     renderIntField = _simple
     renderFloatField = _simple
     renderBoolField = _simple
+    renderAgreeField = renderBoolField
     renderRadioField = _simple
     renderMenuField = _simple
     renderCheckboxesField = _simple
@@ -517,5 +534,7 @@ class TextDisplayRenderer(TextRenderer):
     def renderFileUploadField( self, field, value, errmsg, required ):
         # Never display a file upload. Don't even try.
         return u''
+
+    renderSetFileField = renderFileUploadField
 
     renderJSDateField = _simple

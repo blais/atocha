@@ -4,7 +4,7 @@
 #
 
 """
-Fields ...
+Single or Multiple Choice Fields
 """
 
 # stdlib imports
@@ -29,20 +29,20 @@ class _MultipleField(Field):
     to labels.  This is a base class for radio buttons, lists of checkboxes and
     menus.
 
-    The values are ascii str's only, they cannot be unicode (this is a
-    limitation we impose ourselves, as a recognition that the values are to be
+    The choices are ascii str's only, they cannot be unicode (this is a
+    limitation we impose ourselves, as a recognition that the choices are to be
     used internally only, and not as user-visible strings).  However, if the
-    values are integers, they will be automatically converted to strings, so
-    that values are always strings.
+    choices are integers, they will be automatically converted to strings, so
+    that choices are always strings.
 
-    One issue with the choices fields is that the set of valid values may be
+    One issue with the choices fields is that the set of valid choices may be
     generated dynamically, and therefore sometimes we need to be able to create
-    the field at a moment where we do not know in advance what the values will
+    the field at a moment where we do not know in advance what the choices will
     be.  If this is the case:
 
-    - for rendering: we set the values on the field right before rendering it.
+    - for rendering: we set the choices on the field right before rendering it.
 
-    - for parsing: the field has an option to avoid checking against values set
+    - for parsing: the field has an option to avoid checking against choices set
       on it.  You can set that field and then do some manual checking using the
       protocol provided by the form parser.
 
@@ -52,113 +52,113 @@ class _MultipleField(Field):
     types_parse = (NoneType, list,)
     types_render = (list,)
 
-    def __init__( self, name, values,
+    def __init__( self, name, choices,
                   label=None, hidden=None, initial=None, nocheck=None ):
         """
         :Arguments:
 
-        - 'values': See setvalues() for full description.
+        - 'choices': See setchoices() for full description.
 
         - 'nocheck' -> bool: Set this to True if you want to prevent the parser
-          from cross-checking against the values set in the instance of this
-          field.
+          from cross-checking the values against the choices set in the instance
+          of this field.
 
         """
         Field.__init__(self, name, label, hidden, initial)
 
         self.nocheck = nocheck
-        """When parsing, do not perform checks specific to the values set on
-        against the received values. This is useful if the set of values for
+        """When parsing, do not perform checks specific to the choices set on
+        against the received values. This is useful if the set of choices for
         this field is generated dynamically and you will do your validation by
         hand.  Another thing that can be done is to not use this but to call
-        setvalue() before running the parser on the arguments, if in the
-        handler you know which values are possibly valid and would like to use
+        setchoice() before running the parser on the arguments, if in the
+        handler you know which choices are possibly valid and would like to use
         the parsing code provided in this field."""
 
-        self.values = None
-        "(Internal use only.) List of the possible values for this field"
+        self.choices = None
+        "(Internal use only.) List of the possible choices for this field"
 
-        self.valueset = None
-        """(Internal use only.) Set of the possible values for this field,
+        self.choiceset = None
+        """(Internal use only.) Set of the possible choices for this field,
         maintainde for fast lookup only."""
 
-        # Set the initial values for this field.
-        self.setvalues(values)
+        # Set the initial choices for this field.
+        self.setchoices(choices)
 
 
-    def setvalues( self, values ):
+    def setchoices( self, choices ):
         """
-        Set the values that this field renders and parses.  'values' is of the
+        Set the choices that this field renders and parses.  'choices' is of the
         same types as described in the constructor.
 
         :Arguments:
 
-        - 'values' -> list or tuple of str or (str, unicode) value-label pairs:
-          the ordered values, to be rendered and checked against when parsing.
-          This is not a mapping because order is important for rendering.  If
-          the elements of the list are pairs, the label is used for the
-          user-visible strings to be used when rendering the widget.
+        - 'choices' -> list or tuple of str or (str, unicode) choice-label
+          pairs:  the ordered choices, to be rendered and checked against when
+          parsing.  This is not a mapping because order is important for
+          rendering.  If the elements of the list are pairs, the label is used
+          for the user-visible strings to be used when rendering the widget.
 
-          Note that we also accept integers for values instead of ascii
+          Note that we also accept integers for choices instead of ascii
           strings, but these will be automatically converted to strings.
 
         """
-        self.valueset = {}
-        self.values = []
+        self.choiceset = {}
+        self.choices = []
 
-        # Accumulator for the normalized values.
-        normvalues = []
+        # Accumulator for the normalized choices.
+        normchoices = []
 
-        if values is None:
+        if choices is None:
             return
         else:
-            assert isinstance(values, (list, tuple))
+            assert isinstance(choices, (list, tuple))
 
-            # Normalize all the values into pairs.
-            for el in values:
+            # Normalize all the choices into pairs.
+            for el in choices:
 
-                value = label = None
+                choice = label = None
 
-                # Accept simple values.
+                # Accept simple choices.
                 if isinstance(el, (int, str)):
-                    value = el
+                    choice = el
 
-                # And of course, a value-label pair.
+                # And of course, a choice-label pair.
                 elif isinstance(el, tuple):
                     assert len(el) == 2
-                    value, label = el
+                    choice, label = el
 
                 else:
                     raise RuntimeError(
-                        "Error: wrong type of value in initializer element: %s."
+                        "Error: wrong type of choice in initializer element: %s."
                         % type(el))
 
-                # Convert integer value into string if necessary.
-                if isinstance(value, int):
-                    value = str(value)
+                # Convert integer choice into string if necessary.
+                if isinstance(choice, int):
+                    choice = str(choice)
 
-                # If the label is not set, it takes the same value as the label
+                # If the label is not set, it takes the same choice as the label
                 # (convert to unicode from ascii).
                 if label is None:
-                    label = value.decode('ascii')
+                    label = choice.decode('ascii')
                 else:
                     # Other we check to make sure that the label is of type
                     # msg_type, which is the required type for all the
-                    # user-visible values.
+                    # user-visible choices.
                     assert isinstance(label, msg_type)
 
                 # Just more zealous sanity checking.
-                assert isinstance(value, str)
+                assert isinstance(choice, str)
 
                 # We add the new pair to our internal, normalized set of
-                # values.
-                self.values.append( (value, label) )
-                self.valueset[value] = label
+                # choices.
+                self.choices.append( (choice, label) )
+                self.choiceset[choice] = label
 
 
     def checkvalues( self, values ):
         """
-        Cross-check values agains the set of possible values for this field.
+        Cross-check values agains the set of possible choices for this field.
         The 'nocheck' option is processed here internally, so you can just call
         this method in the derived classes. 'values' must be a list or tuple of
         value strings to be checked.
@@ -172,10 +172,10 @@ class _MultipleField(Field):
         for value in values:
             assert isinstance(value, str)
 
-            if value not in self.valueset:
+            if value not in self.choiceset:
                 # Note: this could be an internal error.
                 raise RuntimeError("Error: internal error checking values "
-                                   "in a multiple field.")
+                                   "against choices in a multiple field.")
 
 #-------------------------------------------------------------------------------
 #
@@ -189,17 +189,17 @@ class _OneChoiceField(_MultipleField):
     types_parse = (NoneType, unicode, list)
     types_render = (str,)
 
-    def __init__( self, name, values,
+    def __init__( self, name, choices,
                   label=None, hidden=None, initial=None, nocheck=None ):
 
         # Check the type of initial, which must be one of the types accepted
-        # for values.
+        # for choices.
         if isinstance(initial, int):
             initial = str(initial)
         assert isinstance(initial, (NoneType,) + _OneChoiceField.types_data)
 
         # Initialize base classes, always set as required.
-        _MultipleField.__init__(self, name, values, label, hidden,
+        _MultipleField.__init__(self, name, choices, label, hidden,
                                 initial, nocheck)
 
     def parse_value( self, pvalue ):
@@ -237,8 +237,8 @@ class _OneChoiceField(_MultipleField):
 
     def render_value( self, dvalue ):
         if dvalue is None:
-            if self.values:
-                return self.values[0][0]
+            if self.choices:
+                return self.choices[0][0]
             else:
                 # Not sure what to do if there are not field values.
                 raise RuntimeError("Error: single selection field without "
@@ -250,7 +250,7 @@ class _OneChoiceField(_MultipleField):
 
     def display_value( self, dvalue ):
         # Translate the label of the value before returning it.
-        return _(self.valueset[dvalue])
+        return _(self.choiceset[dvalue])
 
 
 #-------------------------------------------------------------------------------
@@ -262,10 +262,10 @@ class RadioField(_OneChoiceField, Orientable):
     """
     css_class = 'radio'
 
-    def __init__( self, name, values,
+    def __init__( self, name, choices,
                   label=None, hidden=None, initial=None,
                   nocheck=None, orient=ORI_VERTICAL ):
-        _OneChoiceField.__init__(self, name, values, label, hidden,
+        _OneChoiceField.__init__(self, name, choices, label, hidden,
                                  initial, nocheck)
         Orientable.__init__(self, orient)
 
@@ -278,9 +278,9 @@ class MenuField(_OneChoiceField):
     """
     css_class = 'menu'
 
-    def __init__( self, name, values, label=None, hidden=None,
+    def __init__( self, name, choices, label=None, hidden=None,
                   initial=None, nocheck=None ):
-        _OneChoiceField.__init__(self, name, values, label, hidden,
+        _OneChoiceField.__init__(self, name, choices, label, hidden,
                                  initial, nocheck)
 
 
@@ -294,11 +294,11 @@ class _ManyChoicesField(_MultipleField):
     types_parse = (NoneType, unicode, list)
     types_render = (list,)
 
-    def __init__( self, name, values, label=None, hidden=None,
+    def __init__( self, name, choices, label=None, hidden=None,
                   initial=None, nocheck=None ):
 
         # Check the type of initial, which must be one of the types accepted for
-        # values.
+        # choices.
         if isinstance(initial, int):
             initial = str(initial)
         elif isinstance(initial, (list, tuple)):
@@ -313,7 +313,7 @@ class _ManyChoicesField(_MultipleField):
         assert isinstance(initial, (NoneType,) + _ManyChoicesField.types_data)
 
         # Initialize base classes, always set as required.
-        _MultipleField.__init__(self, name, values, label, hidden,
+        _MultipleField.__init__(self, name, choices, label, hidden,
                                 initial, nocheck)
 
     def parse_value( self, pvalue ):
@@ -353,7 +353,7 @@ class _ManyChoicesField(_MultipleField):
     def display_value( self, dvalue ):
         # Get labels and join them.
         # Note: Translate the labels of the value before returning it.
-        labels = [_(self.valueset[x]) for x in dvalue]
+        labels = [_(self.choiceset[x]) for x in dvalue]
         return u', '.join(labels)
 
 
@@ -366,11 +366,11 @@ class CheckboxesField(_ManyChoicesField, Orientable):
     """
     css_class = 'checkboxes'
 
-    def __init__( self, name, values,
+    def __init__( self, name, choices,
                   label=None, hidden=None, initial=None,
                   nocheck=None, orient=ORI_VERTICAL ):
 
-        _ManyChoicesField.__init__(self, name, values, label, hidden,
+        _ManyChoicesField.__init__(self, name, choices, label, hidden,
                                    initial, nocheck)
         Orientable.__init__(self, orient)
 
@@ -379,7 +379,7 @@ class CheckboxesField(_ManyChoicesField, Orientable):
 class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
     """
     A listbox higher than one entry.  Either ''zero or one'' choices, OR ''zero
-      or many'' choices can be made, thus, a listbox can be in one of two modes:
+    or many'' choices can be made, thus, a listbox can be in one of two modes:
 
     - SINGLE mode: it allows zero or one choices, returns a str or None;
     - MULTIPLE mode: it allows zero, one or many choices, returns a list;
@@ -398,7 +398,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
 
     __default_size = 5
 
-    def __init__( self, name, values, label=None, hidden=None, initial=None,
+    def __init__( self, name, choices, label=None, hidden=None, initial=None,
                   required=None, nocheck=None, multiple=False, size=None ):
         """
         :Arguments:
@@ -413,7 +413,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
 
         - 'size' -> int: the height/number of visible elements of the listbox.
           By default, if left unset, it will use a reasonable minimum or the
-          number of values if very small.
+          number of choices if very small.
 
         """
         assert isinstance(multiple, (bool, int))
@@ -421,10 +421,10 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
         "Whether the listbox allows more than a maximum of one choice."
 
         if multiple:
-            _ManyChoicesField.__init__(self, name, values, label, hidden,
+            _ManyChoicesField.__init__(self, name, choices, label, hidden,
                                        initial, nocheck)
         else:
-            _OneChoiceField.__init__(self, name, values, label, hidden,
+            _OneChoiceField.__init__(self, name, choices, label, hidden,
                                      initial, nocheck)
         OptRequired.__init__(self, required)
 
@@ -433,8 +433,8 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
 
         # Set a more sensible default if it was not set.
         if size is None:
-            if values:
-                self.size = min(len(values), self.__default_size)
+            if choices:
+                self.size = min(len(choices), self.__default_size)
             else:
                 self.size = self.__default_size
 
@@ -462,3 +462,4 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
             if dvalue is None:
                 return u''
             return _OneChoiceField.display_value(self, dvalue)
+
