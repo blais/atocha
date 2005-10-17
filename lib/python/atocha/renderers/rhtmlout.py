@@ -94,6 +94,7 @@ class HoutFormRenderer(HoutRenderer):
 
     # CSS classes.
     css_input = u'atoinput'
+    css_submit = u'atosubmit'
     css_required = u'atorequired'
     css_vertical = u'atominitable'
     
@@ -150,11 +151,13 @@ class HoutFormRenderer(HoutRenderer):
     def do_render_submit( self, submit, reset ):
         nodes = []
         if isinstance(submit, msg_type):
-            nodes.append(INPUT(type='submit', value=_(submit)))
+            nodes.append(INPUT(type='submit', value=_(submit),
+                               CLASS=self.css_submit))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
-                nodes.append(INPUT(type='submit', name=name, value=_(value)))
+                nodes.append(INPUT(type='submit', name=name,
+                                   value=_(value), CLASS=self.css_submit))
         if reset:
             nodes.append(INPUT(type='reset', value=_(reset)))
         return nodes

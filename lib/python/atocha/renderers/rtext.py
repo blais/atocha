@@ -112,6 +112,7 @@ class TextFormRenderer(TextRenderer):
 
     # CSS classes.
     css_input = u'atoinput'
+    css_submit = u'atosubmit'
     css_required = u'atorequired'
     css_vertical = u'atominitable'
 
@@ -194,12 +195,14 @@ class TextFormRenderer(TextRenderer):
         f = self.ofile or self._create_buffer()
 
         if isinstance(submit, msg_type):
-            f.write(u'<input type="submit" value="%s" />\n' % _(submit))
+            f.write(u'<input type="submit" value="%s" class="%s" />\n' %
+                    (_(submit), self.css_submit))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
-                f.write(u'<input type="submit" name="%s" value="%s" />\n' %
-                        (name, _(value)))
+                f.write((u'<input type="submit" name="%s" '
+                         u'value="%s" class="%s" />\n') %
+                        (name, _(value), self.css_submit))
 
         if reset:
             f.write(u'<input type="reset" value="%s" />\n' % _(reset))
