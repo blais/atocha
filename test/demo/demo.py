@@ -194,7 +194,7 @@ template_post = """
 
 <center>
 <div id="source">
-<a href="atochademo.txt" class="button">View Source Code</a>
+<a href="demo.txt" class="button">View Source Code</a>
 </div>
 </center>
 
