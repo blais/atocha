@@ -1,0 +1,50 @@
+j=================================================
+   atocha: Interactive Demo and Test Framework
+=================================================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-10-17
+:Abstract:
+
+   Description of demo files and organization.
+
+Introduction
+============
+
+This directory contains the demo code for a few backends.  This demo code is the
+same that is linked from the web page.  It can also be used to test new features
+and widgets.  It contains a form that shows-off most of the widgets that come
+with Atocha, and their corresponding error handling.
+
+Handlers
+========
+
+Essentially, the demo consists in four handlers and manipulate a dictionary of
+varied data:
+
+- display: displays the stored data, you cannot edit it;
+- query: renders a form to edit the data;
+- handle: handlers the form submit and sets the new data;
+- reset: resets the data store.
+
+Most of the source code resides in demo.py.  Each backend contains its specific
+setup code and then calls the handlers in demo.py.
+
+
+Backends
+========
+
+CGI
+---
+
+The CGI handlers can be found under the cgi-bin directory.  Just point your web
+server config to serve that directory with ExecCGI option enabled and you should
+be able to access the scripts.
+
+
+mod_python
+----------
+
+A simple mod_python example handler is available under the modpython directory.
+You need to configure your Apache server with the suggested config.
+

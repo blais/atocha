@@ -1,0 +1,13 @@
+=============================
+   atocha: Automated Tests
+=============================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-10-17
+:Abstract:
+
+   Description of automated tests.
+
+
+You will need py.test to be able to run the automated tests. 
+Just setenv PYTEST to point to your py.test executable and run "make".
