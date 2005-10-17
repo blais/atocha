@@ -5,29 +5,23 @@
 #
 
 """
-Common definitions for CGI tests.
+Common definitions for demo and interactive tests.
 
 You might define something similar for your own environment.
 """
 
 # stdlib imports.
-import sys
+import sys, os, StringIO, base64, shelve
 from os.path import *
-projects_root = dirname(dirname(dirname(dirname(dirname(sys.argv[0])))))
-import os, StringIO, base64, shelve
 
 # htmlout imports.
-sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
 try:
-    import htmlout
     from htmlout import *
 except ImportError:
     pass # We won't be able to test the htmlout renderers.
 
 # atocha imports.
-sys.path.append(join(projects_root, 'atocha', 'lib', 'python'))
 from atocha import *
-from atocha.norms.ncgi import CGINormalizer
 
 
 #-------------------------------------------------------------------------------
@@ -126,57 +120,13 @@ form1 = Form(
 ##     # Agree checkbox.
 ##     AgreeField('terms', N_("Agree to Terms"),),
 
-    action='handle.cgi', reset=1)
-
-
-#===============================================================================
-# Parser setup.
-#
-# Here we define a function that will get used by the FormParser class whenever
-# it needs to perform a redirect. Form data, errors and message are meant to be
-# passed to the routine where we're redirecting to.
-#
-# This needs only be setup once for the whole application, and is necessary to
-# insure that Atocha not make assumptions about your web application framework.
-# If you don't define the redirection mechanism, you can check the return value
-# of FormParser.end() and do the redirect by hand, but you need to be careful
-# not to forget to check everytimeq if you do that.
-#===============================================================================
-
-#-------------------------------------------------------------------------------
-#
-def setup_cgi():
-    """
-    Setup for CGI scripts.
-    """
-    def do_redirect( url, form, status, message, values, errors ):
-        # Store form data for later retrieval in session data.
-        db = getdb()
-        db['session-%s' % form1.name] = values, errors, message
-
-        print 'Location: %s' % url
-        print
-        print '302 Errors in user input.'
-        sys.exit(0)
-
-    # Setup automatic redirection mechanism.
-    FormParser.redirect_func = staticmethod(do_redirect)
-
-    # Setup normalizer for CGI scripts using Python's cgi module.
-    FormParser.normalizer = CGINormalizer()
-
-    # Setup form renderer for rendering scripts.
-    TextFormRenderer.scriptsdir = 'scripts'
-    if 'htmlout' in globals():
-        HoutFormRenderer.scriptsdir = 'scripts'
-
-
+    action='handle', reset=1)
 
 
 #-------------------------------------------------------------------------------
 # HTML page templates for our test scripts
 
-template_pre = """Content-type: text/html
+template_pre = """
 
 <html>
   <meta>
@@ -197,7 +147,6 @@ template_pre = """Content-type: text/html
 
 """
 
-sourcelink = join('%s.txt' % splitext(basename(sys.argv[0]))[0])
 template_post = """
 </div>
 
@@ -232,14 +181,15 @@ def getdb():
 # HANDLERS
 #===============================================================================
 
-db = getdb()
+ext = None
 
 #-------------------------------------------------------------------------------
 #
 def handler_query():
     """
-    CGI handler for rendering a query form to allow the user to enter input.
+    Handler for rendering a query form to allow the user to enter input.
     """
+    db = getdb()
 
     # Get old form data to fill the initial values of the form.
     # Fetch the real data.
@@ -256,28 +206,35 @@ def handler_query():
         if sessvalues:
             values.update(sessvalues)
 
+    db.close()
+
     # Create a form renderert to render the form..
     if rtype == 'text':
         r = TextFormRenderer(form1, values, errors,
                              output_encoding='latin-1')
-        rendered = r.render(action='handle.cgi')
+        rendered = r.render(action='handle' + ext)
         scripts = r.render_scripts()
     else:
         from htmlout import tostring
         r = HoutFormRenderer(form1, values, errors)
-        rendered = tostring(r.render(action='handle.cgi'), encoding='latin-1')
+        rendered = tostring(r.render(action='handle' + ext), encoding='latin-1')
         scripts = [tostring(x, encoding='latin-1') for x in r.render_scripts()]
         scripts = '\n'.join(scripts)
 
     # Render the page (see template in other module).
-    uimsg = message and '<div id="message">%s</div>' % message or ''
-    sys.stdout.write(template_pre % {'title': 'Form Render and Handling',
-                                     'uimsg': uimsg,
-                                     'scripts': scripts})
+    s = StringIO.StringIO()
+    uimsg = ''
+    if message:
+        uimsg = '<div id="message">%s</div>' % message.encode('latin-1')
+    s.write(template_pre % {'title': 'Form Render and Handling',
+                            'uimsg': uimsg,
+                            'scripts': scripts})
 
     # Here, we use the form render:
-    sys.stdout.write(rendered)
-    sys.stdout.write(template_post)
+    s.write(rendered)
+    s.write(template_post)
+
+    return s.getvalue()
 
 #-------------------------------------------------------------------------------
 #
@@ -285,8 +242,9 @@ def handler_handle( args, url ):
     """
     Handler for form submission.
     """
+    db = getdb()
     
-    p = FormParser(form1, args, 'query.cgi')
+    p = FormParser(form1, args, 'query' + ext)
     
     if 'merengue' in (p['dances'] or []):
         repldances = list(p['dances'])
@@ -310,6 +268,7 @@ def handler_handle( args, url ):
         db['photofn-%s' % form1.name] = p['photo'].filename
     
     db['data-%s' % form1.name] = values
+    db.close()
     
     return handler_display()
     
@@ -320,10 +279,13 @@ def handler_display():
     Render page for final accepted displayed data.
     Render with display renderer, with a text rendition at the bottom.
     """
+    db = getdb()
+
     # Get data from database.
     values = db.get('data-%s' % form1.name, {})
     photo = db.get('photo-%s' % form1.name, None)
     photofn = db.get('photofn-%s' % form1.name, '')
+    db.close()
 
     # Create display renderer to display the data.
     if rtype == 'text':
@@ -332,7 +294,7 @@ def handler_display():
                                 output_encoding='latin-1')
         contents = r.render()
 
-        if photo:
+        if photo and 'photo' in form1.names():
             contents += r.table(
                 [(_(form1['photo'].label),
                   u'<img src="data:image/jpg;base64,%s"<br/>%s' %
@@ -343,7 +305,7 @@ def handler_display():
         form = r.render()
         contents = tostring(form, encoding='latin-1')
 
-        if photo:
+        if photo and 'photo' in form1.names():
             htmlphoto = [
                 IMG(src="data:image/jpg;base64,%s" % base64.b64encode(photo)),
                 BR(), photofn or u'']
@@ -351,9 +313,14 @@ def handler_display():
                                  encoding='latin-1')
 
     s = StringIO.StringIO()
+    s.write(template_pre % {'title': 'Form Display',
+                            'uimsg': '',
+                            'scripts': ''})
+
+    s.write(contents)
     print >> s, '<div id="buttons">'
-    print >> s, '<a href="query.cgi" id="edit" class="button">EDIT VALUES</a>'
-    print >> s, '<a href="reset.cgi" id="edit" class="button">RESET</a>'
+    print >> s, '<a href="query%s" id="edit" class="button">EDIT VALUES</a>' % ext
+    print >> s, '<a href="reset%s" id="edit" class="button">RESET</a>' % ext
     print >> s, '</div>'
 
     print >> s, '</div>'
@@ -363,14 +330,10 @@ def handler_display():
     for name, value in values.iteritems():
         print >> s, '%s: %s' % (name, repr(value))
     print >> s, '</pre>'
-    contents += s.getvalue()
 
-    # Set form data for edit.
-    sys.stdout.write(template_pre % {'title': 'Form Display',
-                                     'uimsg': '',
-                                     'scripts': ''})
-    sys.stdout.write(contents)
-    sys.stdout.write(template_post)
+    s.write(template_post)
+
+    return s.getvalue()
 
 
 #-------------------------------------------------------------------------------
@@ -379,6 +342,7 @@ def handler_reset():
     """
     Handler that resets the form data stored in the local DB.
     """
+    db = getdb()
 
     # Set form data for edit.
     for n in 'data', 'photo', 'photofn', 'session':
@@ -386,7 +350,22 @@ def handler_reset():
             del db['%s-%s' % (n, form1.name)]
         except Exception:
             pass
+    db.close()
 
-    handler_display()
+    return handler_display()
 
+
+
+
+#===============================================================================
+# TEST FORM OVERRIDE
+#===============================================================================
+
+## form1 = Form(
+##     'test-form',
+##     # Normal unicode string.
+##     StringField('name', N_("Person's name")),
+##     # Ascii string.
+##     StringField('postal', N_("Postal code"), encoding='ascii'),
+##     action='handle', reset=1)
 

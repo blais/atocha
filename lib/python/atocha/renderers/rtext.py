@@ -155,7 +155,7 @@ class TextFormRenderer(TextRenderer):
         # Other options.
         opts = [('id', form.name),
                 ('name', form.name),
-                ('action', form.action),
+                ('action', action),
                 ('method', form.method),]
         if form.accept_charset is not None:
             opts.append(('accept-charset', form.accept_charset))

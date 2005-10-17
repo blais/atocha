@@ -9,8 +9,10 @@ CGI forwarder script for display.
 
 # stdlib imports
 import sys, cgi, cgitb; cgitb.enable()
-sys.path.append('..')
-from demo import *
+import setup_cgi
 
-setup_cgi()
-handler_display()
+from demo import *
+r = handler_display()
+print 'Content-type: text/html\n\n'
+print r
+

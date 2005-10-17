@@ -9,8 +9,9 @@ CGI forwarder script for query.
 
 # stdlib imports
 import sys, cgi, cgitb; cgitb.enable()
-sys.path.append('..')
-from demo import *
+import setup_cgi
 
-setup_cgi()
-handler_reset()
+from demo import *
+r = handler_reset()
+print 'Content-type: text/html\n\n'
+print r
