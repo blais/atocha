@@ -54,6 +54,6 @@ FormParser.redirect_func = staticmethod(do_redirect)
 FormParser.normalizer = CGINormalizer()
 
 # Setup form renderer for rendering scripts.
-TextFormRenderer.scriptsdir = 'scripts'
+TextFormRenderer.scriptsdir = 'resources/scripts'
 if 'htmlout' in globals():
-    HoutFormRenderer.scriptsdir = 'scripts'
+    HoutFormRenderer.scriptsdir = 'resources/scripts'

@@ -130,7 +130,7 @@ template_pre = """
 
 <html>
   <meta>
-    <link href="style.css" rel="stylesheet" type="text/css"/>
+    <link href="resources/style.css" rel="stylesheet" type="text/css"/>
     %(scripts)s
   </meta>
 <body>

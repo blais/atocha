@@ -53,11 +53,11 @@ def setup_mp( demo_root ):
     FormParser.normalizer = ModPythonNormalizer()
 
     # Setup form renderer for rendering scripts.
-    TextFormRenderer.scriptsdir = 'scripts'
+    TextFormRenderer.scriptsdir = 'resources/scripts'
     try:
         import htmlout
         from atocha import HoutFormRenderer
-        HoutFormRenderer.scriptsdir = 'scripts'
+        HoutFormRenderer.scriptsdir = 'resources/scripts'
     except ImportError:
         pass
 
@@ -97,10 +97,6 @@ def handler( mpreq ):
 
         elif relpath == '/reset':
             out = demo.handler_reset()
-
-        elif relpath == '/style.css':
-            mpreq.content_type = 'text/css'
-            out = file(join(demo_root, 'style.css'), 'r').read()
 
         else:
             out = ''
