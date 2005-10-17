@@ -243,6 +243,7 @@ class Form:
         if only is None:
             fields = self._fields
         else:
+            assert isinstance(only, (list, tuple))
             try:
                 fields = [self._fieldsmap[x] for x in only]
             except KeyError, e:
@@ -251,6 +252,8 @@ class Form:
 
         # Remove fields to be ignored.
         if ignore is not None:
+            assert isinstance(ignore, (list, tuple))
+
             # Note: we're making sure that all the fields specified to be
             # ignored are actually found in the list of fields, by tracking them
             # with a dict.

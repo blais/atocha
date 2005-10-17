@@ -2,23 +2,14 @@
   atocha: TODO
 ================
 
-- Convert all my codebase to Atocha.
+Current Affairs
+===============
 
-- Create a mod_python normalizer, and one for draco (my framework).
-
-
-
+(None)
 
 
-
-
-
-
-
-
-
-Future New Field Types
-======================
+Future New Field Types Ideas
+============================
 
 - Complete the SetFileField with some JavaScript to hide the file input field
   when the reset button is checked.
@@ -42,25 +33,15 @@ Future New Field Types
   user has to copy the files anyway, so it might be ok to assume he might edit
   the scripts somewhat.
 
-- General purpose buttons that would be a form in themselves... we need to
-  provide some mechanism for easily rendering those rather than to have to
-  define an empty form.
 
 
 Ideas
 =====
 
-- Document the types_* where a list is present.  Type assertions should use a
-  debugging function that can be noop'ed and that recurses into the lists for
-  better type checking and that can be noop'ed for efficiency.  Find a way to do
-  that.
-
-- Could our system support fields which have more than one varname?  I think so.
-  Would that be useful?  If it does, look into doing this, creating fields which
-  are comprised of multiple possibly-heterogeneous input widgets.  For example,
-  we could have a date field with three string input widgets.  Implement a date
-  field with three input widgets to test the varname list with more than one
-  name.
+- Document the types_* subtypes where a list is present.  Type assertions should
+  use a debugging function that can be noop'ed and that otherwise recurses into
+  the lists for better type checking and that can be noop'ed for efficiency.
+  Find a way to do that.
 
 - Consider making the implementation for the form renderer use a delegate rather
   than derivation.  The delegate would be specified as a class attribute on the
@@ -84,18 +65,14 @@ Ideas
 - Support ACCESS-KEYS and TABINDEX for widgets that are not hidden?
 
 - Support general client-side scripting hooks (core events and input events)?
-  Can we integrate button input fields for client-side scripting?
+  Also, can we somehow integrate button input fields for client-side scripting?
 
 - Support images for submit buttons.
 
-- Create builder.cgi builder test script, where you gradually store the form
-  contents in the session data, where you can create fields and remove them too.
-  Also, simple test with a menu and a list of widget strings to eval would be
-  nice and easy.
-
 - Implement a ``ButtonForm`` class that will render a form with a single submit
-  button, just to redirect somewhere, no table.
-
+  button, just to redirect somewhere, no table.  General purpose buttons that
+  would be a form in themselves... we need to provide some mechanism for easily
+  rendering those rather than to have to define an empty form.
 
 - Implement 'noempty' in the renderers (previous code: it isn't used much apart
   from the profile and cannot be guaranteed to make sense anymore.  We are
@@ -105,7 +82,6 @@ Ideas
   to not want to render fields for which there is no value set.  It only makes
   sense for the display-only renderer.  Maybe that renderer could take an option
   in its constructor?
-
 
 - For the parser: Maybe we could eventually provide a way to at least decode the
   args which have no corresponding field in the form (if that never becomes

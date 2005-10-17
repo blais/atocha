@@ -52,7 +52,7 @@ class TestForm:
     Test form functionalities.
     """
 
-    # FIXME: we need to check the basic stuff here.
+    # FIXME: we need to check the basic form functionalities here.
 
 
 #-------------------------------------------------------------------------------
@@ -87,9 +87,8 @@ class TestRender:
         # Expect an error on trying to render a hidden field without a value.
         f = Form('test-form', StringField('name'))
         args = {}
-##         p = FormRenderer(f, incomplete=1)
-##         p.render('name')
-# FIXME: todo, bring this back when we will have the simple renderer class.
+        p = TextFormRenderer(f, incomplete=1)
+        p.render(only=['name'], action='bli')
         
         # Note: we cannot really test the destructor failure, because the
         # exception is ignored from there, due to its presence in the __del__()
@@ -103,7 +102,7 @@ class TestRender:
         args = {}
         p = FormRenderer(f, incomplete=1)
         try:
-            p.render(only='notexist')
+            p.render(only=['notexist'])
             assert False
         except RuntimeError:
             pass
