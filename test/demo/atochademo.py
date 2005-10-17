@@ -194,12 +194,7 @@ template_post = """
 
 <center>
 <div id="source">
-View Source Code:
-<a href="common.txt" class="button">Form Definition and Setup</a>
-<a href="query.txt" class="button">Query</a>
-<a href="handle.txt" class="button">Handle</a>
-<a href="display.txt" class="button">Display</a>
-<a href="reset.txt" class="button">Reset</a>
+<a href="atochademo.txt" class="button">View Source Code</a>
 </div>
 </center>
 
