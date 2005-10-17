@@ -7,20 +7,20 @@
 
 @import url("../../../../style.css");
 
-.formerror { color: red; font-size: smaller; }
+.atoerror { color: red; font-size: smaller; }
 
-.formtable {
+.atotable {
   margin-left: auto;
   margin-right: auto;
 }
 
-td.formlabel {
+td.atolabel {
   padding-left: 1em;
   padding-right: 1em;
   background-color: #F4F4F0;
 }
 
-td.formdisplay {
+td.atodisplay {
   padding-left: 1em;
   padding-right: 1em;
   background-color: #F4F4F4;
@@ -48,7 +48,7 @@ pre#values-repr {
   text-align: left;
 }
 
-span.formreq {
+span.atorequired {
   padding-left: 5px;
   padding-right: 5px;
   color: green;
