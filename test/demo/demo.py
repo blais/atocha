@@ -19,6 +19,7 @@ import os, StringIO, base64, shelve
 # htmlout imports.
 sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
 try:
+    import htmlout
     from htmlout import *
 except ImportError:
     pass # We won't be able to test the htmlout renderers.
@@ -128,7 +129,7 @@ form1 = Form(
     action='handle.cgi', reset=1)
 
 
-#-------------------------------------------------------------------------------
+#===============================================================================
 # Parser setup.
 #
 # Here we define a function that will get used by the FormParser class whenever
@@ -140,28 +141,36 @@ form1 = Form(
 # If you don't define the redirection mechanism, you can check the return value
 # of FormParser.end() and do the redirect by hand, but you need to be careful
 # not to forget to check everytimeq if you do that.
+#===============================================================================
 
-def do_redirect( url, form, status, message, values, errors ):
-    # Store form data for later retrieval in session data.
-    db = getdb()
-    db['session-%s' % form1.name] = values, errors, message
+#-------------------------------------------------------------------------------
+#
+def setup_cgi():
+    """
+    Setup for CGI scripts.
+    """
+    def do_redirect( url, form, status, message, values, errors ):
+        # Store form data for later retrieval in session data.
+        db = getdb()
+        db['session-%s' % form1.name] = values, errors, message
 
-    print 'Location: %s' % url
-    print
-    print '302 Errors in user input.'
-    sys.exit(0)
+        print 'Location: %s' % url
+        print
+        print '302 Errors in user input.'
+        sys.exit(0)
 
-# Setup automatic redirection mechanism.
-FormParser.redirect_func = staticmethod(do_redirect)
+    # Setup automatic redirection mechanism.
+    FormParser.redirect_func = staticmethod(do_redirect)
 
-# Setup normalizer for CGI scripts using Python's cgi module.
-FormParser.normalizer = CGINormalizer()
+    # Setup normalizer for CGI scripts using Python's cgi module.
+    FormParser.normalizer = CGINormalizer()
 
-# Setup form renderer for rendering scripts.
-TextFormRenderer.scriptsdir = 'scripts'
+    # Setup form renderer for rendering scripts.
+    TextFormRenderer.scriptsdir = 'scripts'
+    if 'htmlout' in globals():
+        HoutFormRenderer.scriptsdir = 'scripts'
 
-if 'HoutFormRenderer' in globals():
-    HoutFormRenderer.scriptsdir = 'scripts'
+
 
 
 #-------------------------------------------------------------------------------

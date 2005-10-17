@@ -10,6 +10,7 @@ CGI forwarder script for query.
 # stdlib imports
 import sys, cgi, cgitb; cgitb.enable()
 sys.path.append('..')
-from demo import handler_query
+from demo import *
 
+setup_cgi()
 handler_query()
