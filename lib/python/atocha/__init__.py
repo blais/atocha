@@ -81,8 +81,8 @@ from render import *
 from norm import *
 from renderers.rtext import *
 
-# Try to import htmlout, if it is not present, tough tits.
-# I might decide to open-source htmlout at some point.
+# Try to import htmlout, if it is not present, tough tits, we don't import the
+# htmlout renderer. I might decide to open-source htmlout at some point.
 try:
     import htmlout
     from renderers.rhtmlout import *

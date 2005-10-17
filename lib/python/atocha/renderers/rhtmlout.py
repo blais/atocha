@@ -11,6 +11,7 @@ Renderer for forms using htmlout.
 from os.path import join
 
 # atocha imports.
+import atocha
 from atocha.render import FormRenderer
 from atocha.field import ORI_VERTICAL
 from atocha.fields.uploads import FileUploadField
