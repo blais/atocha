@@ -122,8 +122,8 @@ form1 = Form(
     # A file that can be sent or reset.
     SetFileField('photo', N_('Photograph')),
 
-    # Agree checkbox.
-    AgreeField('terms', N_("Agree to Terms"),),
+##     # Agree checkbox.
+##     AgreeField('terms', N_("Agree to Terms"),),
 
     action='handle.cgi', reset=1)
 
@@ -194,7 +194,7 @@ template_post = """
 
 <center>
 <div id="source">
-<a href="demo.txt" class="button">View Source Code</a>
+<a href="demo.py.txt" class="button">View Source Code</a>
 </div>
 </center>
 
@@ -223,15 +223,16 @@ def getdb():
 # HANDLERS
 #===============================================================================
 
+db = getdb()
+
 #-------------------------------------------------------------------------------
 #
-def handle_query( args ):
+def handler_query():
     """
     CGI handler for rendering a query form to allow the user to enter input.
     """
 
     # Get old form data to fill the initial values of the form.
-    db = getdb()
     # Fetch the real data.
     values, errors, message = db.get('data-%s' % form1.name, {}), None, None
 
@@ -271,14 +272,12 @@ def handle_query( args ):
 
 #-------------------------------------------------------------------------------
 #
-def handler_handle( args ):
+def handler_handle( args, url ):
     """
     Handler for form submission.
     """
     
-    cargs = cgi.FieldStorage()
-    
-    p = FormParser(form1, cargs, 'query.cgi')
+    p = FormParser(form1, args, 'query.cgi')
     
     if 'merengue' in (p['dances'] or []):
         repldances = list(p['dances'])
@@ -289,7 +288,6 @@ def handler_handle( args ):
     p.end()
     
     # Set final data in database and remove session data.
-    db = getdb()
     values = p.getvalues(1)
     
     # Handle setfile upload.
@@ -304,23 +302,16 @@ def handler_handle( args ):
     
     db['data-%s' % form1.name] = values
     
-    
-    # On success, redirect to render page.  You could decide to display results
-    # from here.
-    print 'Location: %s' % 'display.cgi'
-    print
-    print '302 Success.'
-    sys.exit(0)
+    return handler_display()
     
 #-------------------------------------------------------------------------------
 #
-def handler_display( args ):
+def handler_display():
     """
     Render page for final accepted displayed data.
     Render with display renderer, with a text rendition at the bottom.
     """
     # Get data from database.
-    db = getdb()
     values = db.get('data-%s' % form1.name, {})
     photo = db.get('photo-%s' % form1.name, None)
     photofn = db.get('photofn-%s' % form1.name, '')
@@ -375,17 +366,18 @@ def handler_display( args ):
 
 #-------------------------------------------------------------------------------
 #
-def handler_reset( args ):
+def handler_reset():
     """
     Handler that resets the form data stored in the local DB.
     """
 
     # Set form data for edit.
-    db = getdb()
     for n in 'data', 'photo', 'photofn', 'session':
         try:
             del db['%s-%s' % (n, form1.name)]
         except Exception:
             pass
 
-    handler_display(args)
+    handler_display()
+
+
