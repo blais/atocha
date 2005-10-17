@@ -11,19 +11,27 @@ You might define something similar for your own environment.
 """
 
 # stdlib imports.
-import sys, shelve
+import sys
 from os.path import *
+projects_root = dirname(dirname(dirname(dirname(dirname(sys.argv[0])))))
+import os, StringIO, base64, shelve
+
+# htmlout imports.
+sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
+try:
+    from htmlout import *
+except ImportError:
+    pass # We won't be able to test the htmlout renderers.
 
 # atocha imports.
-root = dirname(dirname(dirname(dirname(sys.argv[0]))))
-sys.path.append(join(root, 'lib', 'python'))
-sys.path.append('../../../../hume/app/lib/hume') # for htmlout testing.
+sys.path.append(join(projects_root, 'atocha', 'lib', 'python'))
 from atocha import *
 from atocha.norms.ncgi import CGINormalizer
 
+
 #-------------------------------------------------------------------------------
 #
-rtype = 'htmlout' # Renderer type for demo/tests.
+rtype = 'htmlout' # Renderer type for demo/tests: 'text' or 'htmlout'
 
 #-------------------------------------------------------------------------------
 #
@@ -120,20 +128,6 @@ form1 = Form(
     action='handle.cgi', reset=1)
 
 
-
-
-#-------------------------------------------------------------------------------
-#
-# Definition of test form.
-#
-## form1 = Form(
-##     'test-form',
-##     SetFileField('photo', N_('Photograph')),
-##     action='handle.cgi', reset=1)
-
-
-
-
 #-------------------------------------------------------------------------------
 # Parser setup.
 #
@@ -171,19 +165,7 @@ if 'HoutFormRenderer' in globals():
 
 
 #-------------------------------------------------------------------------------
-#
-def getdb():
-    """
-    Returns an open object with a dict interface to store data in a DB.
-    This is used to store both the final data and the session form data.
-    """
-    fn = '/tmp/atocha-test-session-data.db'
-    shelf = shelve.open(fn, 'c')
-    return shelf
-
-
-#-------------------------------------------------------------------------------
-# HTML page templates for our test CGI scripts.
+# HTML page templates for our test scripts
 
 template_pre = """Content-type: text/html
 
@@ -227,3 +209,188 @@ View Source Code:
 </html>
 """
 
+
+#-------------------------------------------------------------------------------
+#
+def getdb():
+    """
+    Returns an open object with a dict interface to store data in a DB.
+    This is used to store both the final data and the session form data.
+
+    Normally you would be using a more decent session and data store, this is
+    just for testing because it is easy and works everywhere.
+    """
+    fn = '/tmp/atocha-test-session-data.db'
+    shelf = shelve.open(fn, 'c')
+    return shelf
+
+#===============================================================================
+# HANDLERS
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+#
+def handle_query( args ):
+    """
+    CGI handler for rendering a query form to allow the user to enter input.
+    """
+
+    # Get old form data to fill the initial values of the form.
+    db = getdb()
+    # Fetch the real data.
+    values, errors, message = db.get('data-%s' % form1.name, {}), None, None
+
+    # Fetch the session data.
+    if 'session-%s' % form1.name in db:
+        sessvalues, errors, message = db.get('session-%s' % form1.name,
+                                             (None, None, None))
+        # Remove that session data (we've used it).
+        del db['session-%s' % form1.name]
+
+        # Update session values with newly parsed values.
+        if sessvalues:
+            values.update(sessvalues)
+
+    # Create a form renderert to render the form..
+    if rtype == 'text':
+        r = TextFormRenderer(form1, values, errors,
+                             output_encoding='latin-1')
+        rendered = r.render(action='handle.cgi')
+        scripts = r.render_scripts()
+    else:
+        from htmlout import tostring
+        r = HoutFormRenderer(form1, values, errors)
+        rendered = tostring(r.render(action='handle.cgi'), encoding='latin-1')
+        scripts = [tostring(x, encoding='latin-1') for x in r.render_scripts()]
+        scripts = '\n'.join(scripts)
+
+    # Render the page (see template in other module).
+    uimsg = message and '<div id="message">%s</div>' % message or ''
+    sys.stdout.write(template_pre % {'title': 'Form Render and Handling',
+                                     'uimsg': uimsg,
+                                     'scripts': scripts})
+
+    # Here, we use the form render:
+    sys.stdout.write(rendered)
+    sys.stdout.write(template_post)
+
+#-------------------------------------------------------------------------------
+#
+def handler_handle( args ):
+    """
+    Handler for form submission.
+    """
+    
+    cargs = cgi.FieldStorage()
+    
+    p = FormParser(form1, cargs, 'query.cgi')
+    
+    if 'merengue' in (p['dances'] or []):
+        repldances = list(p['dances'])
+        repldances.remove('merengue')
+        p.error(u'Please fix error in dances below. I thought you were cuban.',
+                dances=(u'No dominican dances here, please.', repldances))
+    
+    p.end()
+    
+    # Set final data in database and remove session data.
+    db = getdb()
+    values = p.getvalues(1)
+    
+    # Handle setfile upload.
+    if p['photo'] is False:
+        # Reset photo.
+        db['photo-%s' % form1.name] = db['photofn-%s' % form1.name] = None
+    
+    elif p['photo']:
+        # Read in photograph file, if there is one.
+        db['photo-%s' % form1.name] = p['photo'].read()
+        db['photofn-%s' % form1.name] = p['photo'].filename
+    
+    db['data-%s' % form1.name] = values
+    
+    
+    # On success, redirect to render page.  You could decide to display results
+    # from here.
+    print 'Location: %s' % 'display.cgi'
+    print
+    print '302 Success.'
+    sys.exit(0)
+    
+#-------------------------------------------------------------------------------
+#
+def handler_display( args ):
+    """
+    Render page for final accepted displayed data.
+    Render with display renderer, with a text rendition at the bottom.
+    """
+    # Get data from database.
+    db = getdb()
+    values = db.get('data-%s' % form1.name, {})
+    photo = db.get('photo-%s' % form1.name, None)
+    photofn = db.get('photofn-%s' % form1.name, '')
+
+    # Create display renderer to display the data.
+    if rtype == 'text':
+        r = TextDisplayRenderer(form1, values or {}, incomplete=1,
+                                show_hidden=1,
+                                output_encoding='latin-1')
+        contents = r.render()
+
+        if photo:
+            contents += r.table(
+                [(_(form1['photo'].label),
+                  u'<img src="data:image/jpg;base64,%s"<br/>%s' %
+                  (base64.b64encode(photo), photofn))] )
+    else:
+        r = HoutDisplayRenderer(form1, values or {}, incomplete=1,
+                                show_hidden=1)
+        form = r.render()
+        contents = tostring(form, encoding='latin-1')
+
+        if photo:
+            htmlphoto = [
+                IMG(src="data:image/jpg;base64,%s" % base64.b64encode(photo)),
+                BR(), photofn or u'']
+            contents += tostring(r.table( [(_(form1['photo'].label), htmlphoto)] ),
+                                 encoding='latin-1')
+
+    s = StringIO.StringIO()
+    print >> s, '<div id="buttons">'
+    print >> s, '<a href="query.cgi" id="edit" class="button">EDIT VALUES</a>'
+    print >> s, '<a href="reset.cgi" id="edit" class="button">RESET</a>'
+    print >> s, '</div>'
+
+    print >> s, '</div>'
+    print >> s, '<div>'
+    print >> s, '<h2>Repr of Parsed Accepted Values</h2>'
+    print >> s, '<pre id="values-repr">'
+    for name, value in values.iteritems():
+        print >> s, '%s: %s' % (name, repr(value))
+    print >> s, '</pre>'
+    contents += s.getvalue()
+
+    # Set form data for edit.
+    sys.stdout.write(template_pre % {'title': 'Form Display',
+                                     'uimsg': '',
+                                     'scripts': ''})
+    sys.stdout.write(contents)
+    sys.stdout.write(template_post)
+
+
+#-------------------------------------------------------------------------------
+#
+def handler_reset( args ):
+    """
+    Handler that resets the form data stored in the local DB.
+    """
+
+    # Set form data for edit.
+    db = getdb()
+    for n in 'data', 'photo', 'photofn', 'session':
+        try:
+            del db['%s-%s' % (n, form1.name)]
+        except Exception:
+            pass
+
+    handler_display(args)

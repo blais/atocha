@@ -4,26 +4,11 @@
 #
 
 """
-Handler that resets the form data stored in the local DB.
+CGI forwarder script for query.
 """
 
 # stdlib imports
-import sys, cgi, cgitb; cgitb.enable()
+import cgi, cgitb; cgitb.enable()
+from common import handler_reset
 
-# atocha imports.
-from common import *
-
-
-# Set form data for edit.
-db = getdb()
-for n in 'data', 'photo', 'photofn', 'session':
-    try:
-        del db['%s-%s' % (n, form1.name)]
-    except Exception:
-        pass
-
-# Redirect to query page. 
-print 'Location: %s' % 'display.cgi'
-print
-print '302 Values reset.'
-sys.exit(0)
+handler_reset(cgi.FieldStorage())
