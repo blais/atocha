@@ -136,7 +136,7 @@ template_pre = """
 <body>
 
 <div id="project-header">
-  <a href="/"><img src="/home/project-header.png" id="logo"></a>
+  <a href="/"><img src="/home/furius-logo-w.png" id="logo"></a>
   <div id="project-home"><a href="/atocha">Project Home</a></div>
 </div>
 
