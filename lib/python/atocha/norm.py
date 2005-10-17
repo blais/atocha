@@ -21,12 +21,12 @@ an appropriate normalizer instance.
 import cgi
 
 
-__all__ = ['FormNormalizer']
+__all__ = ['ArgsNormalizer']
 
 
 #-------------------------------------------------------------------------------
 #
-class FormNormalizer:
+class ArgsNormalizer:
     """
     Base interface for normalizers.
     """

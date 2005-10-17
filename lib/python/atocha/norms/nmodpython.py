@@ -14,7 +14,7 @@ import sys
 from mod_python.util import FieldStorage, Field
 
 # atocha imports.
-from atocha.norm import FormNormalizer
+from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 
 
@@ -23,7 +23,7 @@ __all__ = ['ModPythonNormalizer']
 
 #-------------------------------------------------------------------------------
 #
-class ModPythonNormalizer(FormNormalizer):
+class ModPythonNormalizer(ArgsNormalizer):
     """
     Normalizer for Python's cgi library.
     """

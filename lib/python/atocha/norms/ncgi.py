@@ -11,7 +11,7 @@ Normalizer for Python's cgi library to handle data coming from CGI scripts.
 import cgi
 
 # atocha imports.
-from atocha.norm import FormNormalizer
+from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 
 
@@ -20,7 +20,7 @@ __all__ = ['CGINormalizer']
 
 #-------------------------------------------------------------------------------
 #
-class CGINormalizer(FormNormalizer):
+class CGINormalizer(ArgsNormalizer):
     """
     Normalizer for Python's cgi library.
     """
