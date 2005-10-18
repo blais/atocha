@@ -1,0 +1,12 @@
+Description: Python package for parsing and rendering data from web forms
+Official-Homepage: http://furius.ca/atocha
+Author: Martin Blais
+Author-Email: blais@furius.ca
+Mailing-List: ## SOON ON SF ##
+ChangeLog: http://furius.ca/atocha/CHANGES
+Announcement: http://freshmeat.net/projects/optcomplete/  ## TODO ##
+Announcement: http://www.python.org/pypi?%3Aaction=search&name=nabu  ## TODO ##
+Download-Releases: http://furius.ca/downloads/atocha/releases
+Download-Snapshots: http://furius.ca/downloads/atocha/snapshots
+Bugs-Reporting: mailto:blais@furius.ca
+License: GNU GPL

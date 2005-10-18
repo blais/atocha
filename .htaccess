@@ -1,5 +1,0 @@
-AuthType Basic
-AuthUserFile /home/blais/w.furius/atocha/etc/htpasswd
-AuthGroupFile /dev/null
-AuthName "Test Access"
-require valid-user
