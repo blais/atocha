@@ -10,7 +10,7 @@ Description
 
 Atocha is a Python package for *parsing* and *rendering* data from web forms.
 It is framework-agnostic, generic, and it should be possible to use it with CGI
-scrips or to incorporate it in your favourite web application framework
+scrips or to incorporate it in your favourite web application framework.
 
 
 Motivation
@@ -111,7 +111,7 @@ demo web pages too.
 Download
 ========
 
-Snapshots of the latest pipexcel source code can be found in the Download_ area.
+Snapshots of the latest atocha source code can be found in the Download_ area.
 If you make any modification to the source, please update and run the tests.
 
 .. _Download: /downloads/atocha
