@@ -1,8 +1,9 @@
 Description: Python package for parsing and rendering data from web forms
 Official-Homepage: http://furius.ca/atocha
+Mirror-Homepage: http://atocha.sourceforge.net
 Author: Martin Blais
 Author-Email: blais@furius.ca
-Mailing-List: ## SOON ON SF ##
+Mailing-List: http://lists.sourceforge.net/mailman/listinfo/atocha-discuss
 ChangeLog: http://furius.ca/atocha/CHANGES
 Announcement: http://freshmeat.net/projects/optcomplete/  ## TODO ##
 Announcement: http://www.python.org/pypi?%3Aaction=search&name=nabu  ## TODO ##
