@@ -91,13 +91,6 @@ class TextRenderer(FormRenderer):
 
         if self.ofile is None: return f.getvalue()
 
-    def _geterror( self, errmsg ):
-        if errmsg:
-            assert isinstance(errmsg, unicode)
-            return (u'<span class="%s">%s</span><br/>' %
-                    (self.css_errors, errmsg))
-        else:
-            return u''
 
 
 
@@ -117,6 +110,14 @@ class TextFormRenderer(TextRenderer):
     css_vertical = u'atominitable'
 
     scriptsdir = None
+
+    def _geterror( self, errmsg ):
+        if errmsg:
+            assert isinstance(errmsg, unicode)
+            return (u'<span class="%s">%s</span><br/>' %
+                    (self.css_errors, errmsg))
+        else:
+            return u''
 
     def do_render( self, fields, action, submit ):
         try:
@@ -193,20 +194,20 @@ class TextFormRenderer(TextRenderer):
     def do_render_submit( self, submit, reset ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
+        f.write(u'<div class="%s">\n' % self.css_submit)
 
         if isinstance(submit, msg_type):
-            f.write(u'<input type="submit" value="%s" class="%s" />\n' %
-                    (_(submit), self.css_submit))
+            f.write(u'<input type="submit" value="%s" />\n' % (_(submit)))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
-                f.write((u'<input type="submit" name="%s" '
-                         u'value="%s" class="%s" />\n') %
-                        (name, _(value), self.css_submit))
+                f.write((u'<input type="submit" name="%s" value="%s" />\n') %
+                        (name, _(value)))
 
         if reset:
             f.write(u'<input type="reset" value="%s" />\n' % _(reset))
 
+        f.write(u'</div>\n')
         if self.ofile is None: return f.getvalue()
 
     def do_render_scripts( self, scripts ):
@@ -438,9 +439,13 @@ class TextDisplayRenderer(TextRenderer):
     """
 
     # CSS classes.
-    css_input = u'atodisplay'
+    css_label = u'atodisplabel'
+    css_input = u'atodispvalue'
 
     def __init__( self, *args, **kwds ):
+        if 'errors' in kwds:
+            raise RuntimeError("Errors not allowed in display renderer.")
+
         try:
             self.show_hidden = kwds['show_hidden']
             del kwds['show_hidden']

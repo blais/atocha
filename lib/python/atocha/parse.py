@@ -384,6 +384,12 @@ class FormParser:
         """
         return self._errors
 
+    def haserror( self, fieldname ):
+        """
+        Returns true if the given field already has an error.
+        """
+        return fieldname in self._errors
+
     def haserrors( self ):
         """
         Returns true if some errors have already been signaled.

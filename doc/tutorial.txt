@@ -98,7 +98,7 @@ wherever you want within your system::
          
    print "<div id="email">
    print "<p>Your email, please:</p>
-   print rdr.render_field('email')     # Render just the email field.
+   print rdr.render_fields('email')     # Render just the email field.
    print "</div>
 
 You could easily use this system to embed Atocha in your favourite templating
@@ -132,7 +132,7 @@ before rendering or parsing, in the renderer::
  
    form['matches'].setchoices(found_matches)
    ...
-   rdr.render_field('matches')
+   rdr.render_fields('matches')
    ...
 
 
@@ -142,7 +142,7 @@ enabled)::
    form['matches'].setchoices(found_matches)
    ...
    p = FormParser(f, args)
-   rdr.render_field('matches')
+   rdr.render_fields('matches')
    ...
 
 

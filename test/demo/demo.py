@@ -210,15 +210,15 @@ def handler_query():
 
     # Create a form renderert to render the form..
     if rtype == 'text':
-        r = TextFormRenderer(form1, values, errors,
+        rdr = TextFormRenderer(form1, values, errors,
                              output_encoding='latin-1')
-        rendered = r.render(action='handle' + ext)
-        scripts = r.render_scripts()
+        rendered = rdr.render(action='handle' + ext)
+        scripts = rdr.render_scripts()
     else:
         from htmlout import tostring
-        r = HoutFormRenderer(form1, values, errors)
-        rendered = tostring(r.render(action='handle' + ext), encoding='latin-1')
-        scripts = [tostring(x, encoding='latin-1') for x in r.render_scripts()]
+        rdr = HoutFormRenderer(form1, values, errors)
+        rendered = tostring(rdr.render(action='handle' + ext), encoding='latin-1')
+        scripts = [tostring(x, encoding='latin-1') for x in rdr.render_scripts()]
         scripts = '\n'.join(scripts)
 
     # Render the page (see template in other module).
@@ -289,27 +289,27 @@ def handler_display():
 
     # Create display renderer to display the data.
     if rtype == 'text':
-        r = TextDisplayRenderer(form1, values or {}, incomplete=1,
+        rdr = TextDisplayRenderer(form1, values or {}, incomplete=1,
                                 show_hidden=1,
                                 output_encoding='latin-1')
-        contents = r.render()
+        contents = rdr.render()
 
         if photo and 'photo' in form1.names():
-            contents += r.table(
+            contents += rdr.table(
                 [(_(form1['photo'].label),
                   u'<img src="data:image/jpg;base64,%s"<br/>%s' %
                   (base64.b64encode(photo), photofn))] )
     else:
-        r = HoutDisplayRenderer(form1, values or {}, incomplete=1,
-                                show_hidden=1)
-        form = r.render()
+        rdr = HoutDisplayRenderer(form1, values or {}, incomplete=1,
+                                  show_hidden=1)
+        form = rdr.render()
         contents = tostring(form, encoding='latin-1')
 
         if photo and 'photo' in form1.names():
             htmlphoto = [
                 IMG(src="data:image/jpg;base64,%s" % base64.b64encode(photo)),
                 BR(), photofn or u'']
-            contents += tostring(r.table( [(_(form1['photo'].label), htmlphoto)] ),
+            contents += tostring(rdr.table( [(_(form1['photo'].label), htmlphoto)] ),
                                  encoding='latin-1')
 
     s = StringIO.StringIO()

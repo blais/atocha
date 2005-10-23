@@ -52,6 +52,7 @@ Ideas
   I'm not sure about this, since the text form renderer already does take an
   option...
 
+
 - Implement DISABLED and READ-ONLY options for all the fields.
 
   * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It

@@ -74,14 +74,6 @@ class HoutRenderer(FormRenderer):
             table.append(extra)
         return table
 
-    def _geterror( self, errmsg ):
-        if errmsg:
-            assert isinstance(errmsg, unicode)
-            return [SPAN(errmsg, CLASS=self.css_errors), BR()]
-        else:
-            return []
-
-
 
 #-------------------------------------------------------------------------------
 #
@@ -99,6 +91,13 @@ class HoutFormRenderer(HoutRenderer):
     css_vertical = u'atominitable'
     
     scriptsdir = None
+
+    def _geterror( self, errmsg ):
+        if errmsg:
+            assert isinstance(errmsg, unicode)
+            return [SPAN(errmsg, CLASS=self.css_errors), BR()]
+        else:
+            return []
 
     def do_render( self, fields, action, submit ):
         # Create the form container.
@@ -151,16 +150,14 @@ class HoutFormRenderer(HoutRenderer):
     def do_render_submit( self, submit, reset ):
         nodes = []
         if isinstance(submit, msg_type):
-            nodes.append(INPUT(type='submit', value=_(submit),
-                               CLASS=self.css_submit))
+            nodes.append(INPUT(type='submit', value=_(submit)))
         else:
             assert isinstance(submit, (list, tuple))
             for value, name in submit:
-                nodes.append(INPUT(type='submit', name=name,
-                                   value=_(value), CLASS=self.css_submit))
+                nodes.append(INPUT(type='submit', name=name, value=_(value)))
         if reset:
             nodes.append(INPUT(type='reset', value=_(reset)))
-        return nodes
+        return DIV(nodes, CLASS=self.css_submit)
 
     def do_render_scripts( self, scripts ):
         nodes = []
@@ -369,9 +366,13 @@ class HoutDisplayRenderer(HoutRenderer):
     """
 
     # CSS classes.
-    css_input = u'atodisplay'
+    css_label = u'atodisplabel'
+    css_input = u'atodispvalue'
 
     def __init__( self, *args, **kwds ):
+        if 'errors' in kwds:
+            raise RuntimeError("Errors not allowed in display renderer.")
+
         try:
             self.show_hidden = kwds['show_hidden']
             del kwds['show_hidden']

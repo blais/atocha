@@ -152,7 +152,7 @@ class FormRenderer:
                 if repl_rvalue is not None:
                     rvalue = repl_rvalue
                     dorender = False
-                    
+
             # No replacement value was found, use the parsed valid value for
             # render.
             if dorender:
@@ -288,7 +288,7 @@ class FormRenderer:
                 raise RuntimeError(
                     'Renderer %s does not have required method %s' % (cls, att))
 
-        
+
         for att in  ('do_render', 'do_render_container', 'do_render_table',
                      'do_table', 'do_render_submit', 'do_render_scripts',
                      'renderHidden',):
@@ -297,12 +297,18 @@ class FormRenderer:
             except AttributeError:
                 raise RuntimeError(
                     'Renderer %s does not have required method %s' % (cls, att))
-            
+
     validate_renderer = classmethod(validate_renderer)
 
 
     #---------------------------------------------------------------------------
     # Public methods that you can use.
+
+    def update_values( self, newvalues ):
+        """
+        Update the renderer's values with the new values.
+        """
+        self._values.update(newvalues)
 
     def render( self, only=None, ignore=None, action=None, submit=None ):
         """
@@ -349,7 +355,9 @@ class FormRenderer:
             assert isinstance(fname, str)
 
         # Process only/ignore field selection.
-        only = fieldnames + kwds.get('only', [])
+        only = fieldnames
+        if only in kwds:
+            only = only + tuple(kwds['only'])
         ignore = kwds.get('ignore', None)
         fields = self._form.select_fields(only, ignore)
 
@@ -365,17 +373,14 @@ class FormRenderer:
 
     def render_field( self, fieldname, hide=None ):
         """
-        Render a single field.
-
-        This method dispatches between the visible and hidden field rendering,
-        fetches the appropriate value for the field, and checks the basic
-        assumptions that are made in the framework.
+        Render given field (by name).
+        If you want to render multiple fields, use render_table().
         """
         try:
             field = self._form[fieldname]
-        except KeyError:
-            raise RuntimeError("Error: invalid field name.")
-
+        except KeyError, e:
+            raise RuntimeError(
+                "Error: field not present in form: %s" % str(e))
         return self._render_field(field, hide)
 
     def render_submit( self, submit=None ):
@@ -452,7 +457,7 @@ class FormRenderer:
         Renders the scripts to be added to the meta headers (implementation).
         """
         raise NotImplementedError
-        
+
     def renderHidden( self, field, rvalue ):
         """
         You must override this method to render a hidden field.  Since all the
