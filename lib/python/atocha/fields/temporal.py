@@ -32,6 +32,9 @@ class DateField(StringField):
     types_render = (unicode,)
     css_class = 'date'
 
+    attributes_delete = ('strip', 'minlen', 'maxlen')
+
+
     __def_display_format = '%a, %d %B %Y' # or '%x'
 
     # Support ISO-8601 format.  
@@ -45,10 +48,12 @@ class DateField(StringField):
     _mon_list = [getattr(locale, 'MON_%d' % x) for x in xrange(1, 13)]
     _abmon_list = [getattr(locale, 'ABMON_%d' % x) for x in xrange(1, 13)]
 
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None ):
-        StringField.__init__(self, name, label, hidden,
-                             initial, required, size=20, strip=True)
+    def __init__( self, name, label=None, **attribs ):
+        DateField.validate_attributes(attribs)
+
+        attribs.setdefault('size', 20)
+        attribs['strip'] = True
+        StringField.__init__(self, name, label, **attribs)
 
     def parse_value( self, pvalue ):
         value = StringField.parse_value(self, pvalue)
@@ -155,15 +160,15 @@ class JSDateField(Field): # Is always required.
 
     __script_re = '^[a-zA-Z_]+$'
 
-    def __init__( self, name, label=None, hidden=None, initial=None ):
-        """
-        Note: there is a special constraint on the varname of the field due to
-        the Javascript code involved (see below).
-        """
-        Field.__init__(self, name, label, hidden, initial)
+    def __init__( self, name, label=None, **attribs ):
+        JSDateField.validate_attributes(attribs)
 
-        # This verification is required for the JS calendar.
+        # Note: there is a special constraint on the varname of the field due to
+        # the Javascript code involved (see below).  This verification is
+        # required for the JS calendar.
         assert re.match(JSDateField.__script_re, name)
+
+        Field.__init__(self, name, label, attribs)
 
     def parse_value( self, pvalue ):
         if pvalue is None:

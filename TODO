@@ -2,48 +2,17 @@
   atocha: TODO
 ================
 
-Current Affairs
-===============
+Current Affairs (Requirements Before 1.0 Initial Release)
+=========================================================
 
+- Write LaTeX documentation for Atocha, using the standard package. Look at
+  mod_python source for example;
 
-./index.html
-X ./lib/python/atocha/field.py
+- The display renderer definitely needs an option to not display fields which
+  have no value.
 
-FIXME todo convert all 'hidden' to 'state'
-./lib/python/atocha/fields/bools.py
-./lib/python/atocha/fields/choices.py
-./lib/python/atocha/fields/numeric.py
-./lib/python/atocha/fields/temporal.py
-./lib/python/atocha/fields/texts.py
-./lib/python/atocha/fields/uploads.py
-
-todo: add and support state to render methods
-./lib/python/atocha/renderers/rhtmlout.py
-./lib/python/atocha/renderers/rtext.py
-
-X ./lib/python/atocha/render.py
-./README
-./test/automated/atochatests.py
-./test/demo/cgi-bin/demo.py.txt
-./test/demo/demo.py
-./TODO
-
-
-
-- Implement DISABLED and READ-ONLY options for all the fields.
-
-  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It
-    cannot be hidden/disabled.
-
-  * Also, a field can be rendered disabled, but not actually be disabled
-    permanently.  I'm not sure what would be the utility in creating a field as
-    disabled.  Disabled is akin to hidden, and as such is more of a rendering
-    option than anything else.  IMO we should support disabled similar to
-    hidden.
-
-
-
-
+- Support some of the JS tags
+- Add support for attribute-like access for value on the FormParser
 
 - Write an example of templating library integration.
 
@@ -51,15 +20,18 @@ X ./lib/python/atocha/render.py
 
 
 
+Known Bugs and Misfeatures
+==========================
 
+- The JSDateField does not yet support disabled/read-only states.  We would need
+  to change the JavaScript file to support that.
 
+- You need to customize the javascript file when you copy them, to adjust some
+  of the paths at the top of the file to point to the appropriate icons that it
+  refers.
 
-
-
-
-
-
-
+- We do support accessibility features yet (but we could and we will). See notes
+  below.
 
 
 Future New Field Types Ideas
@@ -105,7 +77,10 @@ Ideas
   I'm not sure about this, since the text form renderer already does take an
   option...
 
-- Support ACCESS-KEYS and TABINDEX for widgets that are not hidden?
+- Support accessibilityL FIELDSET, LEGEND, LABEL tags for organization.  Deal
+  with Access keys, tab index.  This should be a simple matter of supporting
+  adding attributes and then making the renderers support them.  Support
+  ACCESS-KEYS and TABINDEX for widgets that are not hidden?
 
 - Support general client-side scripting hooks (core events and input events)?
   Also, can we somehow integrate button input fields for client-side scripting?
@@ -129,6 +104,12 @@ Ideas
 - For the parser: Maybe we could eventually provide a way to at least decode the
   args which have no corresponding field in the form (if that never becomes
   necessary, don't do so).
+
+- For Menus: 
+
+  * Support disabled state for single options.
+  * Support option groups and associated disabled state.
+
 
 
 More Tests

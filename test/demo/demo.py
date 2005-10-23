@@ -26,7 +26,7 @@ from atocha import *
 
 #-------------------------------------------------------------------------------
 #
-rtype = 'htmlout' # Renderer type for demo/tests: 'text' or 'htmlout'
+rtype = 'text' # Renderer type for demo/tests: 'text' or 'htmlout'
 
 #-------------------------------------------------------------------------------
 #
@@ -42,21 +42,22 @@ form1 = Form(
     StringField('postal', N_("Postal code"), encoding='ascii'),
 
     # Hidden field.
-    StringField('secret', hidden=1, initial='zanzibar',
+    StringField('secret', state=Field.HIDDEN, initial='zanzibar',
                 encoding='latin-1'),
 
     # Password field.
     PasswordField('passwd', N_("Password"), size=12, maxlen=8),
 
     # A text area.
-    TextAreaField('description', N_("Description"), rows=10, cols=60),
+    TextAreaField('description', N_("Description"),
+                  rows=10, cols=60),
 
     # Simple date.
     DateField('birthday', N_("Birthday")),
 
     # A fancier date input widget.
     JSDateField('barmitz', N_("Bar Mitzvah")),
-    
+
     # Email address and URL fields.
     EmailField('email', N_("Email")),
     URLField('homepage', N_("Home Page")),
@@ -119,6 +120,14 @@ form1 = Form(
 
 ##     # Agree checkbox.
 ##     AgreeField('terms', N_("Agree to Terms"),),
+
+    # Disabled field.
+    StringField('veteran', N_("Veretan"), initial=u'Disabled...',
+                state=Field.DISABLED),
+
+    # Read-Only field.
+    StringField('notouch', N_("Touch Me"), initial=u"Don't touch",
+                state=Field.READONLY),
 
     action='handle', reset=1)
 
@@ -243,35 +252,35 @@ def handler_handle( args, url ):
     Handler for form submission.
     """
     db = getdb()
-    
+
     p = FormParser(form1, args, 'query' + ext)
-    
+
     if 'merengue' in (p['dances'] or []):
         repldances = list(p['dances'])
         repldances.remove('merengue')
         p.error(u'Please fix error in dances below. I thought you were cuban.',
                 dances=(u'No dominican dances here, please.', repldances))
-    
+
     p.end()
-    
+
     # Set final data in database and remove session data.
     values = p.getvalues(1)
-    
+
     # Handle setfile upload.
     if p['photo'] is False:
         # Reset photo.
         db['photo-%s' % form1.name] = db['photofn-%s' % form1.name] = None
-    
+
     elif p['photo']:
         # Read in photograph file, if there is one.
         db['photo-%s' % form1.name] = p['photo'].read()
         db['photofn-%s' % form1.name] = p['photo'].filename
-    
+
     db['data-%s' % form1.name] = values
     db.close()
-    
+
     return handler_display()
-    
+
 #-------------------------------------------------------------------------------
 #
 def handler_display():

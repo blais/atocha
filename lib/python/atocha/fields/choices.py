@@ -52,28 +52,35 @@ class _MultipleField(Field):
     types_parse = (NoneType, list,)
     types_render = (list,)
 
-    def __init__( self, name, choices,
-                  label=None, hidden=None, initial=None, nocheck=None ):
-        """
-        :Arguments:
+    attributes_mandatory = (
+        ('choices', 'Sequence of str or (str, unicode)',
+         """Choice-label pairs: the ordered choices, to be rendered and checked
+        against when parsing.  This is not a mapping because order is important
+        for rendering.  If the elements of the list are pairs, the label is used
+        for the user-visible strings to be used when rendering the widget.  Note
+        that we also accept integers for choices instead of ascii strings, but
+        these will be automatically converted to strings."""),
+        )
+        
+    attributes_declare = (
+        ('nocheck', 'bool',
+         """Set this to True if you want to prevent the parser from
+         cross-checking the values against the choices set in the instance of
+         this field.  When parsing, do not perform checks specific to the
+         choices set on against the received values. This is useful if the set
+         of choices for this field is generated dynamically and you will do your
+         validation by hand.  Another thing that can be done is to not use this
+         but to call setchoice() before running the parser on the arguments, if
+         in the handler you know which choices are possibly valid and would like
+         to use the parsing code provided in this field."""),
+        )
 
-        - 'choices': See setchoices() for full description.
+    def __init__( self, name, choices, label, attribs ):
 
-        - 'nocheck' -> bool: Set this to True if you want to prevent the parser
-          from cross-checking the values against the choices set in the instance
-          of this field.
+        self.nocheck = attribs.pop('nocheck', None)
 
-        """
-        Field.__init__(self, name, label, hidden, initial)
+        Field.__init__(self, name, label, attribs)
 
-        self.nocheck = nocheck
-        """When parsing, do not perform checks specific to the choices set on
-        against the received values. This is useful if the set of choices for
-        this field is generated dynamically and you will do your validation by
-        hand.  Another thing that can be done is to not use this but to call
-        setchoice() before running the parser on the arguments, if in the
-        handler you know which choices are possibly valid and would like to use
-        the parsing code provided in this field."""
 
         self.choices = None
         "(Internal use only.) List of the possible choices for this field"
@@ -89,19 +96,7 @@ class _MultipleField(Field):
     def setchoices( self, choices ):
         """
         Set the choices that this field renders and parses.  'choices' is of the
-        same types as described in the constructor.
-
-        :Arguments:
-
-        - 'choices' -> list or tuple of str or (str, unicode) choice-label
-          pairs:  the ordered choices, to be rendered and checked against when
-          parsing.  This is not a mapping because order is important for
-          rendering.  If the elements of the list are pairs, the label is used
-          for the user-visible strings to be used when rendering the widget.
-
-          Note that we also accept integers for choices instead of ascii
-          strings, but these will be automatically converted to strings.
-
+        same types as described in the attributes.
         """
         self.choiceset = {}
         self.choices = []
@@ -189,18 +184,20 @@ class _OneChoiceField(_MultipleField):
     types_parse = (NoneType, unicode, list)
     types_render = (str,)
 
-    def __init__( self, name, choices,
-                  label=None, hidden=None, initial=None, nocheck=None ):
+    def __init__( self, name, choices, label, attribs ):
 
         # Check the type of initial, which must be one of the types accepted
         # for choices.
-        if isinstance(initial, int):
-            initial = str(initial)
-        assert isinstance(initial, (NoneType,) + _OneChoiceField.types_data)
-
+        if 'initial' in attribs:
+            initial = attribs['initial']
+            if isinstance(initial, int):
+                initial = str(initial)
+            assert isinstance(initial, (NoneType,) + _OneChoiceField.types_data)
+            attribs['initial'] = initial
+                
         # Initialize base classes, always set as required.
-        _MultipleField.__init__(self, name, choices, label, hidden,
-                                initial, nocheck)
+        _MultipleField.__init__(self, name, choices, label, attribs)
+
 
     def parse_value( self, pvalue ):
         # See note about a value expected to have been submitted for the field,
@@ -262,12 +259,11 @@ class RadioField(_OneChoiceField, Orientable):
     """
     css_class = 'radio'
 
-    def __init__( self, name, choices,
-                  label=None, hidden=None, initial=None,
-                  nocheck=None, orient=ORI_VERTICAL ):
-        _OneChoiceField.__init__(self, name, choices, label, hidden,
-                                 initial, nocheck)
-        Orientable.__init__(self, orient)
+    def __init__( self, name, choices, label=None, **attribs ):
+        RadioField.validate_attributes(attribs)
+
+        Orientable.__init__(self, attribs)
+        _OneChoiceField.__init__(self, name, choices, label, attribs)
 
 #-------------------------------------------------------------------------------
 #
@@ -278,10 +274,10 @@ class MenuField(_OneChoiceField):
     """
     css_class = 'menu'
 
-    def __init__( self, name, choices, label=None, hidden=None,
-                  initial=None, nocheck=None ):
-        _OneChoiceField.__init__(self, name, choices, label, hidden,
-                                 initial, nocheck)
+    def __init__( self, name, choices, label=None, **attribs ):
+        MenuField.validate_attributes(attribs)
+
+        _OneChoiceField.__init__(self, name, choices, label, attribs)
 
 
 #-------------------------------------------------------------------------------
@@ -294,27 +290,29 @@ class _ManyChoicesField(_MultipleField):
     types_parse = (NoneType, unicode, list)
     types_render = (list,)
 
-    def __init__( self, name, choices, label=None, hidden=None,
-                  initial=None, nocheck=None ):
+    def __init__( self, name, choices, label, attribs ):
 
         # Check the type of initial, which must be one of the types accepted for
         # choices.
-        if isinstance(initial, int):
-            initial = str(initial)
-        elif isinstance(initial, (list, tuple)):
-            newinitial = []
-            for el in initial:
-                if isinstance(el, int):
-                    el = str(int)
-                else:
-                    assert isinstance(el, str)
-                newinitial.append(el)
-            initial = newinitial
-        assert isinstance(initial, (NoneType,) + _ManyChoicesField.types_data)
+        if 'initial' in attribs:
+            initial = attribs['initial']
+            if isinstance(initial, int):
+                initial = str(initial)
+            elif isinstance(initial, (list, tuple)):
+                newinitial = []
+                for el in initial:
+                    if isinstance(el, int):
+                        el = str(int)
+                    else:
+                        assert isinstance(el, str)
+                    newinitial.append(el)
+                initial = newinitial
+            assert isinstance(initial, (NoneType,) + _ManyChoicesField.types_data)
+            attribs['initial'] = initial
 
         # Initialize base classes, always set as required.
-        _MultipleField.__init__(self, name, choices, label, hidden,
-                                initial, nocheck)
+        _MultipleField.__init__(self, name, choices, label, attribs)
+
 
     def parse_value( self, pvalue ):
         if pvalue is None or pvalue == u'':
@@ -366,13 +364,11 @@ class CheckboxesField(_ManyChoicesField, Orientable):
     """
     css_class = 'checkboxes'
 
-    def __init__( self, name, choices,
-                  label=None, hidden=None, initial=None,
-                  nocheck=None, orient=ORI_VERTICAL ):
+    def __init__( self, name, choices, label=None, **attribs ):
+        CheckboxesField.validate_attributes(attribs)
 
-        _ManyChoicesField.__init__(self, name, choices, label, hidden,
-                                   initial, nocheck)
-        Orientable.__init__(self, orient)
+        Orientable.__init__(self, attribs)
+        _ManyChoicesField.__init__(self, name, choices, label, attribs)
 
 #-------------------------------------------------------------------------------
 #
@@ -396,47 +392,39 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
 
     css_class = 'listbox'
 
+    attributes_declare = (
+        ('multiple', 'bool',
+         """Set this to True if the field should allow more than one value
+         maximum to be set."""),
+
+        ('size', 'int',
+         """The height/number of visible elements of the listbox.  By default,
+         if left unset, it will use a reasonable minimum or the number of
+         choices if very small."""),
+        )
+
     __default_size = 5
 
-    def __init__( self, name, choices, label=None, hidden=None, initial=None,
-                  required=None, nocheck=None, multiple=False, size=None ):
-        """
-        :Arguments:
+    def __init__( self, name, choices, label=None, **attribs ):
+        ListboxField.validate_attributes(attribs)
 
-        - 'required' -> bool: whether the listbox forces a minimum of one choice
-          to be made;
-
-        - 'nocheck' -> bool: (See class _MultipleField for details.)
-
-        - 'multiple' -> bool: set this to True if the field should allow more
-          than one value maximum to be set.
-
-        - 'size' -> int: the height/number of visible elements of the listbox.
-          By default, if left unset, it will use a reasonable minimum or the
-          number of choices if very small.
-
-        """
-        assert isinstance(multiple, (bool, int))
-        self.multiple = multiple
-        "Whether the listbox allows more than a maximum of one choice."
-
-        if multiple:
-            _ManyChoicesField.__init__(self, name, choices, label, hidden,
-                                       initial, nocheck)
-        else:
-            _OneChoiceField.__init__(self, name, choices, label, hidden,
-                                     initial, nocheck)
-        OptRequired.__init__(self, required)
-
-        self.size = size
-        "The number of visible elements that the render should set."
-
+        self.multiple = attribs.pop('multiple', False)
+        assert isinstance(self.multiple, (bool, int))
+        
         # Set a more sensible default if it was not set.
-        if size is None:
+        self.size = attribs.pop('size', None)
+        if self.size is None:
             if choices:
                 self.size = min(len(choices), self.__default_size)
             else:
                 self.size = self.__default_size
+
+        OptRequired.__init__(self, attribs)
+        if self.multiple:
+            _ManyChoicesField.__init__(self, name, choices, label, attribs)
+        else:
+            _OneChoiceField.__init__(self, name, choices, label, attribs)
+
 
     def parse_value( self, pvalue ):
         # Check the required value, this forces at least one choice to be

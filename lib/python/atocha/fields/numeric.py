@@ -33,26 +33,34 @@ class _NumericalField(Field, OptRequired):
     types_parse = (NoneType, unicode,)
     types_render = (unicode,)
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None, required=None,
-                  minval=None, maxval=None, format=None ):
-        Field.__init__(self, name, label, hidden, initial)
-        OptRequired.__init__(self, required)
+    attributes_declare = (
+        ('minval', 'int', "Minimum value that is accepted."),
 
-        assert isinstance(minval, (NoneType, self._numtype))
-        assert isinstance(maxval, (NoneType, self._numtype))
+        ('maxval', 'int', "Maximum value that is accepted."),
 
-        self.minval = minval
-        "Minimum value that is accepted."
-
-        self.maxval = maxval
-        "Maximum value that is accepted."
-
-        self.format = format and format.decode('ascii') or None
-        """Printf-like format for output display.  If this is not set the
+        ('format', 'str',
+         """Printf-like format for output display.  If this is not set the
         default string conversion routines are used.  Note that you should set
         an appropriate format for the relevant numerical type.  Also, this does
-        not affect the input parsing at all."""
+        not affect the input parsing at all."""),
+        )
+
+    def __init__( self, name, label, attribs ):
+
+        self.minval = attribs.pop('minval', None)
+        assert isinstance(self.minval, (NoneType, self._numtype))
+
+        self.maxval = attribs.pop('maxval', None)
+        assert isinstance(self.maxval, (NoneType, self._numtype))
+        
+        if 'format' in attribs:
+            self.format = attribs.pop('format').decode('ascii')
+        else:
+            self.format = None
+
+        OptRequired.__init__(self, attribs)
+        Field.__init__(self, name, label, attribs)
+
 
     def parse_value( self, pvalue ):
         # Check the required value.
@@ -107,6 +115,11 @@ class IntField(_NumericalField):
     css_class = 'int'
     _numtype = int
 
+    def __init__( self, name, label=None, **attribs ):
+        IntField.validate_attributes(attribs)
+
+        _NumericalField.__init__(self, name, label, attribs)
+
 
 class FloatField(_NumericalField):
     """
@@ -115,3 +128,9 @@ class FloatField(_NumericalField):
     types_data = (NoneType, float,)
     css_class = 'float'
     _numtype = float
+
+    def __init__( self, name, label=None, **attribs ):
+        FloatField.validate_attributes(attribs)
+
+        _NumericalField.__init__(self, name, label, attribs)
+

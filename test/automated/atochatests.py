@@ -72,7 +72,7 @@ class TestRender:
         'Test rendering hidden fields.'
 
         # Expect an error on trying to render a hidden field without a value.
-        f = Form('test-form', StringField('name', hidden=1))
+        f = Form('test-form', StringField('name', state=Field.HIDDEN))
         args = {}
         p = FormRenderer(f, incomplete=1)
         try:
@@ -98,7 +98,7 @@ class TestRender:
         'Test rendering fields that do not exist.'
 
         # Expect an error on trying to render a hidden field without a value.
-        f = Form('test-form', StringField('name', hidden=1))
+        f = Form('test-form', StringField('name', state=Field.HIDDEN))
         args = {}
         p = FormRenderer(f, incomplete=1)
         try:
@@ -111,7 +111,7 @@ class TestRender:
         'Test output encoding for text renderer.'
 
         f = Form('test-form',
-                 StringField('name', hidden=1),
+                 StringField('name', state=Field.HIDDEN),
                  action='handle.cgi')
         args = {'name': u'Mélanie'}
         r = TextFormRenderer(f, args)

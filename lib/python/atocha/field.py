@@ -10,6 +10,9 @@ Form fields (widgets) definitions.
 # stdlib imports
 import re
 from types import NoneType
+import sys
+if sys.version_info[:2] < (2, 4):
+    from sets import Set as set
 
 # atocha imports.
 from messages import msg_registry, msg_type
@@ -31,25 +34,35 @@ class Field:
     form.  Each field must be given at least a name, which should unique within
     the form.
 
-    Fields:
+    Attributes
+    ----------
 
-    - 'name': Unique identifier for the field, and name of the form variables as
-      well;
+    Every field class should define the following class attributes:
 
-    - 'label' (optional): Label that is used to identify the field when
-      rendering it.
+    - 'attributes_mandatory' -> sequence of (name, typedesc, description)
+      pairs. This states that the current class requires the given list of
+      parameters.
 
-    - 'hidden' (optional): the field is rendered as a hidden input and does not
-      show up visibly in the browser page;
+    - 'attributes_declare' -> sequence of (name, typedesc, description)
+      pairs. This states that the current class supports the given list of
+      attributes.
 
-    - 'initial': Default value that is used for rendering the field with known
-      initial conditions if no value is given for it.  Important note: this
-      value is not used by the parsing at all.  If an argument is missing during
-      parsing, the value associated with the field will be set to None.  This is
-      NOT a default value to be provided by the parser if the field is not
-      submitted.
+    - 'attributes_delete' -> sequence of attribute names. This states the the
+      given class removes the given attributes from the list of valid attributes
+      that it supports.
 
-    Types: every field class should define the following class attributes:
+    Note that the computation of the final list of attributes is done lazily,
+    and that you do not need to append those classes attributes to those of the
+    parent, in the derived classes. The aggregation of attributes from the base
+    classes is made automatically.
+
+    These declarations are used to verify validity of given attributes at
+    runtime, and to generate documentation of the fields.
+
+    Types
+    -----
+
+    Every field class must define the following class attributes:
 
     - 'types_data' -> tuple: possible data types for parsed values, which may
       include None if it is a valid data value that can be returned by the
@@ -94,41 +107,145 @@ class Field:
     # Regular expression for valid variable names.
     varname_re = re.compile('[a-z0-9]')
 
-    # State definitions.
-    NORMAL = 1
-    READONLY = 2
-    DISABLED = 3
-    HIDDEN = 4
-    _states = (NORMAL, READONLY, DISABLED, HIDDEN)
+    # State definition enums.
+    _states = NORMAL, READONLY, DISABLED, HIDDEN = range(1, 5)
+    
+    #---------------------------------------------------------------------------
+    #
 
-    def __init__( self, name, label=None, state=NORMAL, initial=None ):
+    # Attributes declarations.
+    attributes_mandatory = (
+        ('name', 'str',
+        """Unique identifier name for the field, and name of the form
+        variables as well."""),
+        )
+
+    attributes_declare = (
+        ('label', 'str', "The visible label used by the form rendering."),
+
+        # We would like to keep the varnames feature a bit hidden for now, to be
+        # used by subclasses and not abused by creators of forms unless really
+        # needed.
+        #
+        # ('varnames', 'tuple of str', """Tuple of variable names used for the
+        # field, by default, a one-element tuple, of the same name as the field
+        # itself."""),
+
+        ('state', 'one of Field._states',
+        """Whether the field is to be rendered visible, readonly,
+        disabled or hidden.  This value represents the default state, and can be
+        overridden when the field is rendered. You can use the values
+        Field.NORMAL (default), Field.READONLY, Field.DISABLED, Field.HIDDEN.
+        """),
+
+        ('initial', 'valid data type for Field',"""Default value that is used for
+        rendering the field with known initial conditions if no value is given
+        for it.  Important note:  this value is not used by the parsing at all.
+        If an argument is missing during parsing, the value associated with the
+        field will be set to None. This is NOT a default value to be provided by
+        the parser if the field is not submitted. """),
+        )
+
+    attributes_delete = ()
+
+    
+    def get_attributes( cls ):
+        """
+        Lazily compute the field attributes and returns a set of valid
+        attributes and a list of (name, typedesc, desc) tuples.
+        """
+        if '_attributes' not in cls.__dict__:
+
+            # Build the list of classes in order of inheritance.
+            allclasses, clsstack = [], [cls]
+            while clsstack:
+                thiscls = clsstack.pop()
+                allclasses.append(thiscls)
+                clsstack.extend(thiscls.__bases__)
+            allclasses.reverse()
+
+            # Accumulate the tuples of attributes, in order.
+            mattmap, mattorder = {}, []
+            attmap, attorder = {}, []
+            for thiscls in allclasses:
+                if 'attributes_mandatory' in thiscls.__dict__:
+                    for a in thiscls.__dict__['attributes_mandatory']:
+                        attmap[ a[0] ] = a + (True,)
+                        mattorder.append( a[0] )
+
+                if 'attributes_declare' in thiscls.__dict__:
+                    for a in thiscls.__dict__['attributes_declare']:
+                        attmap[ a[0] ] = a + (False,)
+                        attorder.append( a[0] )
+
+                if 'attributes_delete' in thiscls.__dict__:
+                    for aname in thiscls.__dict__['attributes_delete']:
+                        del attmap[aname]
+
+            # Compute the final list of attributes and their description.
+            adescs, aset = [], set()
+            for aname in mattorder + attorder:
+                try:
+                    a = attmap[aname]
+                    assert len(a) == 4
+                    adescs.append(a)
+                    aset.add(aname)
+                except KeyError:
+                    pass
+
+            cls._attributes_set = aset
+            cls._attributes = adescs
+            
+        return cls._attributes_set, cls._attributes
+
+    get_attributes = classmethod(get_attributes)
+    
+    def validate_attributes( cls, attribs ):
+        """
+        Validates that all the attributes names given are supported.
+        """
+        if not __debug__:
+            return # Only in optimized mode.
+        
+        aset, adescs = cls.get_attributes()
+        errors = []
+        for aname in attribs.iterkeys():
+            if aname not in aset:
+                errors.append(aname)
+        if errors:
+            raise RuntimeError(
+                "Error: attributes '%s' not supported in field class '%s'." %
+                (', '.join(errors), cls.__name__))
+
+    validate_attributes = classmethod(validate_attributes)
+
+    #---------------------------------------------------------------------------
+    #
+    def __init__( self, name, label, attribs ):
         assert isinstance(name, str)
         assert isinstance(label, (NoneType, msg_type))
-        assert state in Field._states
 
         self.name = name
-        "Name of the field."
-
-        assert Field.varname_re.match(name)
-        self.varnames = [name]
-        """Tuple of variable names used for the field, by default, a one-element
-        tuple, of the same name as the field itself."""
-        # Note: customization for the variable names is relatively rare, so we
-        # leave it to the derived classes to do the right thing.
-
+        
         self.label = label
-        "The visible label used by the form rendering."
 
-        self.state = state
-        """Whether the field is to be rendered visible, readonly, disabled or
-        hidden."""
+        self.varnames = attribs.pop('varnames', [name])
+        for varname in self.varnames:
+            assert Field.varname_re.match(varname)
+
+        self.state = attribs.pop('state', Field.NORMAL)
+        assert self.state is None or self.state in Field._states
 
         # Make sure that the initial value is of an acceptable type for this
         # field.
-        assert isinstance(initial, (NoneType,) + self.types_data)
-        self.initial = initial
-        """The initial value set on the field when rendering, if not provided
-        by the values array."""
+        self.initial = attribs.pop('initial', None)
+        assert isinstance(self.initial, (NoneType,) + self.types_data)
+
+        # Check that all attributes have been popped.
+        if attribs:
+            raise RuntimeError(
+                "Error: unsupported attributes '%s' in field '%s'." %
+                (', '.join(attribs.keys()), self.name))
 
     def __str__( self ):
         """
@@ -258,34 +375,32 @@ class FieldError(Exception):
 #
 class OptRequired:
     """
-    Base class for all fields which can be optionally required, that is, which
+    Base class for all fields which can be OPTIONALLY REQUIRED, that is, which
     can take the 'required' option which allows them to check whether the input
     was submitted or not.
 
     The required field is checked via the parse_value() method for each field
     type, and not in the parser itself (previous versions of this library used
     to do that).
+
+    Important note: the 'required' option does not make sense for all the field
+    types, due to the nature of the submission protocol (for example, for the
+    checkboxes, the absence of the field value means a value of False, so we
+    cannot really check if the value was False or ''not submitted''.  This is
+    why some of the fields do not support the required field.
     """
-    def __init__( self, required=None ):
-        """
-        :Arguments:
 
-        - 'required': Indicates that if the value is missing from the arguments
-          during parsing, and error will be signaled for that input.  If
-          'required' is not set, a missing argument will produce a value of
-          None in the parser for the corresponding field.
+    attributes_declare = (
+        ('required', 'bool',
+        """Indicates that if the value is missing from the arguments during
+        parsing, and error will be signaled for that input.  If 'required' is
+        not set, a missing argument will produce a value of None in the parser
+        for the corresponding field."""),
+        )
 
-          Important note: the 'required' option does not make sense for all the
-          field types, due to the nature of the submission protocol (for
-          example, for the checkboxes, the absence of the field value means a
-          value of False, so we cannot really check if the value was False or
-          ''not submitted''.  This is why some of the fields do not support the
-          required field.
-
-        """
-        assert isinstance(required, (NoneType, bool, int))
-        self.required = required
-        "Whether the argument is OPTIONALLY required or not."
+    def __init__( self, attribs ):
+        self.required = bool(attribs.pop('required', False))
+        assert isinstance(self.required, bool)
 
     def parse_value( self, pvalue ):
         """
@@ -312,10 +427,15 @@ class Orientable:
     this setting allows the user to choose the layout style.
     """
 
-    def __init__( self, orient=ORI_VERTICAL ):
+    attributes_declare = (
+        ('orient', 'One of ORI_VERTICAL, ORI_HORIZONTAL',
+        """Orientation of the mini-table for layout of multiple inputs."""),
+        )
 
-        assert orient in [ORI_HORIZONTAL, ORI_VERTICAL]
-        self.orient = orient
+    def __init__( self, attribs ):
+
+        self.orient = attribs.pop('orient', ORI_VERTICAL)
+        assert self.orient in [ORI_HORIZONTAL, ORI_VERTICAL]
         """Orientation of the field for rendering."""
 
 

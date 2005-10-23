@@ -31,14 +31,18 @@ class BoolField(Field):
     types_render = (bool,)
     css_class = 'bool'
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None,
-                  disptrue=None, dispfalse=None ):
-        Field.__init__(self, name, label, hidden, initial)
+    attributes_declare = (
+        ('disptrue', 'str', "String for display of True value."),
+        ('dispfalse', 'str', "String for display of False value."),
+        )
 
-        self.disptrue = disptrue
-        self.dispfalse = dispfalse
-        """String for display.  This can be a useful convenience."""
+    def __init__( self, name, label=None, **attribs ):
+        BoolField.validate_attributes(attribs)
+        
+        self.disptrue = attribs.pop('disptrue', None)
+        self.dispfalse = attribs.pop('dispfalse', None)
+
+        Field.__init__(self, name, label, attribs)
 
     def parse_value( self, pvalue ):
         # Accept a missing argument or an empty string as False value (browsers
@@ -66,8 +70,17 @@ class AgreeField(BoolField):
     """
     css_class = 'agree'
 
-    def __init__( self, name, label=None, hidden=None ):
-        BoolField.__init__(self, name, label, hidden, False)
+    attributes_delete = ('initial',)
+
+    def __init__( self, name, label=None, **attribs ):
+        AgreeField.validate_attributes(attribs)
+
+        # Make sure that we're never initialized already checked (this is the
+        # whole point of this field, to force the user to explicitly agree by
+        # checking the checkbox).
+        attribs['initial'] = False
+
+        BoolField.__init__(self, name, label, **attribs)
         
     def isrequired( self ):
         """

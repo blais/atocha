@@ -5,3 +5,18 @@ div#project-header {
   background-image: url("etc/header-papillon1.jpg");
   background-color: #F0F3B0;
 }
+
+.field-options { 
+  font-size: small;
+  border: medium solid #CCC;
+  padding: 0.5em;
+}
+
+.field-options .topic-title { 
+  font-size: larger;
+  text-decoration: underline;
+}
+
+.field-options dd  { 
+  color: #666;
+}

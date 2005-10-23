@@ -2,8 +2,14 @@
 
 PYTEST ?= $(HOME)/src/dist-py/py/bin/py.test
 
-CMD = python2.3 $(PYTEST) -s -x
+PY = python2.3
+CMD =  $(PYTEST) -s -x
 
-all:
-	$(CMD) atochatests.py
+all: dbg
+
+dbg:
+	$(PY) $(CMD) atochatests.py
+
+# opt:
+# 	$(PY) -O $(CMD) atochatests.py
 

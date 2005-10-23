@@ -34,6 +34,8 @@ template = """
 
 """
 
+_opts_as_table = 0
+
 #-------------------------------------------------------------------------------
 #
 def main():
@@ -76,6 +78,30 @@ def main():
             print >> o,  '-' * len(cls.__name__)
             print >> o
             print >> o,  textwrap.dedent(cls.__doc__)
+
+            aset, adescs = cls.get_attributes()
+            if _opts_as_table:
+                print >> o
+                print >> o, '.. csv-table::'
+                print >> o, '   :class: field-options'
+                print >> o, '   :widths: 5, 5, 50'
+                print >> o, '   :header: "Name", "Type", "Description"'
+                print >> o, '   :delim: {'
+                print >> o
+                for aname, atype, adesc, amand in adescs:
+                    print >> o, '  ', '{'.join(
+                        (aname, atype, ' '.join(adesc.splitlines())) )
+                print >> o
+            else:
+                print >> o, '.. topic:: Valid Attributes'
+                print >> o, '   :class: field-options'
+                print >> o
+                for aname, atype, adesc, amand in adescs:
+                    if not amand:
+                        atype += ' (Optional)'
+                    print >> o, '    %s  --> %s' % (aname, atype)
+                    print >> o, '       ', ' '.join(adesc.splitlines())
+                print >> o
 
     f = tempfile.NamedTemporaryFile()
     f.write(o.getvalue())

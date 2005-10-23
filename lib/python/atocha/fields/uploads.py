@@ -89,16 +89,20 @@ class FileUploadField(Field, OptRequired):
     types_render = (unicode,)
     css_class = 'file'
 
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None,
-                  filtpat=None ):
-        Field.__init__(self, name, label, hidden, initial)
-        OptRequired.__init__(self, required)
+    attributes_declare = (
+        ('filtpat', 'str',
+         """Filter string to initialize the browser dialog on the client-side
+         with. This corresponds to the 'accept' attribute of the corresponding
+         HTML input field."""),
+        )
+         
+    def __init__( self, name, label=None, **attribs ):
+        FileUploadField.validate_attributes(attribs)
 
-        self.filtpat = filtpat
-        """Filter string to initialize the browser dialog on the client-side
-        with. This corresponds to the 'accept' attribute of the corresponding
-        HTML input field."""
+        self.filtpat = attribs.pop('filtpat', None)
+
+        OptRequired.__init__(self, attribs)
+        Field.__init__(self, name, label, attribs)
 
     def parse_value( self, pvalue ):
         """
@@ -226,18 +230,22 @@ class SetFileField(FileUploadField):
 
     __resetext = '_reset'
 
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None,
-                  filtpat=None, remlabel=None ):
-        FileUploadField.__init__(self, name, label, hidden, initial, required,
-                                 filtpat)
+    attributes_declare = (
+        ('remlabel', 'str',
+         """String to be used as the label for the 'reset' checkbox.  This
+         should be a string that will only get translated at the moment of
+         rendering."""),
+        )
 
-        self.remlabel = remlabel
-        if remlabel is None:
+    def __init__( self, name, label=None, **attribs ):
+        SetFileField.validate_attributes(attribs)
+
+        self.remlabel = attribs.pop('remlabel', None)
+        if self.remlabel is None:
             self.remlabel = msg_registry.get_notrans('setfile-reset')
         assert isinstance(self.remlabel, str)
-        """String to be used as the label for the 'reset' checkbox. This should
-        be a string that will only get translated at the moment of rendering."""
+
+        FileUploadField.__init__(self, name, label, **attribs)
 
         # We use two variable names in this field: the basic name for the file
         # upload, and another name for the checkbox.

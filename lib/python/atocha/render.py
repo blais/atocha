@@ -77,22 +77,20 @@ class FormRenderer:
             raise RuntimeError(
                 "Error: Form renderer did not render form completely.")
 
-    def _render_field( self, field, state=Field.NORMAL ):
+    def _render_field( self, field, state ):
         """
         Render a single field (implementation).
 
-        This method dispatches between the visible and hidden field rendering,
-        fetches the appropriate value for the field, and checks the basic
-        assumptions that are made in the framework.
+        This method dispatches between the visible and hidden field rendering
+        states, fetches the appropriate value for the field, and checks the
+        basic assumptions that are made in the framework.
 
         If 'state' is specified, we force the rendering of this field as if it
         was in that state, with the same conditions.  This is useful for hiding
         a field.
         """
         assert isinstance(field, Field)
-
-        # Figure out if this field should be rendered as hidden or not.
-        state = state or field.state
+        assert state in Field._states
 
         #
         # Get error to be used for rendering.
@@ -245,7 +243,7 @@ class FormRenderer:
                     "Error: Non-editabled field '%s' must have no errors." %
                     field.name)
 
-        if state == Field.HIDDEN:
+        if state is Field.HIDDEN:
             output = renderobj.renderHidden(field, rvalue)
 
         else:
@@ -258,7 +256,7 @@ class FormRenderer:
             mname = 'render%s' % field.__class__.__name__
             try:
                 method = getattr(renderobj, mname)
-                output = method(field, rvalue, errmsg, field.isrequired())
+                output = method(field, state, rvalue, errmsg, field.isrequired())
             except Exception, e:
                 raise
                 raise RuntimeError(
@@ -376,7 +374,7 @@ class FormRenderer:
         """
         return self.do_table(pairs)
 
-    def render_field( self, fieldname, state=Field.NORMAL ):
+    def render_field( self, fieldname, state=None ):
         """
         Render given field (by name).
         If you want to render multiple fields, use render_table().
@@ -386,6 +384,9 @@ class FormRenderer:
         except KeyError, e:
             raise RuntimeError(
                 "Error: field not present in form: %s" % str(e))
+
+        if state is None:
+            state = field.state
         return self._render_field(field, state)
 
     def render_submit( self, submit=None ):

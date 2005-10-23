@@ -25,37 +25,33 @@ __all__ = ['StringField', 'TextAreaField', 'PasswordField',
 class _TextField(Field, OptRequired):
     """
     Base class for fields receiving text.
-
-    Additional attributes:
-
-    - 'minlen': Minimal length of text field.
-
-    - 'maxlen': Maximal length of text field.
-
-    - 'encoding': Which encoding is considered to be a valid parsed/data value
-                  for this field. If you leave this to None, the field produces
-                  Unicode values.
-
     """
     types_data = (str, unicode,)
     types_parse = (NoneType, unicode,)
     types_render = (unicode,)
     css_class = 'text'
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, encoding=None ):
-        Field.__init__(self, name, label, hidden, initial)
-        OptRequired.__init__(self, required)
+    attributes_declare = (
+        ('minlen', 'int', "Minimum length of the field."),
 
-        self.minlen = minlen
-        "Minimum length of the field."
+        ('maxlen', 'int', "Maximum length of the field."),
 
-        self.maxlen = maxlen
-        "Maximum  length of the field."
+        ('encoding', 'str',
+         """Encoding to convert the string into and to validate to.  This
+         determines which encoding is considered to be a valid parsed/data value
+         for this field. If you leave this to None, the field produces Unicode
+         values."""),
+        )
 
-        self.encoding = encoding
-        "Encoding to convert the string into and to validate."
+    def __init__( self, name, label, attribs ):
+
+        self.minlen = attribs.pop('minlen', None)
+        self.maxlen = attribs.pop('maxlen', None)
+        self.encoding = attribs.pop('encoding', None)
+        
+        OptRequired.__init__(self, attribs)
+        Field.__init__(self, name, label, attribs)
+
 
     def parse_value( self, pvalue ):
         # Check the required value.
@@ -137,27 +133,25 @@ class _TextField(Field, OptRequired):
 class StringField(_TextField):
     """
     String input that must be on a single line.
-
-    Additional attributes:
-
-    - 'strip': Whether the data string returned has whitespace automatically
-      stripped off the beginning and end of it.
     """
     css_class = 'string'
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, size=None, encoding=None,
-                  strip=False ):
-        _TextField.__init__(self, name, label, hidden, initial, required,
-                            minlen, maxlen, encoding)
+    attributes_declare = (
+        ('size', 'int', """Suggested rendering size of the field."""),
 
-        self.size = size or maxlen
-        """Suggested rendering size of the field."""
+        ('strip', 'bool',
+         """Whether the string returned should be stripped of whitespace before
+         rendering and during parsing."""),
+        )
 
-        self.strip = strip
-        """Whether the string should be stripped before rendering and during
-        parsing."""
+    def __init__( self, name, label=None, **attribs ):
+        StringField.validate_attributes(attribs)
+
+        self.size = attribs.pop('size', attribs.get('maxlen', None))
+        self.strip = attribs.pop('strip', False)
+
+        _TextField.__init__(self, name, label, attribs)
+
 
     def parse_value( self, pvalue ):
         dvalue = _TextField.parse_value(self, pvalue)
@@ -194,18 +188,18 @@ class TextAreaField(_TextField):
     """
     css_class = 'textarea'
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, encoding=None,
-                  rows=None, cols=None ):
-        _TextField.__init__(self, name, label, hidden, initial, required,
-                            minlen, maxlen, encoding)
+    attributes_declare = (
+        ('rows', 'int', "The number of rows to render the field with."),
+        ('cols', 'int', "The number of column to render the field with."),
+        )
 
-        self.rows = rows
-        "The number of rows to render the field with."
+    def __init__( self, name, label=None, **attribs ):
+        TextAreaField.validate_attributes(attribs)
 
-        self.cols = cols
-        "The number of columns to render the field with."
+        self.rows = attribs.pop('rows', None)
+        self.cols = attribs.pop('cols', None)
+
+        _TextField.__init__(self, name, label, attribs)
 
     def render_value( self, dvalue ):
         rvalue = _TextField.render_value(self, dvalue)
@@ -231,15 +225,20 @@ class PasswordField(StringField):
     """
     css_class = 'password'
 
-    def __init__( self, name,
-                  label=None, hidden=None, initial=None, required=None,
-                  minlen=None, maxlen=None, size=None, encoding=None,
-                  hidepw=True ):
-        StringField.__init__(self, name, label, hidden, initial, required,
-                             minlen, maxlen, size, encoding, strip=False)
+    attributes_delete = ('strip',)
 
-        self.hidepw = hidepw
-        "Specifies whether the password should be hidden on rendering."
+    attributes_declare = (
+        ('hidepw', 'bool',
+         "Specifies whether the password should be state on rendering."),
+        )
+
+    def __init__( self, name, label=None, **attribs ):
+        PasswordField.validate_attributes(attribs)
+
+        self.hidepw = attribs.pop('hidepw', True)
+
+        attribs['strip'] = False
+        StringField.__init__(self, name, label, **attribs)
 
     def render_value( self, dvalue ):
         if self.hidepw:
@@ -258,22 +257,29 @@ class PasswordField(StringField):
 class EmailField(StringField):
     """
     Field for an email address.  The user can also enter a full name with <> but
-    the name is automatically thrown away.
-
-    Encoding is fixed to 'ascii', data is stripped automatically.
+    the name is automatically thrown away.  Encoding is fixed to 'ascii', data
+    is stripped automatically.
     """
     types_data = (str,)
     css_class = 'email'
 
+    attributes_declare = (
+        ('accept_local', 'bool',
+         """True if we accept local email addresses (i.e. without a @)."""),
+        )
+    
+    attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+
     __email_re = re.compile('^.*@.*\.[a-zA-Z][a-zA-Z]+$')
 
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None, accept_local=False ):
-        StringField.__init__(self, name, label, hidden, initial, required,
-                             size=None, encoding='ascii', strip=True)
+    def __init__( self, name, label=None, **attribs ):
+        EmailField.validate_attributes(attribs)
 
-        self.accept_local = accept_local
-        """True if we accept local email addresses (i.e. without a @)."""
+        self.accept_local = attribs.pop('accept_local', False)
+        
+        attribs['encoding'] = 'ascii'
+        attribs['strip'] = True
+        StringField.__init__(self, name, label, **attribs)
 
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
@@ -320,17 +326,20 @@ class URLField(StringField):
     """
     Field for an URL. We can parse some of the syntax for a valid URL.  This
     field can also be used by the renderer to automatically add a link to the
-    displayed value, if it is requested to render for display only.
-
-    Encoding is fixed to 'ascii', data is stripped automatically.
+    displayed value, if it is requested to render for display only.  Encoding is
+    fixed to 'ascii', data is stripped automatically.
     """
     types_data = (str,)
     css_class = 'url'
 
-    def __init__( self, name, label=None, hidden=None,
-                  initial=None, required=None ):
-        StringField.__init__(self, name, label, hidden, initial, required,
-                             size=None, encoding='ascii', strip=True)
+    attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+
+    def __init__( self, name, label=None, **attribs ):
+        URLField.validate_attributes(attribs)
+
+        attribs['encoding'] = 'ascii'
+        attribs['strip'] = True
+        StringField.__init__(self, name, label, **attribs)
 
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
@@ -344,3 +353,4 @@ class URLField(StringField):
         # Note: eventually, we want to parse using urlparse or something.
 
         return dvalue
+
