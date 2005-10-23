@@ -187,7 +187,9 @@ class JSDateField(Field): # Is always required.
 
         # Match the given string, it should always match.
         mo = JSDateField.__date_re.match(dvalue)
-        assert mo
+        if mo is None:
+            raise RuntimeError(
+                "Error: internal error with input from JSDateField.")
 
         # Convert into date.
         try:

@@ -274,8 +274,15 @@ class MenuField(_OneChoiceField):
     """
     css_class = 'menu'
 
+    attributes_declare = (
+        ('onchange', 'str (JavaScript)',
+         """JavaScript to run when the selector changes."""),
+        )
+    
     def __init__( self, name, choices, label=None, **attribs ):
         MenuField.validate_attributes(attribs)
+
+        self.onchange = attribs.pop('onchange', None)
 
         _OneChoiceField.__init__(self, name, choices, label, attribs)
 

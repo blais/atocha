@@ -33,7 +33,12 @@ class BoolField(Field):
 
     attributes_declare = (
         ('disptrue', 'str', "String for display of True value."),
+
         ('dispfalse', 'str', "String for display of False value."),
+
+        ('onchange', 'str (JavaScript)',
+         """JavaScript to run when the field is changed. This should
+         transparently render the more widely supported onclick callback."""),
         )
 
     def __init__( self, name, label=None, **attribs ):
@@ -41,6 +46,7 @@ class BoolField(Field):
         
         self.disptrue = attribs.pop('disptrue', None)
         self.dispfalse = attribs.pop('dispfalse', None)
+        self.onchange = attribs.pop('onchange', None)
 
         Field.__init__(self, name, label, attribs)
 

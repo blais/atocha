@@ -12,6 +12,7 @@ Run these tests using the codespeak py.test tool.
 
 # stdlib imports.
 import sys, os, datetime, StringIO, webbrowser
+import unittest 
 from pprint import pprint, pformat
 
 
@@ -26,11 +27,19 @@ reload(sys); sys.setdefaultencoding('undefined')
 
 #-------------------------------------------------------------------------------
 #
-class TestSimple:
+class Test(unittest.TestCase):
+    """
+    Base class for tests. We just use this for its assert functions.
+    """
+    def __init__( self ):
+        pass
+
+#-------------------------------------------------------------------------------
+#
+class TestSimple(Test):
     """
     Simple varied tests.
     """
-
     def test_simple1( self ):
         'Simple form test.'
 
@@ -42,7 +51,7 @@ class TestSimple:
         p = FormParser(f)
         p.parse(args)
         p.end()
-        assert p['name'] == u'école'
+        self.assertEqual(p['name'], u'école')
 
 
 #-------------------------------------------------------------------------------
@@ -184,7 +193,7 @@ class TestRender:
 #
 _u8str = u'école'.encode('utf-8')
 
-class TestFields:
+class TestFields(Test):
     """
     Tests for specific fields.
     """
@@ -563,12 +572,9 @@ class TestFields:
         assert not p.haserrors() and p['birthday'] == datetime.date(2005, 10, 03)
 
         p = FormParser(f)
-        try:
-            # This will assert because the value is just plain wrong and it is
-            # not a user error.
-            p.parse({'birthday': 'Thu, Jan 01, 2005'})
-            assert 0 
-        except AssertionError: pass
+        # This will assert because the value is just plain wrong and it is
+        # not a user error.
+        self.assertRaises(RuntimeError, p.parse, {'birthday': 'Thu, Jan 01, 2005'})
         p.end()
 
     def test_fileupload( self ):

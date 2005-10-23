@@ -5,17 +5,18 @@
 Current Affairs (Requirements Before 1.0 Initial Release)
 =========================================================
 
-- Write LaTeX documentation for Atocha, using the standard package. Look at
-  mod_python source for example;
+- Replace RuntimeError by AtochaError for internal errors.
+- Fix tests in optimized mode.
+
+- Implement rendering of onchange tags in renderers.
+
+- Add support for attribute-like access for value on the FormParser
 
 - The display renderer definitely needs an option to not display fields which
   have no value.
 
-- Support some of the JS tags
-- Add support for attribute-like access for value on the FormParser
-
-- Write an example of templating library integration.
-
+- Write more complete usage documentation for Atocha, in LaTeX using the
+  standard Python tools.
 
 
 
@@ -32,6 +33,13 @@ Known Bugs and Misfeatures
 
 - We do support accessibility features yet (but we could and we will). See notes
   below.
+
+- We need to support more of the JS tags. - onclick - onchange, etc.  I need
+  more time to test them, for now I just put the ones that I needed immediately
+  (checkboxes, menus).
+
+- The tests don't run in optimized mode, this is not really a bug, but rather
+  just to the assert function that we use in the test.
 
 
 Future New Field Types Ideas
@@ -63,6 +71,10 @@ Future New Field Types Ideas
 
 Ideas
 =====
+
+- Write a simple example of templating library integration, something simple
+  that everyone can understand, just replacing div tags with ids by regexps or
+  something.
 
 - Document the types_* subtypes where a list is present.  Type assertions should
   use a debugging function that can be noop'ed and that otherwise recurses into
