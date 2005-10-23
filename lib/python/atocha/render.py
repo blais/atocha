@@ -77,7 +77,7 @@ class FormRenderer:
             raise RuntimeError(
                 "Error: Form renderer did not render form completely.")
 
-    def _render_field( self, field, hide=None ):
+    def _render_field( self, field, state=Field.NORMAL ):
         """
         Render a single field (implementation).
 
@@ -85,13 +85,14 @@ class FormRenderer:
         fetches the appropriate value for the field, and checks the basic
         assumptions that are made in the framework.
 
-        If 'hide' is specified, we force the rendering of this field as if it
-        was a hidden field, with the same conditions.
+        If 'state' is specified, we force the rendering of this field as if it
+        was in that state, with the same conditions.  This is useful for hiding
+        a field.
         """
         assert isinstance(field, Field)
 
         # Figure out if this field should be rendered as hidden or not.
-        hidden = hide or field.ishidden()
+        state = state or field.state
 
         #
         # Get error to be used for rendering.
@@ -117,13 +118,15 @@ class FormRenderer:
         if self._values is None or field.name not in self._values:
             # There is no value for the field.
 
-            # If the field is hidden and the value is not set, we raise an
-            # error. We should not be able to render hidden fields without a
-            # value.  Also, hidden fields should not have errors.  Hidden fields
-            # should have an explicit value provided in the 'values' array.
-            if hidden and field.initial is None:
+            # If the field is hidden/read-only/disabled and the value is not
+            # set, we raise an error. We should not be able to render such
+            # fields without a value.  Also, such fields should not have errors.
+            # Such fields should have an explicit value provided in the 'values'
+            # array.
+            if state != Field.NORMAL and field.initial is None:
                 raise RuntimeError(
-                    "Error: Hidden field '%s' has no value." % field.name)
+                    "Error: Hidden/read-only field '%s' has no value." %
+                    field.name)
 
             # We will look at using the replacement value instead of the value.
             if error is not None:
@@ -173,7 +176,7 @@ class FormRenderer:
                 (repr(rvalue), repr(field.types_render)))
 
         # Dispatch to renderer.
-        output = self._dispatch_render(field, rvalue, errmsg, hidden)
+        output = self._dispatch_render(field, rvalue, errmsg, state)
 
         # Mark this fields as having been rendered.
         self._rendered.add(field.name)
@@ -214,9 +217,9 @@ class FormRenderer:
         # CheckboxesField).
         uvalue = field.display_value(dvalue)
 
-        # Dispatch to renderer. Notice we hard-wire no-errors and not-hidden
+        # Dispatch to renderer. Notice we hard-wire no-errors and normal visible
         # states.
-        output = self._dispatch_render(field, uvalue, None, False)
+        output = self._dispatch_render(field, uvalue, None, Field.NORMAL)
 
         # Mark this fields as having been rendered.
         self._rendered.add(field.name)
@@ -224,7 +227,7 @@ class FormRenderer:
         # Return output from the field-specific rendering code.
         return output
 
-    def _dispatch_render( self, field, rvalue, errmsg, hidden ):
+    def _dispatch_render( self, field, rvalue, errmsg, state ):
         """
         Dispatch to the appropriate method for rendering the fields.
         """
@@ -233,14 +236,16 @@ class FormRenderer:
         # customizable in the future.
         renderobj = self
 
-        if hidden:
-            # Make sure that we're not trying to render hidden fields that have
-            # errors associated to them.
+        if state != Field.NORMAL:
+            # Make sure that we're not trying to render
+            # hidden/read-only/disabled fields that have errors associated to
+            # them.
             if errmsg is not None:
                 raise RuntimeError(
-                    "Error: Hidden field '%s' must have no errors." %
+                    "Error: Non-editabled field '%s' must have no errors." %
                     field.name)
 
+        if state == Field.HIDDEN:
             output = renderobj.renderHidden(field, rvalue)
 
         else:
@@ -371,7 +376,7 @@ class FormRenderer:
         """
         return self.do_table(pairs)
 
-    def render_field( self, fieldname, hide=None ):
+    def render_field( self, fieldname, state=Field.NORMAL ):
         """
         Render given field (by name).
         If you want to render multiple fields, use render_table().
@@ -381,7 +386,7 @@ class FormRenderer:
         except KeyError, e:
             raise RuntimeError(
                 "Error: field not present in form: %s" % str(e))
-        return self._render_field(field, hide)
+        return self._render_field(field, state)
 
     def render_submit( self, submit=None ):
         """
@@ -469,9 +474,12 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def renderField( self, field, rvalue, errmsg, required ):
+    def renderField( self, field, state, rvalue, errmsg, required ):
         """
         Example of the signature for the methods that must be overriden.
+
+        Note that these rendering methods must support rendering normal,
+        read-only and disabled fields.
         """
         raise RuntimeError("Do not call this.")
 

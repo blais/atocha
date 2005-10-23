@@ -5,7 +5,60 @@
 Current Affairs
 ===============
 
+
+./index.html
+X ./lib/python/atocha/field.py
+
+FIXME todo convert all 'hidden' to 'state'
+./lib/python/atocha/fields/bools.py
+./lib/python/atocha/fields/choices.py
+./lib/python/atocha/fields/numeric.py
+./lib/python/atocha/fields/temporal.py
+./lib/python/atocha/fields/texts.py
+./lib/python/atocha/fields/uploads.py
+
+todo: add and support state to render methods
+./lib/python/atocha/renderers/rhtmlout.py
+./lib/python/atocha/renderers/rtext.py
+
+X ./lib/python/atocha/render.py
+./README
+./test/automated/atochatests.py
+./test/demo/cgi-bin/demo.py.txt
+./test/demo/demo.py
+./TODO
+
+
+
+- Implement DISABLED and READ-ONLY options for all the fields.
+
+  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It
+    cannot be hidden/disabled.
+
+  * Also, a field can be rendered disabled, but not actually be disabled
+    permanently.  I'm not sure what would be the utility in creating a field as
+    disabled.  Disabled is akin to hidden, and as such is more of a rendering
+    option than anything else.  IMO we should support disabled similar to
+    hidden.
+
+
+
+
+
 - Write an example of templating library integration.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -51,18 +104,6 @@ Ideas
 
   I'm not sure about this, since the text form renderer already does take an
   option...
-
-
-- Implement DISABLED and READ-ONLY options for all the fields.
-
-  * Hmmm... a field can be visible/enabled, visible/disabled or hidden.  It
-    cannot be hidden/disabled.
-
-  * Also, a field can be rendered disabled, but not actually be disabled
-    permanently.  I'm not sure what would be the utility in creating a field as
-    disabled.  Disabled is akin to hidden, and as such is more of a rendering
-    option than anything else.  IMO we should support disabled similar to
-    hidden.
 
 - Support ACCESS-KEYS and TABINDEX for widgets that are not hidden?
 

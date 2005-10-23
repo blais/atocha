@@ -94,10 +94,17 @@ class Field:
     # Regular expression for valid variable names.
     varname_re = re.compile('[a-z0-9]')
 
-    def __init__( self, name, label=None, hidden=None, initial=None ):
+    # State definitions.
+    NORMAL = 1
+    READONLY = 2
+    DISABLED = 3
+    HIDDEN = 4
+    _states = (NORMAL, READONLY, DISABLED, HIDDEN)
+
+    def __init__( self, name, label=None, state=NORMAL, initial=None ):
         assert isinstance(name, str)
         assert isinstance(label, (NoneType, msg_type))
-        assert isinstance(hidden, (NoneType, bool, int))
+        assert state in Field._states
 
         self.name = name
         "Name of the field."
@@ -112,8 +119,9 @@ class Field:
         self.label = label
         "The visible label used by the form rendering."
 
-        self.hidden = hidden or False
-        "Whether the field is to be rendered as hidden or not."
+        self.state = state
+        """Whether the field is to be rendered visible, readonly, disabled or
+        hidden."""
 
         # Make sure that the initial value is of an acceptable type for this
         # field.
@@ -132,7 +140,7 @@ class Field:
         """
         Returns true if this field is hidden.
         """
-        return self.hidden
+        return self.state == Field.HIDDEN
 
     def isrequired( self ):
         """
