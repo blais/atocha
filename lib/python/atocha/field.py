@@ -15,6 +15,7 @@ if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from messages import msg_registry, msg_type
 
 
@@ -213,7 +214,7 @@ class Field:
             if aname not in aset:
                 errors.append(aname)
         if errors:
-            raise RuntimeError(
+            raise AtochaError(
                 "Error: attributes '%s' not supported in field class '%s'." %
                 (', '.join(errors), cls.__name__))
 
@@ -243,7 +244,7 @@ class Field:
 
         # Check that all attributes have been popped.
         if attribs:
-            raise RuntimeError(
+            raise AtochaError(
                 "Error: unsupported attributes '%s' in field '%s'." %
                 (', '.join(attribs.keys()), self.name))
 
@@ -309,7 +310,7 @@ class Field:
 
         Note that if there is an unexpected value or an error, which is NOT DUE
         TO USER INPUT, you should NOT raise a FieldError, but rather fail with
-        an assert or a RuntimeError.  Raising FieldError is reserved for
+        an assert or a AtochaInternalError.  Raising FieldError is reserved for
         signaling user input error.
         """
         raise NotImplementedError # return dvalue

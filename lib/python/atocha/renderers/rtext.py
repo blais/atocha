@@ -12,6 +12,7 @@ import StringIO, codecs
 from os.path import join
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from atocha.render import FormRenderer
 from atocha.field import Field, ORI_VERTICAL
 from atocha.fields.uploads import FileUploadField
@@ -151,7 +152,7 @@ class TextFormRenderer(TextRenderer):
         form = self._form
 
         if action is None:
-            raise RuntimeError('Error: You must specify a non-null action '
+            raise AtochaError('Error: You must specify a non-null action '
                                'for rendering this form.')
 
         # Other options.
@@ -241,8 +242,8 @@ class TextFormRenderer(TextRenderer):
                 inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
                               (varname.decode('ascii'), rval))
         else:
-            raise RuntimeError("Error: unexpected type '%s' for rendering." %
-                               type(rvalue))
+            raise AtochaInternalError("Error: unexpected type '%s' for rendering." %
+                                       type(rvalue))
 
         return u'\n'.join(inputs)
 
@@ -471,7 +472,7 @@ class TextDisplayRenderer(TextRenderer):
 
     def __init__( self, *args, **kwds ):
         if 'errors' in kwds:
-            raise RuntimeError("Errors not allowed in display renderer.")
+            raise AtochaError("Errors not allowed in display renderer.")
 
         try:
             self.show_hidden = kwds['show_hidden']

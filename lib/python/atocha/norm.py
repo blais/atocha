@@ -17,10 +17,6 @@ an appropriate normalizer instance.
 """
 
 
-# stdlib imports.
-import cgi
-
-
 __all__ = ['ArgsNormalizer']
 
 

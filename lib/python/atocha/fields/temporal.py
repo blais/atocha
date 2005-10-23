@@ -12,6 +12,7 @@ import re, datetime, locale
 from types import NoneType
 
 # atocha imports.
+from atocha import AtochaInternalError
 from atocha.field import Field, FieldError
 from atocha.messages import msg_registry
 from texts import StringField
@@ -182,13 +183,13 @@ class JSDateField(Field): # Is always required.
             dvalue = pvalue.encode('ascii')
         except UnicodeEncodeError:
             # This should not happen if the value comes from the code.
-            raise RuntimeError(
+            raise AtochaInternalError(
                 "Error: internal error with input from JSDateField.")
 
         # Match the given string, it should always match.
         mo = JSDateField.__date_re.match(dvalue)
         if mo is None:
-            raise RuntimeError(
+            raise AtochaInternalError(
                 "Error: internal error with input from JSDateField.")
 
         # Convert into date.

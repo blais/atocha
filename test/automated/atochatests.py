@@ -56,7 +56,7 @@ class TestSimple(Test):
 
 #-------------------------------------------------------------------------------
 #
-class TestForm:
+class TestForm(Test):
     """
     Test form functionalities.
     """
@@ -66,7 +66,7 @@ class TestForm:
 
 #-------------------------------------------------------------------------------
 #
-class TestRender:
+class TestRender(Test):
     """
     Tests for rendering.
     """
@@ -83,12 +83,8 @@ class TestRender:
         # Expect an error on trying to render a hidden field without a value.
         f = Form('test-form', StringField('name', state=Field.HIDDEN))
         args = {}
-        p = FormRenderer(f, incomplete=1)
-        try:
-            p.render()
-            assert False
-        except RuntimeError:
-            pass
+        p = TextFormRenderer(f, incomplete=1)
+        self.assertRaises(AtochaError, p.render)
 
     def test_incomplete( self ):
         'Test rendering incompletely.'
@@ -110,11 +106,7 @@ class TestRender:
         f = Form('test-form', StringField('name', state=Field.HIDDEN))
         args = {}
         p = FormRenderer(f, incomplete=1)
-        try:
-            p.render(only=['notexist'])
-            assert False
-        except RuntimeError:
-            pass
+        self.assertRaises(AtochaError, p.render, only=['notexist'])
 
     def test_encoding( self ):
         'Test output encoding for text renderer.'
@@ -425,17 +417,11 @@ class TestFields(Test):
         assert not p.haserrors() and p['coffee'] == 'latte'
 
         p = FormParser(f)
-        try:
-            p.parse({'coffee': ['latte', 'expresso']})
-            assert 0
-        except RuntimeError: pass
+        self.assertRaises(AtochaError, p.parse, {'coffee': ['latte', 'expresso']})
         p.end()
 
         p = FormParser(f)
-        try:
-            p.parse({'coffee': 'american'})
-            assert 0
-        except RuntimeError: pass            
+        self.assertRaises(AtochaError, p.parse, {'coffee': 'american'})
         p.end()
 
         # Test with labels.
@@ -484,10 +470,7 @@ class TestFields(Test):
         assert not p.haserrors() and p['coffee'] == ['latte', 'expresso']
 
         p = FormParser(f)
-        try:
-            p.parse({'coffee': 'american'})
-            assert 0
-        except RuntimeError: pass            
+        self.assertRaises(AtochaError, p.parse, {'coffee': 'american'})
         p.end()
 
         # Test with labels.
@@ -574,7 +557,7 @@ class TestFields(Test):
         p = FormParser(f)
         # This will assert because the value is just plain wrong and it is
         # not a user error.
-        self.assertRaises(RuntimeError, p.parse, {'birthday': 'Thu, Jan 01, 2005'})
+        self.assertRaises(AtochaError, p.parse, {'birthday': 'Thu, Jan 01, 2005'})
         p.end()
 
     def test_fileupload( self ):

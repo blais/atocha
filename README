@@ -123,9 +123,12 @@ Reporting Bugs
 Bugs
 ----
 
-If you find bugs, send email to the author: Martin Blais <blais@furius.ca>.  I
-share my source code in the hope that other users will provide feedback to
-improve stability.  Contributions are also welcome.
+If you find bugs, please post them on the `associated SourceForge bug
+tracker`__.  I share my source code in the hope that other users will provide
+feedback to improve stability.  Contributions are also welcome.
+
+__ http://sourceforge.net/tracker/?group_id=150947
+
 
 Support and Stability
 ---------------------

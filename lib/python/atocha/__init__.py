@@ -71,6 +71,28 @@ Notes
 
 """
 
+# Note: we declare those before due to cycle.
+#-------------------------------------------------------------------------------
+#
+class AtochaError(Exception):
+    """
+    Class used for errors due to the misuse of the Atocha API.  An occurrence of
+    this exception means that you most likely have made a mistake in your code
+    using Atocha.
+    """
+    
+#-------------------------------------------------------------------------------
+#
+class AtochaInternalError(AtochaError):
+    """
+    Internal errors probably due to a bug in the Atocha library.
+    Please report such errors to the bug database at SourceForge.
+
+    These exception may also occur due to bad code in 3rd party fields and/or
+    renderers.
+    """
+
+
 # atocha imports.
 from form import *
 from field import *

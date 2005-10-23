@@ -12,6 +12,7 @@ import re, StringIO
 from types import NoneType, InstanceType
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 from bools import BoolField
@@ -172,7 +173,7 @@ class FileUploadField(Field, OptRequired):
         else:
             # Otherwise it's not an instance nor a string, we really don't know
             # what to do.
-            raise RuntimeError(
+            raise AtochaInternalError(
                 "Internal error: type for file parsing unknown.")
 
         # Check the required value, this forces at least one choice to be
@@ -193,7 +194,7 @@ class FileUploadField(Field, OptRequired):
         # Nothing to display from this, it's a file, you'll have to do something
         # special.
         if dvalue is not None:
-            raise RuntimeError("Error: attempting to display a file upload.")
+            raise AtochaError("Error: attempting to display a file upload.")
         return u''
 
 

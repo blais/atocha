@@ -21,6 +21,7 @@ if sys.version_info[:2] < (2, 4):
 import types
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from field import Field
 import fields
 from messages import msg_type, msg_registry # Used for _() setup.
@@ -74,7 +75,7 @@ class FormRenderer:
             # This gets ignored to some extent, because it is called within the
             # destructor, and only outputs a message to stderr, but it should be
             # ugly enough in the program's logs to show up.
-            raise RuntimeError(
+            raise AtochaError(
                 "Error: Form renderer did not render form completely.")
 
     def _render_field( self, field, state ):
@@ -122,7 +123,7 @@ class FormRenderer:
             # Such fields should have an explicit value provided in the 'values'
             # array.
             if state != Field.NORMAL and field.initial is None:
-                raise RuntimeError(
+                raise AtochaError(
                     "Error: Hidden/read-only field '%s' has no value." %
                     field.name)
 
@@ -169,7 +170,7 @@ class FormRenderer:
             rvalue = field.render_value(dvalue)
 
         if not isinstance(rvalue, field.types_render):
-            raise RuntimeError(
+            raise AtochaError(
                 "Error: rvalue '%s' is invalid (expecting %s)." %
                 (repr(rvalue), repr(field.types_render)))
 
@@ -239,7 +240,7 @@ class FormRenderer:
             # hidden/read-only/disabled fields that have errors associated to
             # them.
             if errmsg is not None:
-                raise RuntimeError(
+                raise AtochaError(
                     "Error: Non-editabled field '%s' must have no errors." %
                     field.name)
 
@@ -259,8 +260,8 @@ class FormRenderer:
                 output = method(field, state, rvalue, errmsg, field.isrequired())
             except Exception, e:
                 raise
-                raise RuntimeError(
-                    "Error: Attempting to render field '%s': %s" %
+                raise AtochaInternalError(
+                    "Error: While attempting to render field '%s': %s" %
                     (field, str(e)))
 
         return output
@@ -288,7 +289,7 @@ class FormRenderer:
             try:
                 getattr(cls, 'render%s' % att)
             except AttributeError:
-                raise RuntimeError(
+                raise AtochaInternalError(
                     'Renderer %s does not have required method %s' % (cls, att))
 
 
@@ -298,7 +299,7 @@ class FormRenderer:
             try:
                 getattr(cls, att)
             except AttributeError:
-                raise RuntimeError(
+                raise AtochaInternalError(
                     'Renderer %s does not have required method %s' % (cls, att))
 
     validate_renderer = classmethod(validate_renderer)
@@ -382,7 +383,7 @@ class FormRenderer:
         try:
             field = self._form[fieldname]
         except KeyError, e:
-            raise RuntimeError(
+            raise AtochaError(
                 "Error: field not present in form: %s" % str(e))
 
         if state is None:
@@ -482,6 +483,6 @@ class FormRenderer:
         Note that these rendering methods must support rendering normal,
         read-only and disabled fields.
         """
-        raise RuntimeError("Do not call this.")
+        raise AtochaError("Do not call this.")
 
 

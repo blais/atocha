@@ -12,8 +12,9 @@ import re
 from types import NoneType
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from atocha.field import Field, FieldError
-from atocha.field import OptRequired, Orientable, ORI_VERTICAL
+from atocha.field import OptRequired, Orientable
 from atocha.messages import msg_registry, msg_type
 
 
@@ -124,7 +125,7 @@ class _MultipleField(Field):
                     choice, label = el
 
                 else:
-                    raise RuntimeError(
+                    raise AtochaError(
                         "Error: wrong type of choice in initializer element: %s."
                         % type(el))
 
@@ -169,7 +170,7 @@ class _MultipleField(Field):
 
             if value not in self.choiceset:
                 # Note: this could be an internal error.
-                raise RuntimeError("Error: internal error checking values "
+                raise AtochaError("Error: internal error checking values "
                                    "against choices in a multiple field.")
 
 #-------------------------------------------------------------------------------
@@ -216,7 +217,7 @@ class _OneChoiceField(_MultipleField):
 
         if isinstance(pvalue, list):
             # We really should not be receiving more than one value here.
-            raise RuntimeError(
+            raise AtochaInternalError(
                 "Error: internal error with radio (list received).")
 
         # Decode the string as a ascii strings.
@@ -224,7 +225,7 @@ class _OneChoiceField(_MultipleField):
             dvalue = pvalue.encode('ascii')
         except UnicodeEncodeError:
             # The values really should be ascii-encodeable strings...
-            raise RuntimeError(
+            raise AtochaInternalError(
                 "Error: internal error with radio (value encoding)")
 
         # Check the given argument against the value.
@@ -238,7 +239,7 @@ class _OneChoiceField(_MultipleField):
                 return self.choices[0][0]
             else:
                 # Not sure what to do if there are not field values.
-                raise RuntimeError("Error: single selection field without "
+                raise AtochaError("Error: single selection field without "
                                    "values... cannot set default state.")
 
         # Nothing special to do, the selection string should remain that way
@@ -339,7 +340,7 @@ class _ManyChoicesField(_MultipleField):
                 dvalue.append(decval)
             except UnicodeEncodeError:
                 # The values really should be ascii-encodeable strings...
-                raise RuntimeError(
+                raise AtochaInternalError(
                     "Error: internal error with radio value encoding")
 
         # Check the given argument against the value.

@@ -13,6 +13,7 @@ import re
 from types import NoneType
 
 # atocha imports.
+from atocha import AtochaError, AtochaInternalError
 from field import Field, FieldError
 from fields.uploads import FileUploadField, FileUpload
 from messages import msg_registry, msg_type
@@ -82,7 +83,7 @@ class Form:
                 if isinstance(n, tuple):
                     assert isinstance(n[1], msg_type)
                 else:
-                    raise RuntimeError("Internal error with submit types.")
+                    raise AtochaInternalError("Internal error with submit types.")
         else:
             assert isinstance(self.submit, msg_type)
         assert self.submit
@@ -202,7 +203,7 @@ class Form:
         Add a field to the form. The field argument must be a Field instance.
         """
         if not isinstance(field, Field):
-            raise TypeError('Expecting a Field instance.')
+            raise AtochaError('Type error: Expecting a Field instance.')
         elif isinstance(field, FileUploadField):
             # If a FileUpload field is added, make sure that we modify the
             # enctype for the form appropriately.
@@ -210,14 +211,14 @@ class Form:
 
         # Check name collisions.
         if field.name in self._fieldsmap:
-            raise RuntimeError(
+            raise AtochaError(
                 'Error: Field name %s is already used.' % field.name)
 
         # Check variable name collisions.
         for fi in self._fields:
             for varname in field.varnames:
                 if varname in fi.varnames:
-                    raise RuntimeError(
+                    raise AtochaError(
                         'Error: Collision in varnames between %s and %s.' %
                         (fi.name, field.name))
         
@@ -247,7 +248,7 @@ class Form:
             try:
                 fields = [self._fieldsmap[x] for x in only]
             except KeyError, e:
-                raise RuntimeError(
+                raise AtochaError(
                     "Error: field not present in form: %s" % str(e))
 
         # Remove fields to be ignored.
@@ -378,7 +379,7 @@ class Form:
                 pvalue = vallist
 
             else:
-                raise RuntimeError(
+                raise AtochaInternalError(
                     'Internal error with types: unexpected type: %s.' %
                     type(argvalue))
 
@@ -401,7 +402,7 @@ class Form:
         # can accept that situation (the answer should be yes, most of the
         # time, see the types_parse in each field).
         if not isinstance(pvalue, fi.types_parse):
-            raise RuntimeError(
+            raise AtochaInternalError(
                 'Internal error with parse value type: %s.' % type(pvalue))
 
         #
@@ -459,7 +460,7 @@ class Form:
                 elif isinstance(n, tuple):
                     submit_values.append(n[0])
                 else:
-                    raise RuntimeError("Internal error with submit types.")
+                    raise AtochaInternalError("Internal error with submit types.")
         return submit_values
 
     def parse_submit( self, args ):
@@ -487,7 +488,7 @@ class Form:
             for sv in submit_values:
                 if sv in args:
                     if found is not None:
-                        raise RuntimeError(
+                        raise AtochaInternalError(
                             "Error: Multiple values for submits.")
                     found = sv
                     # Note: don't break, keep checking.

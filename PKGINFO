@@ -5,9 +5,9 @@ Author: Martin Blais
 Author-Email: blais@furius.ca
 Mailing-List: http://lists.sourceforge.net/mailman/listinfo/atocha-discuss
 ChangeLog: http://furius.ca/atocha/CHANGES
-Announcement: http://freshmeat.net/projects/optcomplete/  ## TODO ##
-Announcement: http://www.python.org/pypi?%3Aaction=search&name=nabu  ## TODO ##
+Announcement: http://freshmeat.net/projects/atocha/  ## TODO ##
+Announcement: http://www.python.org/pypi?%3Aaction=search&name=atocha  ## TODO ##
 Download-Releases: http://furius.ca/downloads/atocha/releases
 Download-Snapshots: http://furius.ca/downloads/atocha/snapshots
-Bugs-Reporting: mailto:blais@furius.ca
+Bugs-Reporting: http://sourceforge.net/tracker/?group_id=150947
 License: GNU GPL

@@ -116,7 +116,7 @@ print rdr.render_container(action='/edit/handler2')
       
 print &quot;&lt;div id=&quot;email&quot;&gt;
 print &quot;&lt;p&gt;Your email, please:&lt;/p&gt;
-print rdr.render_field('email')     # Render just the email field.
+print rdr.render_fields('email')     # Render just the email field.
 print &quot;&lt;/div&gt;
 </pre>
 <p>You could easily use this system to embed Atocha in your favourite templating
@@ -145,7 +145,7 @@ before rendering or parsing, in the renderer:</p>
 <pre class="literal-block">
 form['matches'].setchoices(found_matches)
 ...
-rdr.render_field('matches')
+rdr.render_fields('matches')
 ...
 </pre>
 <p>And in the parser (only needed if the choice field has &quot;choice checking&quot;
@@ -154,7 +154,7 @@ enabled):</p>
 form['matches'].setchoices(found_matches)
 ...
 p = FormParser(f, args)
-rdr.render_field('matches')
+rdr.render_fields('matches')
 ...
 </pre>
 </div>

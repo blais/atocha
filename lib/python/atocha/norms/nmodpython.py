@@ -7,9 +7,6 @@
 Normalizer for Apache + mod_python.
 """
 
-# stdlib imports.
-import sys
-
 # mod_python imports.
 from mod_python.util import FieldStorage, Field
 

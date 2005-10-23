@@ -11,7 +11,7 @@ Renderer for forms using htmlout.
 from os.path import join
 
 # atocha imports.
-import atocha
+from atocha import AtochaError, AtochaInternalError
 from atocha.render import FormRenderer
 from atocha.field import Field, ORI_VERTICAL
 from atocha.fields.uploads import FileUploadField
@@ -118,7 +118,7 @@ class HoutFormRenderer(HoutRenderer):
         form = self._form
 
         if action is None:
-            raise RuntimeError('Error: You must specify a non-null action '
+            raise AtochaError('Error: You must specify a non-null action '
                                'for rendering this form.')
 
         # Other options.
@@ -187,8 +187,8 @@ class HoutFormRenderer(HoutRenderer):
                 inputs.append(
                     INPUT(name=varname, type="hidden", value=rval))
         else:
-            raise RuntimeError("Error: unexpected type '%s' for rendering." %
-                               type(rvalue))
+            raise AtochaInternalError("Error: unexpected type '%s' for rendering." %
+                                       type(rvalue))
 
         return inputs
 
@@ -394,7 +394,7 @@ class HoutDisplayRenderer(HoutRenderer):
 
     def __init__( self, *args, **kwds ):
         if 'errors' in kwds:
-            raise RuntimeError("Errors not allowed in display renderer.")
+            raise AtochaError("Errors not allowed in display renderer.")
 
         try:
             self.show_hidden = kwds['show_hidden']
