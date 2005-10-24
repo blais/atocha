@@ -196,7 +196,9 @@ class FormRenderer:
 
         # If there is an error for the field, return a constant error string. We
         # do not print replacement values for the display, the value has to be
-        # fully valid.
+        # fully valid.  It may be possible that displaying a field with errors
+        # is not allowed in the code that calls this, but this might change in
+        # the future.
         if self._errors is not None and field.name in self._errors:
             return msg_registry['display-error']
 
