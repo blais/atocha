@@ -12,9 +12,8 @@ from os.path import join
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
-from atocha.render import FormRenderer
+import atocha.render
 from atocha.field import Field, ORI_VERTICAL
-from atocha.fields.uploads import FileUploadField
 from atocha.messages import msg_type
 
 # htmlout imports.
@@ -30,7 +29,7 @@ __all__ = ['HoutFormRenderer', 'HoutDisplayRenderer']
 
 #-------------------------------------------------------------------------------
 #
-class HoutRenderer(FormRenderer):
+class HoutRenderer(atocha.render.FormRenderer):
     """
     Base class for all renderers that will output to htmlout.
     """
@@ -56,7 +55,7 @@ class HoutRenderer(FormRenderer):
             self.label_semicolon = False
         """Whether we automatically add a semicolon to the labels or not."""
 
-        FormRenderer.__init__(self, *args, **kwds)
+        atocha.render.FormRenderer.__init__(self, *args, **kwds)
 
     def do_table( self, pairs=(), extra=None ):
         table = TABLE(CLASS=self.css_table)
@@ -89,7 +88,7 @@ class HoutFormRenderer(HoutRenderer):
     css_submit = u'atosub'
     css_required = u'atoreq'
     css_vertical = u'atomini'
-    
+
     scriptsdir = None
 
     def _geterror( self, errmsg ):
@@ -163,7 +162,7 @@ class HoutFormRenderer(HoutRenderer):
         nodes = []
         if not scripts:
             return nodes
-        
+
         scriptsdir = self.scriptsdir or ''
         for fn, notice in scripts.iteritems():
             nodes.append( SCRIPT(notice,
@@ -208,7 +207,7 @@ class HoutFormRenderer(HoutRenderer):
         if label is not None:
             inpu.text = label
         if checked:
-            inpu.attrib['checked'] = '1'            
+            inpu.attrib['checked'] = '1'
         if getattr(field, 'size', None):
             inpu.attrib['size'] = str(field.size)
         if getattr(field, 'maxlen', None):
@@ -387,7 +386,7 @@ class HoutFormRenderer(HoutRenderer):
 
 #-------------------------------------------------------------------------------
 #
-class HoutDisplayRenderer(HoutRenderer):
+class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
     """
     Display renderer in normal text. This renderer is meant to display parsed
     values as a read-only table, and not as an editable form.
@@ -400,16 +399,7 @@ class HoutDisplayRenderer(HoutRenderer):
     css_input = u'atodval'
 
     def __init__( self, *args, **kwds ):
-        if 'errors' in kwds:
-            raise AtochaError("Errors not allowed in display renderer.")
-
-        try:
-            self.show_hidden = kwds['show_hidden']
-            del kwds['show_hidden']
-        except KeyError:
-            self.show_hidden = True # Default is to display.
-        """Determines whether we render the fields that are hidden."""
-
+        atocha.render.DisplayRendererBase.__init__(self, kwds)
         HoutRenderer.__init__(self, *args, **kwds)
 
     def do_render( self, fields, action, submit ):
@@ -420,20 +410,7 @@ class HoutDisplayRenderer(HoutRenderer):
         return None
 
     def do_render_table( self, fields ):
-        visible = []
-        for field in fields:
-            # Don't display hidden fields.
-            if not self.show_hidden and field.ishidden():
-                continue
-
-            # Never display a file upload. Don't even try.
-            if isinstance(field, FileUploadField):
-                continue
-
-            rendered = self._display_field(field)
-            visible.append( (self._get_label(field), rendered) )
-
-        return self.do_table(visible)
+        return self.do_render_display_table(fields)
 
     def do_render_submit( self, submit, reset ):
         return None
@@ -469,7 +446,7 @@ class HoutDisplayRenderer(HoutRenderer):
         if rvalue:
             return [A(rvalue, href='%s' % rvalue)]
         return []
-        
+
     renderIntField = _simple
     renderFloatField = _simple
     renderBoolField = _simple

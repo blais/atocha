@@ -506,3 +506,7 @@ class Form:
                 if fn not in scripts:
                     scripts[fn] = notice
         return scripts
+
+#-------------------------------------------------------------------------------
+#
+def render_buttons

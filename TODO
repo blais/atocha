@@ -2,20 +2,13 @@
   atocha: TODO
 ================
 
-Current Affairs (Requirements Before 1.0 Initial Release)
-=========================================================
+Current Affairs (Requirements Before 1.0 Final Release)
+=======================================================
 
-- The display renderer definitely needs an option to not display fields which
-  have no value.
-
-  * render.py:225 is where the check should go.  Support this feature in both
-    renderers.
-
-
+- Implement buttons array, see tutorial.txt, see form.py
 
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
-
 
 
 

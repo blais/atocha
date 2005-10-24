@@ -24,12 +24,12 @@ import types
 from atocha import AtochaError, AtochaInternalError
 from field import Field
 import fields
+from atocha.fields.uploads import FileUploadField
 from messages import msg_type, msg_registry # Used for _() setup.
 from parse import FormParser
 
 
 __all__ = ['FormRenderer']
-
 
 
 #-------------------------------------------------------------------------------
@@ -176,51 +176,6 @@ class FormRenderer:
 
         # Dispatch to renderer.
         output = self._dispatch_render(field, rvalue, errmsg, state)
-
-        # Mark this fields as having been rendered.
-        self._rendered.add(field.name)
-
-        # Return output from the field-specific rendering code.
-        return output
-
-
-    def _display_field( self, field ):
-        """
-        Convert the value for the given field from valid type data to a
-        user-displayable string.  This is used by the display renderers to
-        provide a nice user rendering of the values.
-
-        This always returns a unicode string, ready to be printed.
-        """
-        assert isinstance(field, Field)
-
-        # If there is an error for the field, return a constant error string. We
-        # do not print replacement values for the display, the value has to be
-        # fully valid.  It may be possible that displaying a field with errors
-        # is not allowed in the code that calls this, but this might change in
-        # the future.
-        if self._errors is not None and field.name in self._errors:
-            return msg_registry['display-error']
-
-        # Check if there is a valid dvalue.
-        if self._values is None:
-            return msg_registry['display-unset']
-        try:
-            dvalue = self._values[field.name]
-        except KeyError:
-            return msg_registry['display-unset']
-
-        # Have the value converted by the field for display.
-        #
-        # Note: if there is any translation to be done, we expect the
-        # display_value method to have done it before us.  This is so that
-        # combinations of translated values can be performed (e.g. see
-        # CheckboxesField).
-        uvalue = field.display_value(dvalue)
-
-        # Dispatch to renderer. Notice we hard-wire no-errors and normal visible
-        # states.
-        output = self._dispatch_render(field, uvalue, None, Field.NORMAL)
 
         # Mark this fields as having been rendered.
         self._rendered.add(field.name)
@@ -487,4 +442,110 @@ class FormRenderer:
         """
         raise AtochaError("Do not call this.")
 
+
+#-------------------------------------------------------------------------------
+#
+class DisplayRendererBase:
+    """
+    Common options for display renderers (but they might not make sense for
+    other renderer types, this is why we provide this special class).
+    """
+
+    def __init__( self, kwds ):
+        if 'errors' in kwds:
+            raise AtochaError("Errors not allowed in display renderer.")
+
+        self.show_hidden = kwds.pop('show_hidden', True)
+        """Determines whether we render the fields that are hidden."""
+
+        self.show_unset = kwds.pop('show_unset', True)
+        """Determines whether we render the fields that have no associated value
+        to render.  This will display set but empty values (such as empty
+        strings)."""
+
+        self.show_empty = kwds.pop('show_empty', True)
+        """Determines whether we render the fields that do have an associated
+        value but which evaluates to False.  This will not display fields with
+        empty strings."""
+
+    def _display_field( self, field, dvalue ):
+        """
+        Convert the value for the given field from valid type data to a
+        user-displayable string.  This is used by the display renderers to
+        provide a nice user rendering of the values.
+
+        This always returns a unicode string, ready to be printed.
+        """
+        assert isinstance(field, Field)
+        assert isinstance(dvalue, field.types_data)
+
+        # Have the value converted by the field for display.
+        #
+        # Note: if there is any translation to be done, we expect the
+        # display_value method to have done it before us.  This is so that
+        # combinations of translated values can be performed (e.g. see
+        # CheckboxesField).
+        uvalue = field.display_value(dvalue)
+
+        # Dispatch to renderer. Notice we hard-wire no-errors and normal visible
+        # states.
+        output = self._dispatch_render(field, uvalue, None, Field.NORMAL)
+
+        # Mark this fields as having been rendered.
+        self._rendered.add(field.name)
+
+        # Return output from the field-specific rendering code.
+        return output
+
+    def do_render_display_table( self, fields ):
+        """
+        Render a table for diplay, honoring the appropriate options.
+        """
+        visible = []
+        for field in fields:
+            # Don't display unset fields.
+            if not self.show_unset and field.ishidden():
+                continue
+
+            # Never display a file upload. Don't even try.
+            if isinstance(field, FileUploadField):
+                continue
+
+            # If there is an error for the field, return a constant error string. We
+            # do not print replacement values for the display, the value has to be
+            # fully valid.  It may be possible that displaying a field with errors
+            # is not allowed in the code that calls this, but this might change in
+            # the future.
+            if self._errors is not None and field.name in self._errors:
+                rendered = msg_registry['display-error']
+
+            elif self._values is None:
+                # Cull out unset values.
+                if not self.show_unset:
+                    continue
+                else:
+                    rendered = msg_registry['display-unset']
+
+            else:
+                # We might have a value available to convert and display.
+                try:
+                    dvalue = self._values[field.name]
+
+                    # Cull out empty values.
+                    if not self.show_empty and not dvalue:
+                        continue
+
+                    # Render the field to be displayed.
+                    rendered = self._display_field(field, dvalue)
+
+                except KeyError:
+                    # Cull out unset values.
+                    if not self.show_unset:
+                        continue
+                    else:
+                        rendered = msg_registry['display-unset']
+
+            visible.append( (self._get_label(field), rendered) )
+
+        return self.do_table(visible)
 

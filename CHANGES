@@ -2,7 +2,3 @@
   atocha: CHANGES
 ===================
 
-- [2005-10-23] Implemented disabled and read-only states.
-- [2005-10-17] Completed all the important features.
-- [2005-10-08] Initial commit after rework of old form library.
-

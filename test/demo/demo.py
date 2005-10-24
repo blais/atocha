@@ -26,7 +26,7 @@ from atocha import *
 
 #-------------------------------------------------------------------------------
 #
-rtype = 'text' # Renderer type for demo/tests: 'text' or 'htmlout'
+rtype = 'htmlout' # Renderer type for demo/tests: 'text' or 'htmlout'
 
 #-------------------------------------------------------------------------------
 #

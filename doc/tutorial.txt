@@ -236,6 +236,31 @@ already present in the form definition::
    print "</div>
 
 
+Rendering Buttons Only
+======================
+
+If you want to just render some buttons, you can use an empty form::
+
+    form = Form(
+        'form-first-login',
+        submit=N_('Edit Profile Now'), method='GET'
+        )
+
+    ...
+    TextFormRenderer(form)
+    rdr.render(action='/u/%s/profile/general_edit' % u.username)
+
+Or use the convenience method that will do the simple stuff for you::
+
+    TextFormRenderer.render_buttons(
+        N_('Edit Profile Now'), 
+        method='GET', 
+        action='/u/%s/profile/general_edit' % u.username)
+
+FIXME todo implement this, see if it's worth it.
+
+
+
 Options
 =======
 

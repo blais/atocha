@@ -13,9 +13,8 @@ from os.path import join
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
-from atocha.render import FormRenderer
+import atocha.render
 from atocha.field import Field, ORI_VERTICAL
-from atocha.fields.uploads import FileUploadField
 from atocha.messages import msg_type
 
 
@@ -24,7 +23,7 @@ __all__ = ['TextFormRenderer', 'TextDisplayRenderer']
 
 #-------------------------------------------------------------------------------
 #
-class TextRenderer(FormRenderer):
+class TextRenderer(atocha.render.FormRenderer):
     """
     Base class for all renderers that will output to text.
     """
@@ -57,7 +56,7 @@ class TextRenderer(FormRenderer):
             self.label_semicolon = False
         """Whether we automatically add a semicolon to the labels or not."""
 
-        FormRenderer.__init__(self, *args, **kwds)
+        atocha.render.FormRenderer.__init__(self, *args, **kwds)
 
 
     def _create_buffer( self ):
@@ -465,7 +464,7 @@ class TextFormRenderer(TextRenderer):
 
 #-------------------------------------------------------------------------------
 #
-class TextDisplayRenderer(TextRenderer):
+class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     """
     Display renderer in normal text. This renderer is meant to display parsed
     values as a read-only table, and not as an editable form.
@@ -478,16 +477,7 @@ class TextDisplayRenderer(TextRenderer):
     css_input = u'atodval'
 
     def __init__( self, *args, **kwds ):
-        if 'errors' in kwds:
-            raise AtochaError("Errors not allowed in display renderer.")
-
-        try:
-            self.show_hidden = kwds['show_hidden']
-            del kwds['show_hidden']
-        except KeyError:
-            self.show_hidden = True # Default is to display.
-        """Determines whether we render the fields that are hidden."""
-
+        atocha.render.DisplayRendererBase.__init__(self, kwds)
         TextRenderer.__init__(self, *args, **kwds)
 
     def do_render( self, fields, action, submit ):
@@ -513,20 +503,7 @@ class TextDisplayRenderer(TextRenderer):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
-        visible = []
-        for field in fields:
-            # Don't display hidden fields.
-            if not self.show_hidden and field.ishidden():
-                continue
-
-            # Never display a file upload. Don't even try.
-            if isinstance(field, FileUploadField):
-                continue
-
-            rendered = self._display_field(field)
-            visible.append( (self._get_label(field), rendered) )
-
-        self.do_table(visible)
+        self.do_render_display_table(fields)
 
         if self.ofile is None: return f.getvalue()
 
