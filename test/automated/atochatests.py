@@ -49,15 +49,16 @@ class TestSimple(Test):
         # Test very basic stuff.
         args = {'name': _u8str}
         p = FormParser(f)
-        p.parse(args)
+        p.parse_args(args)
         o = p.end()
 
         # Test accessor methods.
-        name = p['name'] # Using accessor.
-        name = o.name # Using accessor.
+        name = p['name'] # Using item accessor on parser.
+        name = p.o.name # Using attribute accessor on parser.
+        name = o.name # Using attribute accessor.
         self.assertRaises(KeyError, getattr, o, 'name2')
         self.assertEqual(o.name, u'école')
-
+ 
 
 #-------------------------------------------------------------------------------
 #
@@ -121,10 +122,10 @@ class TestRender(Test):
                  action='handle.cgi')
         args = {'name': u'Mélanie'}
         r = TextFormRenderer(f, args)
-        assert isinstance(r.render(), unicode)
+        self.assert_(isinstance(r.render(), unicode))
 
         r = TextFormRenderer(f, args, output_encoding='latin-1')
-        assert isinstance(r.render(), str)
+        self.assert_(isinstance(r.render(), str))
 
 
     #---------------------------------------------------------------------------
@@ -201,8 +202,8 @@ class TestFields(Test):
         # Test without a label.
         f = Form('test-form', StringField('name'))
         args = {'name': _u8str}
-        p = FormParser(f, args, end=1)
-        assert p['name'] == u'école'
+        o = FormParser.parse(f, args)
+        self.assert_(o.name == u'école')
 
         # Test some encodings.
         f = Form('test-form',
@@ -216,54 +217,56 @@ class TestFields(Test):
                 'nameutf': _u8str,
                 'namelatin': _u8str,
                 'nameascii': 'ecole'}
-        p = FormParser(f, args=args, end=1)
-        assert p['nameuni'] == u'\xe9cole' and type(p['nameuni']) is unicode
-        assert p['nameutf'] == '\xc3\xa9cole' and type(p['nameutf']) is str
-        assert p['namelatin'] == '\xe9cole' and type(p['namelatin']) is str
-        assert p['nameascii'] == 'ecole' and type(p['nameascii']) is str
-        assert not p.haserrors()
+        o = FormParser.parse(f, args=args)
+        self.assert_(o is not None)
+        self.assert_(o.nameuni == u'\xe9cole' and type(o.nameuni) is unicode)
+        self.assert_(o.nameutf == '\xc3\xa9cole' and type(o.nameutf) is str)
+        self.assert_(o.namelatin == '\xe9cole' and type(o.namelatin) is str)
+        self.assert_(o.nameascii == 'ecole' and type(o.nameascii) is str)
 
         # Test string encoding errors.
         args = {'nameascii': _u8str}
-        p = FormParser(f, args, end=1)
-        assert p['nameascii'] is None
-        assert p.haserrors()
-        assert p.geterrors().keys() == ['nameascii']
+        p = FormParser(f, args)
+        o = p.end()
+        self.assert_(o is None)
+        self.assert_(p.geterrors().keys() == ['nameascii'])
 
         # Test required field.
         f = Form('test-form', StringField('name', required=1))
         args = {}
-        p = FormParser(f, args, end=1)
-        assert p.haserrors()
-        assert p.geterrors().keys() == ['name']
-        assert p['name'] is None
+        p = FormParser(f, args)
+        o = p.end()
+        self.assert_(o is None)
+        self.assert_(p.haserrors())
+        self.assert_(p.geterrors().keys() == ['name'])
+        self.assert_(p['name'] is None)
 
         # Test with multiline input.
         f = Form('test-form', StringField('name', minlen=4, maxlen=10))
         args = {'name': 'Martin\nblibli\nlis'}
-        p = FormParser(f, args, end=1)
-        assert p.haserrors()
+        o = FormParser.parse(f, args)
+        self.assert_(o is None)
 
         # Test min/max lengths.
         f = Form('test-form', StringField('name', minlen=4, maxlen=10))
         args = {'name': 'Martin'}
-        p = FormParser(f, args, end=1)
-        assert not p.haserrors()
+        o = FormParser.parse(f, args)
+        self.assert_(o.name)
 
         args = {'name': 'Jon'}
-        p = FormParser(f, args, end=1)
-        assert p.haserrors()
+        o = FormParser.parse(f, args)
+        self.assert_(o is None)
 
         args = {'name': 'Elizabeth the 3rd'}
-        p = FormParser(f, args, end=1)
-        assert p.haserrors()
+        p = FormParser.parse(f, args)
+        self.assert_(o is None)
 
         # Test strip option.
         f = Form('test-form', StringField('name', strip=1))
         args = {'name': ' Martin  '}
-        p = FormParser(f, args, end=1)
-        assert not p.haserrors()
-        assert p['name'] == u'Martin'
+        o = FormParser.parse(f, args)
+        self.assert_(o is not None)
+        self.assert_(o.name == u'Martin')
 
     def test_textarea( self ):
         'Textarea tests.'
@@ -279,36 +282,35 @@ class TestFields(Test):
         args2 = {'quote': u"""Aller a l'école,
         c'est pas juste pour les bollés.""".encode(f.accept_charset)}
 
-        p = FormParser(f, args1, end=1)
-        assert not p.haserrors()
-        assert p['quote']
+        for a in args1, args2:
+            o = FormParser.parse(f, a)
+            self.assert_(o is not None)
+            self.assert_(o.quote)
+
         
-        p = FormParser(f, args2, end=1)
-        assert not p.haserrors()
-        assert p['quote']
-
-
     def test_date( self ):
         'DateField tests.'
 
         # Test simple.
         f = Form('test-form', DateField('birthday'))
 
-        p = FormParser(f, {}, end=1)
-        assert not p.haserrors() and p['birthday'] is None
+        o = FormParser.parse(f, {})
+        self.assert_(o and o.birthday is None)
         
         f = Form('test-form', DateField('birthday', required=1))
 
-        p = FormParser(f, {}, end=1)
-        assert p.haserrors() and 'birthday' in p.geterrors()
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(o is None and 'birthday' in p.geterrors())
 
         for x in '1972-05-28', '28 may 1972', 'May 28, 1972', 'May 28 1972':
-            p = FormParser(f, {'birthday': x}, end=1)
-            assert not p.haserrors()
-            assert p['birthday'] == datetime.date(1972, 05, 28)
+            o = FormParser.parse(f, {'birthday': x})
+            self.assert_(o is not None)
+            self.assert_(o.birthday == datetime.date(1972, 05, 28))
 
-        p = FormParser(f, {'birthday': 'Thu, Jan 01, 2005'}, end=1)
-        assert p.haserrors() and 'birthday' in p.geterrors()
+        p = FormParser(f, {'birthday': 'Thu, Jan 01, 2005'})
+        o = p.end()
+        self.assert_(o is None and p.haserrors() and 'birthday' in p.geterrors())
 
 
     def test_email( self ):
@@ -316,31 +318,38 @@ class TestFields(Test):
 
         f = Form('test-form', EmailField('email'))
 
-        p = FormParser(f, {'email': 'blais@furius.ca'}, end=1)
-        assert not p.haserrors() and p['email'] == 'blais@furius.ca'
+        p = FormParser(f, {'email': 'blais@furius.ca'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['email'] == 'blais@furius.ca')
 
-        p = FormParser(f, {'email': 'Martin Blais <blais@furius.ca>'}, end=1)
-        assert not p.haserrors() and p['email'] == 'blais@furius.ca'
+        p = FormParser(f, {'email': 'Martin Blais <blais@furius.ca>'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['email'] == 'blais@furius.ca')
         
-        p = FormParser(f, {'email': 'blais'}, end=1)
-        assert p.haserrors() and p.geterrorfields() == ['email']
+        p = FormParser(f, {'email': 'blais'})
+        o = p.end()
+        self.assert_(p.haserrors() and p.geterrorfields() == ['email'])
 
         f2 = Form('test-form', EmailField('email', accept_local=1))
-        p = FormParser(f2, {'email': 'blais'}, end=1)
-        assert not p.haserrors() and p['email'] == 'blais'
+        p = FormParser(f2, {'email': 'blais'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['email'] == 'blais')
 
-        p = FormParser(f, {'email': 'blais+bli@furius.ca'}, end=1)
-        assert not p.haserrors() and p['email'] == 'blais+bli@furius.ca'
+        p = FormParser(f, {'email': 'blais+bli@furius.ca'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['email'] == 'blais+bli@furius.ca')
 
-        p = FormParser(f, {'email': 'blais@furius.org'}, end=1)
-        assert not p.haserrors() and p['email'] == 'blais@furius.org'
+        p = FormParser(f, {'email': 'blais@furius.org'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['email'] == 'blais@furius.org')
 
-        p = FormParser(f, {'email': 'blais[@furius.com'}, end=1)
-        assert p.haserrors() and p['email'] is None
+        p = FormParser(f, {'email': 'blais[@furius.com'})
+        o = p.end()
+        self.assert_(p.haserrors() and p['email'] is None)
 
         # TLDs are not checked, it seems. We'll take it.
         # p = FormParser(f, {'email': 'blais@furius.glu'}, end=1)
-        # assert p.haserrors() and p.geterrorfields() == ['email']
+        # self.assert_(p.haserrors() and p.geterrorfields() == ['email'])
 
     def test_url( self ):
         'URLField tests.'
@@ -353,23 +362,28 @@ class TestFields(Test):
         # Test simple.
         f = Form('test-form', IntField('number', minval=3, maxval=20))
 
-        p = FormParser(f, {'number': '17'}, end=1)
-        assert not p.haserrors()
-        assert p['number'] == 17
+        p = FormParser(f, {'number': '17'})
+        o = p.end()
+        self.assert_(not p.haserrors())
+        self.assert_(p['number'] == 17)
 
-        p = FormParser(f, {'number': '2'}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {'number': '2'})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
-        p = FormParser(f, {'number': '25'}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {'number': '25'})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
-        p = FormParser(f, {'number': '17.3'}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {'number': '17.3'})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
         # Test required.
         f = Form('test-form', IntField('number', required=1))
-        p = FormParser(f, {}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
     def test_float( self ):
         'FloatField tests.'
@@ -377,24 +391,29 @@ class TestFields(Test):
         # Test simple.
         f = Form('test-form', FloatField('number', minval=3.2, maxval=20.7))
 
-        p = FormParser(f, {'number': '17.3'}, end=1)
-        assert not p.haserrors()
-        assert p['number'] == 17.3
+        p = FormParser(f, {'number': '17.3'})
+        o = p.end()
+        self.assert_(not p.haserrors())
+        self.assert_(p['number'] == 17.3)
 
-        p = FormParser(f, {'number': '17'}, end=1)
-        assert not p.haserrors()
-        assert p['number'] == 17
+        p = FormParser(f, {'number': '17'})
+        o = p.end()
+        self.assert_(not p.haserrors())
+        self.assert_(p['number'] == 17)
 
-        p = FormParser(f, {'number': '2.03'}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {'number': '2.03'})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
-        p = FormParser(f, {'number': '25.87'}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {'number': '25.87'})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
         # Test required.
         f = Form('test-form', IntField('number', required=1))
-        p = FormParser(f, {}, end=1)
-        assert p.haserrors() and 'number' in p.geterrors()
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(p.haserrors() and 'number' in p.geterrors())
 
     def test_bool( self ):
         'BoolField tests.'
@@ -402,14 +421,17 @@ class TestFields(Test):
         # Test simple.
         f = Form('test-form', BoolField('agree'))
 
-        p = FormParser(f, {}, end=1)
-        assert not p.haserrors() and p['agree'] is False
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['agree'] is False)
         
-        p = FormParser(f, {'agree': 'bullshyte'}, end=1)
-        assert not p.haserrors() and p['agree'] is True
+        p = FormParser(f, {'agree': 'bullshyte'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['agree'] is True)
 
-        p = FormParser(f, {'agree': ''}, end=1)
-        assert not p.haserrors() and p['agree'] is False
+        p = FormParser(f, {'agree': ''})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['agree'] is False)
 
     def _test_one( self, cls, **extra ):
         'One choices test.'
@@ -418,15 +440,18 @@ class TestFields(Test):
         f = Form('test-form',
                  cls('coffee', ('latte', 'expresso', 'moccha'), **extra))
         
-        p = FormParser(f, {'coffee': 'latte'}, end=1)
-        assert not p.haserrors() and p['coffee'] == 'latte'
+        p = FormParser(f, {'coffee': 'latte'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == 'latte')
 
         p = FormParser(f)
-        self.assertRaises(AtochaError, p.parse, {'coffee': ['latte', 'expresso']})
+        self.assertRaises(AtochaError, p.parse_args,
+                          {'coffee': ['latte', 'expresso']})
         p.end()
 
         p = FormParser(f)
-        self.assertRaises(AtochaError, p.parse, {'coffee': 'american'})
+        self.assertRaises(AtochaError, p.parse_args,
+                          {'coffee': 'american'})
         p.end()
 
         # Test with labels.
@@ -435,8 +460,9 @@ class TestFields(Test):
                                 ('expresso', N_('Expresso')),
                                 ('moccha', N_('Moccha'))], **extra))
 
-        p = FormParser(f, {'coffee': 'expresso'}, end=1)
-        assert not p.haserrors() and p['coffee'] == 'expresso'
+        p = FormParser(f, {'coffee': 'expresso'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == 'expresso')
 
 
         # Test with integer values.
@@ -445,8 +471,9 @@ class TestFields(Test):
                                 (20, N_('Expresso')),
                                 (30, N_('Moccha'))], **extra))
 
-        p = FormParser(f, {'coffee': '10'}, end=1)
-        assert not p.haserrors() and p['coffee'] == '10'
+        p = FormParser(f, {'coffee': '10'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == '10')
 
 
         # Test with disabled value check.
@@ -454,8 +481,9 @@ class TestFields(Test):
                  cls('coffee', ('latte', 'expresso', 'moccha'),
                      nocheck=1, **extra))
 
-        p = FormParser(f, {'coffee': 'american'}, end=1)
-        assert not p.haserrors() and p['coffee'] == 'american'
+        p = FormParser(f, {'coffee': 'american'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == 'american')
 
 
     def _test_many( self, cls, **extra ):
@@ -465,17 +493,20 @@ class TestFields(Test):
         f = Form('test-form',
                  cls('coffee', ('latte', 'expresso', 'moccha'), **extra))
 
-        p = FormParser(f, {}, end=1)
-        assert not p.haserrors() and p['coffee'] == []
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == [])
         
-        p = FormParser(f, {'coffee': 'latte'}, end=1)
-        assert not p.haserrors() and p['coffee'] == ['latte']
+        p = FormParser(f, {'coffee': 'latte'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == ['latte'])
 
-        p = FormParser(f, {'coffee': ['latte', 'expresso']}, end=1)
-        assert not p.haserrors() and p['coffee'] == ['latte', 'expresso']
+        p = FormParser(f, {'coffee': ['latte', 'expresso']})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == ['latte', 'expresso'])
 
         p = FormParser(f)
-        self.assertRaises(AtochaError, p.parse, {'coffee': 'american'})
+        self.assertRaises(AtochaError, p.parse_args, {'coffee': 'american'})
         p.end()
 
         # Test with labels.
@@ -484,8 +515,9 @@ class TestFields(Test):
                                 ('expresso', N_('Expresso')),
                                 ('moccha', N_('Moccha'))], **extra))
 
-        p = FormParser(f, {'coffee': 'expresso'}, end=1)
-        assert not p.haserrors() and p['coffee'] == ['expresso']
+        p = FormParser(f, {'coffee': 'expresso'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == ['expresso'])
 
 
         # Test with integer values.
@@ -494,8 +526,9 @@ class TestFields(Test):
                                 (20, N_('Expresso')),
                                 (30, N_('Moccha'))], **extra))
 
-        p = FormParser(f, {'coffee': '10'}, end=1)
-        assert not p.haserrors() and p['coffee'] == ['10']
+        p = FormParser(f, {'coffee': '10'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == ['10'])
 
 
         # Test with disabled value check.
@@ -503,8 +536,9 @@ class TestFields(Test):
                  cls('coffee', ('latte', 'expresso', 'moccha'),
                      nocheck=1, **extra))
 
-        p = FormParser(f, {'coffee': 'american'}, end=1)
-        assert not p.haserrors() and p['coffee'] == ['american']
+        p = FormParser(f, {'coffee': 'american'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] == ['american'])
 
 
     def test_radio( self ):
@@ -520,8 +554,9 @@ class TestFields(Test):
         # Test errors on zero submitted args.
         f = Form('test-form',
                  MenuField('coffee', ('latte', 'expresso', 'moccha')))
-        p = FormParser(f, {}, end=1)
-        assert p.haserrors() and 'coffee' in p.geterrors()
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(p.haserrors() and 'coffee' in p.geterrors())
 
     def test_checkboxes( self ):
         'CheckboxesField tests.'
@@ -536,8 +571,9 @@ class TestFields(Test):
         # Test zero selected values.
         f = Form('test-form',
                  ListboxField('coffee', ('latte', 'expresso', 'moccha')))
-        p = FormParser(f, {}, end=1)
-        assert not p.haserrors() and p['coffee'] is None           
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['coffee'] is None)
 
         self._test_many(ListboxField, multiple=1)
 
@@ -549,20 +585,22 @@ class TestFields(Test):
 
         p = FormParser(f)
         try:
-            # This will assert because the birthday is always expected and we're
+            # This will self.assert_(because the birthday is always expected and we're)
             # supposed to take care of hidden inconsistencies ourselves.
-            p.parse({}) 
-            assert 0 
+            p.parse_args({}) 
+            self.assert_(0)
         except AssertionError: pass
         p.end()
         
-        p = FormParser(f, {'birthday': '20051003'}, end=1)
-        assert not p.haserrors() and p['birthday'] == datetime.date(2005, 10, 03)
+        p = FormParser(f, {'birthday': '20051003'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['birthday'] == datetime.date(2005, 10, 03))
 
         p = FormParser(f)
-        # This will assert because the value is just plain wrong and it is
+        # This will self.assert_(because the value is just plain wrong and it is)
         # not a user error.
-        self.assertRaises(AtochaError, p.parse, {'birthday': 'Thu, Jan 01, 2005'})
+        self.assertRaises(AtochaError, p.parse_args,
+                          {'birthday': 'Thu, Jan 01, 2005'})
         p.end()
 
     def test_fileupload( self ):
@@ -577,12 +615,14 @@ class TestFields(Test):
 
         f = Form('test-form', FileUploadField('myfile', 'My File'))
 
-        p = FormParser(f, {}, end=1)
-        assert p['myfile'] is None
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(p['myfile'] is None)
 
-        p = FormParser(f, {'myfile': crfile()}, end=1)
-        assert isinstance(p['myfile'], FileUpload)
-        assert p['myfile'].read() == contents
+        p = FormParser(f, {'myfile': crfile()})
+        o = p.end()
+        self.assert_(isinstance(p['myfile'], FileUpload))
+        self.assert_(p['myfile'].read() == contents)
 
         #
         # Test the SetFile field.
@@ -590,16 +630,20 @@ class TestFields(Test):
 
         f = Form('test-form', SetFileField('setfile', 'Set File'))
 
-        p = FormParser(f, {}, end=1)
-        assert p['setfile'] is None
+        p = FormParser(f, {})
+        o = p.end()
+        self.assert_(p['setfile'] is None)
 
-        p = FormParser(f, {'setfile': crfile()}, end=1)
-        assert isinstance(p['setfile'], FileUpload)
-        assert p['setfile'].read() == contents
+        p = FormParser(f, {'setfile': crfile()})
+        o = p.end()
+        self.assert_(isinstance(p['setfile'], FileUpload))
+        self.assert_(p['setfile'].read() == contents)
 
-        p = FormParser(f, {'setfile_reset': '1'}, end=1)
-        assert p['setfile'] is False
+        p = FormParser(f, {'setfile_reset': '1'})
+        o = p.end()
+        self.assert_(p['setfile'] is False)
 
-        p = FormParser(f, {'setfile': crfile(), 'setfile_reset': '1'}, end=1)
-        assert p['setfile'] is False
+        p = FormParser(f, {'setfile': crfile(), 'setfile_reset': '1'})
+        o = p.end()
+        self.assert_(p['setfile'] is False)
 

@@ -31,10 +31,14 @@ Atocha library provides for the web developer.</p>
 <li><a class="reference" href="#dynamically-generated-choices" id="id6" name="id6">Dynamically Generated Choices</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#form-handling" id="id7" name="id7">Form Handling</a></li>
-<li><a class="reference" href="#display-renderers" id="id8" name="id8">Display Renderers</a></li>
-<li><a class="reference" href="#options" id="id9" name="id9">Options</a></li>
-<li><a class="reference" href="#online-demo" id="id10" name="id10">Online Demo</a></li>
+<li><a class="reference" href="#form-handling" id="id7" name="id7">Form Handling</a><ul>
+<li><a class="reference" href="#simple-method" id="id8" name="id8">Simple Method</a></li>
+<li><a class="reference" href="#custom-validation-method" id="id9" name="id9">Custom Validation Method</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#display-renderers" id="id10" name="id10">Display Renderers</a></li>
+<li><a class="reference" href="#options" id="id11" name="id11">Options</a></li>
+<li><a class="reference" href="#online-demo" id="id12" name="id12">Online Demo</a></li>
 </ul>
 </div>
 <div class="section">
@@ -63,12 +67,17 @@ myform = Form(
     # Simple date.
     DateField('birthday', N_(&quot;Birthday&quot;)),
 
+    # A menu.
+    MenuField('gender', [('m', N_('Male')), 
+                         ('f', N_('Female'))], N_('Gender')),
+
     # Radio buttons.
-    RadioField('sex', [('m', N_('Male')),
-                       ('f', N_('Female')),
-                       ('x', N_('Maybe'))],
-               N_('Gender'), orient=ORI_HORIZONTAL,
-               initial='x'),
+    RadioField('milserv', [('x', N_('Done')),
+                           ('n', N_('Not Done')),
+                           ('d', N_('Dispensed')),
+                           ('o', N_('N/A'))],
+               N_('Military Service'), orient=ORI_HORIZONTAL,
+               initial='o'),
 
     action='/person/handler')
 </pre>
@@ -153,53 +162,74 @@ enabled):</p>
 <pre class="literal-block">
 form['matches'].setchoices(found_matches)
 ...
-p = FormParser(f, args)
-rdr.render_fields('matches')
-...
+o = FormParser.parse(f, args)
+
+# Here we know that o.matches is in the set of found_matches
+... = o.matches
 </pre>
 </div>
 </div>
 <div class="section">
 <h1><a class="toc-backref" href="#id7" id="form-handling" name="form-handling">Form Handling</a></h1>
 <p>A <tt class="docutils literal"><span class="pre">FormParser</span></tt> instance is used to oversee the process of parsing and
-validating user-submitted inputs.  The basic validation of the data types output
-from the fields is automatic, and the particular types depend on the types of
-the fields in the form.</p>
-<p>Most often the validation can only be implemented on the client-side.  There is
-always custom code that needs be setup there to verify the constraints of the
-widgets or between widgets.  Rather than forcing you to implement custom
-validator classes for every handler page, the parser allows you to invoke
-methods to signal errors and to indicate completion of the parsing, so you can
-validate in any order that is most convenient:</p>
+validating user-submitted inputs, and carrying out appropriate errors to be
+re-rendered in the form when they occur.  The basic validation of the data types
+output from the fields is automatic, and the particular types depend on the
+types of the fields in the form.</p>
+<p>This FormParser object has to be configured once somewhere in your code so that
+it knows how to perform a redirection if there are errors.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id8" id="simple-method" name="simple-method">Simple Method</a></h2>
+<p>If you do not need to do any special validation that could result in the user
+being sent back to the form with marked errors, that is, if you are happy with
+the automatic types validation that the fields offer--and this would be the most
+common case I assume--you can use the simple parsing method:</p>
+<pre class="literal-block">
+# In resource, e.g. /person/handle that gets called from a form...
+# The resource receives the arguments 'args'.
+o = FormParser.parse(myform, args, '/person/edit')
+
+#...  use o.gender, o.milserv, o.firstname, etc.
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id9" id="custom-validation-method" name="custom-validation-method">Custom Validation Method</a></h2>
+<p>Most often some custom validation code needs be integrated in the
+validation/error checking process.  This is often custom code that needs to
+verify the constraints of the fields or between fields.  Rather than forcing you
+to implement custom validator classes for every handler page, the parser object
+offers a convenient protocol that allows you to incorporate your own errors in
+the handler's code itself, and eventually to indicate completion of the parsing
+to either redirect or start using the values, e.g.:</p>
 <pre class="literal-block">
 # In resource, e.g. /person/handle that gets called from a form...
 # The resource receives the arguments 'args'.
 parser = FormParser(myform, args, '/person/edit')
 
-if p['sex'] == 'x':
-    p.error(u'Please fix error in gender below.',
-            dances=(u'What do you mean, maybe?', 'm'))
+# Custom validation
+if parser.o.gender == 'f' and parser.o.milserv != 'o':
+    parser.error(u'Please fix error in military service below.',
+        milserv=(u&quot;Women should specify no military service.&quot;, 'o'))
 
 # ... more validation code...
 
 # Indicate the end of parsing.  Redirection may occur here if there
-# are errors.
-p.end()
+# are errors.  Otherwise we get an object whose attributes correspond to the
+# parsed arguments.  This object is also available as 'parser.o'.
+o = parser.end()
 
 # Set final data in database and remove session data.
-#...
+#...  use o.gender, o.milserv, o.firstname, etc.
 </pre>
-<p>This pattern establishes a protocol in which you can customize validation
-(another pattern involves attaching validators to the widgets, but we think it
-is more limited and complicated than the simple protocol that we offer)</p>
 <p>When the parsing is complete, the parser either redirects automatically to the
 submitter resource if necessary, with the accumulated errors for rendering the
-annotated form back to the user, or contains the final parsed values for client
-perusal.  At this point you can use the data to store it or do whatever else you
-want with it.</p>
+annotated form back to the user, or contains the final parsed values for use by
+the caller.  At this point you can use the data to store it or do whatever else
+you want with it.</p>
+</div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id8" id="display-renderers" name="display-renderers">Display Renderers</a></h1>
+<h1><a class="toc-backref" href="#id10" id="display-renderers" name="display-renderers">Display Renderers</a></h1>
 <p>The form object can also be used to display parsed values in a nice-looking
 table, without editing capabilities.  This is simply accomplished by using a
 special kind of renderer, that I call &quot;display renderers&quot;, and which instead of
@@ -217,13 +247,13 @@ print &quot;&lt;/div&gt;
 </pre>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id9" id="options" name="options">Options</a></h1>
+<h1><a class="toc-backref" href="#id11" id="options" name="options">Options</a></h1>
 <p>The <tt class="docutils literal"><span class="pre">Form</span></tt>, <tt class="docutils literal"><span class="pre">FormRenderer</span></tt> and <tt class="docutils literal"><span class="pre">FormParser</span></tt> and <tt class="docutils literal"><span class="pre">Field</span></tt> classes support
 many options for various parameters depending on their specific application.
 Visit the source code to find out what the specific options are.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id10" id="online-demo" name="online-demo">Online Demo</a></h1>
+<h1><a class="toc-backref" href="#id12" id="online-demo" name="online-demo">Online Demo</a></h1>
 <p>Try the <a class="reference" href="../test/demo/cgi-bin/display.cgi">online demo</a> which features an instance of most of the fields, to
 quickly see what the library can do.</p>
 </div>

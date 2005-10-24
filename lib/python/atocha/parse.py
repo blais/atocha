@@ -38,7 +38,7 @@ class FormParser:
        conversions, e.g.::
 
           fparser = FormParser(form, 'form_submit_url')
-          fparser.parse(args)
+          fparser.parse_args(args)
 
     2. Do manual validation of fields via custom code::
 
@@ -140,9 +140,32 @@ class FormParser:
     # expecting.
     normalizer = None
 
+    
+    def parse( form, args, redir=None, redirfun=None ):
+        """
+        Creates a FormParser, applies the arguments to be parsed, and completes
+        the parser automatically, return the parsed results if there is no
+        error.  This method performs redirection automatically if there were
+        errors, or returns None if no redirection protocol has been configured.
 
-    def __init__( self, form, args=None, redir=None, end=False,
-                  redirfun=None ):
+        This is essentially the simpler and preferred way to parse arguments, if
+        you have no custom code for additional validation.  Otherwise, you
+        should create a form parser yourself and use its various methods to
+        perform the parsing.
+        """
+        # Create a parser.
+        parser = FormParser(form, redir, redirfun)
+
+        # Parse the given arguments.
+        parser.parse_args(args)
+        
+        # Complete the parsing.
+        return parser.end()
+
+    parse = staticmethod(parse)
+
+
+    def __init__( self, form, args=None, redir=None, redirfun=None ):
         """
         Create a parser with the given form, and error redirection URL.
 
@@ -160,24 +183,24 @@ class FormParser:
           types of values of this map will be one of str, a list of str, or a
           special object for file uploads.
 
-        - 'end' -> bool (optional): if 'end' is True, this constructor will
-          check immediately for errors and perform redirection automatically.
-          This parameter is not useful if the args are not specified (we have
-          not sent anything to be parsed).
-
-          If you have some custom argument checking code, you should specify
-          end=False to CONTINUE the checking protocol and eventually call the
-          end() method.
-
-          Note: if you continue and you never eventually call end(), an assert
-          will go off when this object is destroyed.  This insures that the
-          client code never forgets to complete the checking protocol.
-
         - 'redirfun' -> instance: an object that will get called to process the
           redirection. See docstring above for alternatives on this.
           (Specifying the 'redirfun' here is not the most convenient way to do
           this.)
 
+        If you have some custom argument checking code, you should specify call
+        this constructor directly to continue the validation protocol and
+        eventually call the end() method.  This is the way that you're supposed
+        to handle constraints between two different fields, with custom code on
+        the caller side.
+
+        If you continue and you never eventually call end(), an assert or trace
+        will go off when this object is destroyed.  This insures that the client
+        code never forgets to complete the checking protocol.
+
+        Note that if you do not have custom code to write, you should use the
+        FormParser.parse() method that takes the same parameters and does all
+        the steps automatically and returns the parsed values.
         """
 
         assert form is not None
@@ -229,14 +252,7 @@ class FormParser:
 
         # Parse the arguments at creation if they are given to us.
         if args is not None:
-            self.parse(args)
-
-        # Complete the parsing if it is requested.
-        if end:
-            # Note: return value is lost, and can be recuperated later by
-            # calling method haserrors().
-            self.end()
-
+            self.parse_args(args)
 
     def __del__( self ):
         """
@@ -246,7 +262,7 @@ class FormParser:
             raise AtochaError("Form parser not ended properly.")
 
 
-    def parse( self, args, only=None, ignore=None ):
+    def parse_args( self, args, only=None, ignore=None ):
         """
         Parse and validate the incoming arguments for the form, including the
         submit value if necessary. This parses all the arguments for which a

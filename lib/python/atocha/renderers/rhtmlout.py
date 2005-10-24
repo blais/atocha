@@ -39,9 +39,9 @@ class HoutRenderer(FormRenderer):
     default_encoding = None # Default: to unicode.
 
     # CSS classes.
-    css_errors = u'atoerror'
-    css_table = u'atotable'
-    css_label = u'atolabel'
+    css_errors = u'atoerr'
+    css_table = u'atotbl'
+    css_label = u'atolbl'
 
     def __init__( self, *args, **kwds ):
         """
@@ -85,10 +85,10 @@ class HoutFormRenderer(HoutRenderer):
     """
 
     # CSS classes.
-    css_input = u'atoinput'
-    css_submit = u'atosubmit'
-    css_required = u'atorequired'
-    css_vertical = u'atominitable'
+    css_input = u'atoinp'
+    css_submit = u'atosub'
+    css_required = u'atoreq'
+    css_vertical = u'atomini'
     
     scriptsdir = None
 
@@ -396,8 +396,8 @@ class HoutDisplayRenderer(HoutRenderer):
     """
 
     # CSS classes.
-    css_label = u'atodisplabel'
-    css_input = u'atodispvalue'
+    css_label = u'atodlbl'
+    css_input = u'atodval'
 
     def __init__( self, *args, **kwds ):
         if 'errors' in kwds:
