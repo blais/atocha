@@ -139,7 +139,8 @@ class FormParser:
     # frameworks to the kinds of generic arguments that this library is
     # expecting.
     normalizer = None
-    
+
+
     def __init__( self, form, args=None, redir=None, end=False,
                   redirfun=None ):
         """
@@ -189,6 +190,10 @@ class FormParser:
         self._values = {}
         """A dict of the successfully parsed values of the arguments.  Arguments
         which had errors are not present in this dict."""
+
+        self._accessor = self.o = ParserAccessor(form, self._values)
+        """Accessor helper class which is used to get access to the values via
+        an attribute interface.  Access via references to 'parser.o'."""
 
         self._errors = {}
         """A dict of field names to errors in the form of (message,
@@ -334,7 +339,8 @@ class FormParser:
         """
         Access the parser's parsed values, insuring that values which have not
         been parsed simply return None rather than raising an exception.  This
-        is just a convenience to allow the client code to be terser.
+        is just a convenience. We recommend that you instead use the accessor
+        object where you can access the parsed values via attribute names.
         """
         try:
             return self._values[key]
@@ -505,11 +511,25 @@ class FormParser:
         - 'redirurl' -> str (optional): can be used to override the default
           redirection URL.
 
-        Returns 'True' after redirection, if it does return (redirection often
-        does work get implemented well by raising an exception, so it is
-        possible that this method never returns.)  If no redirection is done,
-        returns False.
+        If there is an error...
+
+        - This function calls the redirect() method, which is supposed to have
+          been customized to implement the actual work of redirection.
+
+        - Most often this works by raising an exception.  If there is no such
+          customization, this method will be allowed to return 'None' (or the
+          value of the redirect function) and the caller can check this to
+          perform the redirection manually if necessary.
+        
+        If there is NO error...
+
+        - This method returns an instance which has its attributes set to the
+          final parsed values of the fields, using the field names.  If a value
+          is missing, it is simply set to None, so it is always guaranteed to be
+          present.
+
         """
+
         # Mark the parser protocol as complete.
         self._ended = 1
 
@@ -517,8 +537,9 @@ class FormParser:
         if self.haserrors():
             return self.redirect(redir)
 
-        # Otherwise just return and let the client code finish its actions.
-        return False
+        # Otherwise just return the accessor instance, which is initialized with
+        # the appropriate values.  This works similarly to optparse.
+        return self._accessor
 
     def redirect( self, redir=None ):
         """
@@ -558,6 +579,33 @@ class FormParser:
         constructor if you prefer to do that.
         """
         # Default mechanism, return this value from end() method.
-        return True
+        return None
 
     do_redirect = staticmethod(do_redirect)
+
+
+#-------------------------------------------------------------------------------
+#
+class ParserAccessor(object):
+    """
+    Accessor helper class that allows you to access the contents of the
+    values via its attributes.
+    """
+    def __init__( self, form, values ):
+        self._form = form
+        """Form to check for field name validity."""
+
+        self._values = values
+        """Copied reference of the values dict that is maintained by the
+        parser."""
+
+    def __getattr__( self, aname ):
+        "Lookup the attribute on the shared values dict."
+        try:
+            return self._values[aname]
+        except KeyError:
+            try:
+                field = self._form[aname]
+            except KeyError:
+                raise KeyError("Invalid field name '%s'." % aname)
+

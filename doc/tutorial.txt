@@ -39,12 +39,17 @@ entered by the user::
        # Simple date.
        DateField('birthday', N_("Birthday")),
 
+       # A menu.
+       MenuField('gender', [('m', N_('Male')), 
+                            ('f', N_('Female'))], N_('Gender')),
+
        # Radio buttons.
-       RadioField('sex', [('m', N_('Male')),
-                          ('f', N_('Female')),
-                          ('x', N_('Maybe'))],
-                  N_('Gender'), orient=ORI_HORIZONTAL,
-                  initial='x'),
+       RadioField('milserv', [('x', N_('Done')),
+                              ('n', N_('Not Done')),
+                              ('d', N_('Dispensed')),
+                              ('o', N_('N/A'))],
+                  N_('Military Service'), orient=ORI_HORIZONTAL,
+                  initial='o'),
    
        action='/person/handler')
 
@@ -167,18 +172,20 @@ validate in any order that is most convenient::
    # The resource receives the arguments 'args'.
    parser = FormParser(myform, args, '/person/edit')
    
-   if p['sex'] == 'x':
-       p.error(u'Please fix error in gender below.',
-               dances=(u'What do you mean, maybe?', 'm'))
+   # Custom validation
+   if parser['gender'] == 'f' and parser['milserv'] != 'o':
+       parser.error(u'Please fix error in military service below.',
+           milserv=(u"Women should specify no military service.", 'o'))
    
    # ... more validation code...
 
    # Indicate the end of parsing.  Redirection may occur here if there
-   # are errors.
-   p.end()
+   # are errors.  Otherwise we get an object whose attributes correspond to the
+   # parsed arguments.  This object is also available as 'parser.o'.
+   o = parser.end()
    
    # Set final data in database and remove session data.
-   #...
+   #...  use o.gender, o.milserv, o.firstname, etc.
 
    
 This pattern establishes a protocol in which you can customize validation

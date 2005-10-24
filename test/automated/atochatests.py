@@ -50,8 +50,13 @@ class TestSimple(Test):
         args = {'name': _u8str}
         p = FormParser(f)
         p.parse(args)
-        p.end()
-        self.assertEqual(p['name'], u'école')
+        o = p.end()
+
+        # Test accessor methods.
+        name = p['name'] # Using accessor.
+        name = o.name # Using accessor.
+        self.assertRaises(KeyError, getattr, o, 'name2')
+        self.assertEqual(o.name, u'école')
 
 
 #-------------------------------------------------------------------------------

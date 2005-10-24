@@ -273,6 +273,10 @@ class TextFormRenderer(TextRenderer):
         else:
             assert state is Field.NORMAL
             
+        if getattr(field, 'onchange', None):
+            # Note: we transparently translate to a more portable onclick callback.
+            opts.append( ('onclick', field.onchange) )
+
         o = u'<input ' + ' '.join(['%s="%s"' % x for x in opts]).decode('ascii')
         if value:
             o += u' value="%s"' % value
@@ -378,6 +382,9 @@ class TextFormRenderer(TextRenderer):
             selopts.append( ('readonly="1"') )
         else:
             assert field.state is Field.NORMAL
+
+        if getattr(field, 'onchange', None):
+            selopts.append( ('onchange', field.onchange) )
 
         lines = []
         lines.append(

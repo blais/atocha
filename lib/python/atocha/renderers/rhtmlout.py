@@ -221,6 +221,10 @@ class HoutFormRenderer(HoutRenderer):
         else:
             assert state is Field.NORMAL
 
+        if getattr(field, 'onchange', None):
+            # Note: we transparently translate to a more portable onclick callback.
+            inpu.attrib['onclick'] = field.onchange
+
         return inpu
 
     def _single( self, htmltype, field, state, value, errmsg,
@@ -314,6 +318,9 @@ class HoutFormRenderer(HoutRenderer):
             select.attrib['readonly'] = '1'
         else:
             assert state is Field.NORMAL
+
+        if getattr(field, 'onchange', None):
+            select.attrib['onchange'] = field.onchange
 
         for vname, label in field.choices:
             option = OPTION(_(label), value=vname)

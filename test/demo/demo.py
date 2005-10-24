@@ -36,10 +36,10 @@ form1 = Form(
     'test-form',
 
     # Normal unicode string.
-    StringField('name', N_("Person's name")),
+    StringField('name', N_("Person's Name")),
 
     # Ascii string.
-    StringField('postal', N_("Postal code"), encoding='ascii'),
+    StringField('postal', N_("Postal Code"), encoding='ascii'),
 
     # Hidden field.
     StringField('secret', state=Field.HIDDEN, initial='zanzibar',
@@ -99,7 +99,7 @@ form1 = Form(
                           ('corona', N_('Corona')),
                           ('budweiser', N_('Budweiser')),
                           ('paulaner', N_('Paulaner')),],
-                 N_('The Best Beer, if any'),
+                 N_('The Best Beer (If Any)'),
                  ),
 
     # A list of options (multiple).
@@ -122,7 +122,7 @@ form1 = Form(
 ##     AgreeField('terms', N_("Agree to Terms"),),
 
     # Disabled field.
-    StringField('veteran', N_("Veretan"), initial=u'Disabled...',
+    StringField('veteran', N_("Veteran"), initial=u'Disabled...',
                 state=Field.DISABLED),
 
     # Read-Only field.

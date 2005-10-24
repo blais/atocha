@@ -14,16 +14,16 @@
   margin-right: auto;
 }
 
-td.atolabel {
+td.atolabel, td.atodisplabel {
   padding-left: 1em;
   padding-right: 1em;
   background-color: #F4F4F0;
 }
 
-td.atodisplay {
+td.atodispvalue {
   padding-left: 1em;
   padding-right: 1em;
-  background-color: #F4F4F4;
+  background-color: #F8F8F8;
 }
 
 div#message {
@@ -67,16 +67,26 @@ span.atorequired {
 
 #edit { 
   background-color: #CCF;
+  text-decoration: none;
+}
+
+#edit:hover { 
+  background-color: #AAF;
 }
 
 #source { 
   margin-top: 50px;
-  font-size: smaller;
 }
 
 #source a { 
   font-style: italic;
   background-color: #CFA;
+  text-decoration: none;
+  font-size: smaller;
+}
+
+#source a:hover { 
+  background-color: #ACA;
 }
 
 #buttons { 

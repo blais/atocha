@@ -5,20 +5,27 @@
 Current Affairs (Requirements Before 1.0 Initial Release)
 =========================================================
 
-- Replace RuntimeError by AtochaError for internal errors.
-- Fix tests in optimized mode.
-
-- Implement rendering of onchange tags in renderers.
-
 - Add support for attribute-like access for value on the FormParser
+
+FIXME return attributes accessor object
+FIXME: - add static method to parse and get the object immediately
+FIXME: add documentation about the simpler method using the static method above
+FIXME: you might be able to remove the ugly end=1 parameter with the static method
+FIXME: fix all the tests
+FIXME: fix documentation
+
+
+
 
 - The display renderer definitely needs an option to not display fields which
   have no value.
 
+
+
+
+
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
-
-
 
 
 Known Bugs and Misfeatures
