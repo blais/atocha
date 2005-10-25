@@ -11,11 +11,60 @@ Current Affairs (Requirements Before 1.0 Final Release)
 - Maybe we should make StringField use a default encoding of latin-1 and create
   a UnicodeField for strings with default encoding 'unicode'.
 
+- Add a section in document about dealing with multiple submit buttons and an
+  example.
+
+- Add a section in document about extending with new fields and how to register
+  new rendering methods for each renderer from outside the library (Note: right
+  now the only way would be to derived form the renderer class, which is
+  obviously not acceptable--at least not in Python.  We need to implement a
+  double-dispatch mechanism).
+
+  WE NEED TO HAVE A DOUPLE-DISPATCH MECHANISM FOR EXTENDING NICELY WITH CUSTOM
+  RENDERING BEFORE WE RELEASE THIS.
+
 
 
 
 Known Bugs and Misfeatures
 ==========================
+
+Double-Dispatch Mechanism
+-------------------------
+
+- You need to think more about the double-dispatch mechanism for extending the
+  renderer or creating new fields, in particular:
+
+  - Derived field classes should either be handled automatically, or there
+    should be a way for them to decide which method is to be used for rendering;
+
+  - Renderers could choose not to implement certain methods, instead letting the
+    inheritance decide which method is invoked.
+
+  We could use a multimethods package to implement this more cleanly, because
+  right now derivation from the renderer classes is required, and that's just
+  not nice enough.  Extending the system with a new field, it should be possible
+  to provide not only the field but to register custom rendering methods that
+  depend both on the renderer class and obviously to be dispatched from the type
+  of the new field.
+
+
+Other
+-----
+
+- There is a circular dependency between the parser and its accessor object and
+  this causes the GC to be invoked.
+
+- Sometimes we want to getvalue() and getsubmit() from a completed parser, but
+  when using the static method we get the accessor object.  This has one
+  advantage: when using the static method we return the accessor object only and
+  thus we make sure that the parser cannot be used anymore.  We could consider
+  return the parser only and making the accessor object only work when accessed
+  from the parser as parser.o.<fieldname>. This way we could avoid the circular
+  dependency and always returning the parser (even from the static method) would
+  yield a more regular interface. Plus I think that there are some cases where
+  the methods on the accessor are not sufficient, even when the parser is
+  complete.
 
 - The JSDateField does not yet support disabled/read-only states.  We would need
   to change the JavaScript file to support that.
@@ -37,6 +86,10 @@ Known Bugs and Misfeatures
 - It would be nice to be able to give a special CSS class to a buttons array
   form, in case we want to specialize its style.  Also, we might want to render
   the buttons array with the INPUT type 'button' rather than 'submit'.
+
+- We could share the values and submit value between the FormParser and
+  ParserAccessor using a weakref form the accessor to the parser rather than the
+  kludgy approach we're using now.
 
 
 Future New Field Types Ideas
@@ -63,7 +116,6 @@ Future New Field Types Ideas
   its accompanying images... not sure what to do about this yet. I suppose the
   user has to copy the files anyway, so it might be ok to assume he might edit
   the scripts somewhat.
-
 
 
 Ideas

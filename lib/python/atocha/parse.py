@@ -9,7 +9,6 @@ Form parsing.
 See class FormParser (below).
 """
 
-
 # atocha imports.
 from atocha import AtochaError
 from fields.uploads import FileUploadField
@@ -214,10 +213,6 @@ class FormParser:
         """A dict of the successfully parsed values of the arguments.  Arguments
         which had errors are not present in this dict."""
 
-        self._accessor = self.o = ParserAccessor(form, self._values)
-        """Accessor helper class which is used to get access to the values via
-        an attribute interface.  Access via references to 'parser.o'."""
-
         self._errors = {}
         """A dict of field names to errors in the form of (message,
         repl_rvalue). The error messages are specific to the fields to by they
@@ -232,9 +227,10 @@ class FormParser:
         errors to be fixed."""
 
         self._submit = None
-        """A string, which is set after parsing, which indicates which of the
-        submitted buttons was used to submit the form.  This is only meaningful
-        if the form has multiple submit buttons."""
+        """A list containing a single element of type str, which is set after
+        parsing, which indicates which of the submitted buttons was used to
+        submit the form.  This is only meaningful if the form has multiple
+        submit buttons."""
 
         self._submit_parsed = False
         "A flag which is set after the submit values have been parsed."
@@ -249,6 +245,10 @@ class FormParser:
         """An object that will get called to process the redirection with the
         form status, message, errors and partially parsed values for rerendering
         the form to the user with errors marked explicitly."""
+
+        self._accessor = self.o = ParserAccessor(self)
+        """Accessor helper class which is used to get access to the values via
+        an attribute interface.  Access via references to 'parser.o'."""
 
         # Parse the arguments at creation if they are given to us.
         if args is not None:
@@ -337,9 +337,11 @@ class FormParser:
         Parse only for the submit value and nothing else.
         """
         # Parse the value of the various submit buttons if there are many.
-        self._submit = self._form.parse_submit(args)
+        submit_value = self._form.parse_submit(args)
+        self._submit = submit_value
         self._submit_parsed = True
-        return self._submit
+
+        return submit_value
 
     def getsubmit( self ):
         """
@@ -351,7 +353,7 @@ class FormParser:
         assert self._submit_parsed
         return self._submit
 
-    def __getitem__( self, key ):
+    def __getitem__( self, fname ):
         """
         Access the parser's parsed values, insuring that values which have not
         been parsed simply return None rather than raising an exception.  This
@@ -359,9 +361,14 @@ class FormParser:
         object where you can access the parsed values via attribute names.
         """
         try:
-            return self._values[key]
+            return self._values[fname]
         except KeyError:
-            return None
+            # Check if the name is valid.
+            try:
+                fi = self._form[fname]
+                return None
+            except KeyError:
+                raise KeyError("Invalid field name '%s'." % fname)
 
     def getvalues( self, cullfiles=True ):
         """
@@ -385,9 +392,9 @@ class FormParser:
         # uploads parsed values, because we won't be able to fill the file
         # widget with the uploaded data, it would not make sense.
         if not cullfiles:
-            # Note: we don't return a copy for efficiency and because we think that
-            # at that point the user will not use the parser anymore, so sharing the
-            # object should be fine.
+            # Note: we don't return a copy for efficiency and because we think
+            # that at that point the user will not use the parser anymore, so
+            # sharing the object should be fine.
             return self._values
         else:
             vcopy = self._values.copy()
@@ -607,21 +614,16 @@ class ParserAccessor(object):
     Accessor helper class that allows you to access the contents of the
     values via its attributes.
     """
-    def __init__( self, form, values ):
-        self._form = form
-        """Form to check for field name validity."""
+    def __init__( self, parser ):
+        self._parser = parser
+        """Parser (cyclic dependency, unfortunately)."""
 
-        self._values = values
-        """Copied reference of the values dict that is maintained by the
-        parser."""
+    def __getattr__( self, fname ):
+        return self._parser.__getitem__(fname)
 
-    def __getattr__( self, aname ):
-        "Lookup the attribute on the shared values dict."
-        try:
-            return self._values[aname]
-        except KeyError:
-            try:
-                field = self._form[aname]
-            except KeyError:
-                raise KeyError("Invalid field name '%s'." % aname)
+    def getsubmit( self ):
+        return self._parser.getsubmit()
+    
+    def getvalues( self ):
+        return self._parser.getvalues()
 

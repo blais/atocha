@@ -9,6 +9,9 @@ Form definition and exceptions.
 
 
 # stdlib imports
+import sys
+if sys.version_info[:2] < (2, 4):
+    from sets import Set as set
 import re
 from types import NoneType
 
@@ -20,6 +23,13 @@ from messages import msg_registry, msg_type
 
 
 __all__ = ['Form']
+
+
+_python_keywords = set(
+    ('and', 'del', 'for', 'is', 'raise', 'assert', 'elif', 'from', 'lambda',
+    'return', 'break', 'else', 'global', 'not', 'try', 'class', 'except', 'if',
+    'or', 'while', 'continue', 'exec', 'import', 'pass', 'yield', 'def',
+    'finally', 'in', 'print',))
 
 
 #-------------------------------------------------------------------------------
@@ -78,6 +88,7 @@ class Form:
         many."""
         if self.submit is None:
             self.submit = msg_registry.get_notrans('submit-button')
+
         # Check the types.
         if isinstance(self.submit, (list, tuple)):
             for n in self.submit:
@@ -211,6 +222,21 @@ class Form:
             # If a FileUpload field is added, make sure that we modify the
             # enctype for the form appropriately.
             self.enctype = self.__def_enctype_file
+
+        # Check against keywords.
+        if field.name in _python_keywords:
+            # Note: we *could* issue a warning here, but we assume that most
+            # people will use the attribute syntax to access the parsed
+            # arguments and it would only write something to the log file.  It's
+            # really no big deal to force the user not to use field names that
+            # are Python keywords.
+            #
+            # If you tracked this issue all the way here and are reading this
+            # comment and still disagree, send email to the author and I might
+            # change my mind or add a special option to allow this (because this
+            # would work fine otherwise.
+            raise AtochaError(
+                "Error: Field name '%s' is a keyword." % field.name)
 
         # Check name collisions.
         if field.name in self._fieldsmap:

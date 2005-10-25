@@ -8,11 +8,11 @@ Form fields (widgets) definitions.
 """
 
 # stdlib imports
-import re
-from types import NoneType
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
+import re
+from types import NoneType
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError

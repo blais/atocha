@@ -32,7 +32,10 @@ class _TextField(Field, OptRequired):
     css_class = 'text'
 
     attributes_declare = (
-        ('minlen', 'int', "Minimum length of the field."),
+        ('minlen', 'int',
+         """Minimum length of the field, if it is not empty.  You may be able to
+         use the 'required' option if you would like not to allow empty values.
+         """),
 
         ('maxlen', 'int', "Maximum length of the field."),
 
@@ -91,10 +94,16 @@ class _TextField(Field, OptRequired):
             # Otherwise we simply use the unicode value.
             dvalue = pvalue
 
-        # Check the minimum and maximum lengths.
-        if self.minlen is not None and self.minlen > len(dvalue):
-            raise FieldError(msg_registry['text-minlen'],
-                             self.render_value(dvalue))
+        # Check the minimum length.
+        if dvalue:
+            # Note: we only check the minlen if there is a value, so that fields
+            # with minlen and no value submitted are still legal (unless the
+            # required option is specified).
+            if self.minlen is not None and self.minlen > len(dvalue):
+                raise FieldError(msg_registry['text-minlen'],
+                                 self.render_value(dvalue))
+
+        # Check the maximum length.
         if self.maxlen is not None and len(dvalue) > self.maxlen:
             raise FieldError(msg_registry['text-maxlen'],
                              self.render_value(dvalue))
@@ -159,7 +168,6 @@ class StringField(_TextField):
         self.strip = attribs.pop('strip', False)
 
         _TextField.__init__(self, name, label, attribs)
-
 
     def parse_value( self, pvalue ):
         dvalue = _TextField.parse_value(self, pvalue)

@@ -191,7 +191,7 @@ class FormRenderer:
 
         # The class is derived, so dispatch to this class. This might become
         # customizable in the future.
-        renderobj = self
+        renderer = self
 
         if state != Field.NORMAL:
             # Make sure that we're not trying to render
@@ -203,19 +203,33 @@ class FormRenderer:
                     field.name)
 
         if state is Field.HIDDEN:
-            output = renderobj.renderHidden(field, rvalue)
+            output = renderer.renderHidden(field, rvalue)
 
         else:
             # Dispatch to function with name renderXXX() on type field, for
             # example, renderStringField().  Your derived class must have
-            # methods func_<type>.  A search is NOT made up the inheritance
-            # tree, on purpose, because we want to force the renderer to make an
-            # explicit decision about how to render all the widget types used in
-            # the form.
-            mname = 'render%s' % field.__class__.__name__
+            # methods render<type>.
+            #
+            # Note: we could use the visitor pattern but we would need to
+            # customize all the field classes to support it.
+
+            # Search the classes in order of inheritance.
+            clsstack = [field.__class__]
+            method = None
+            while method is None:
+                cls = clsstack.pop()
+                mname = 'render%s' % cls.__name__
+                method = getattr(renderer, mname, None)
+                clsstack.extend(cls.__bases__)
+
+            if method is None:
+                raise AtochaInternalError(
+                    "Error: renderer has no method for '%s'." %
+                    field.__class__)
+
+            renctx = RenderContext(state, rvalue, errmsg, field.isrequired())
             try:
-                method = getattr(renderobj, mname)
-                output = method(field, state, rvalue, errmsg, field.isrequired())
+                output = method(field, renctx)
             except Exception, e:
                 raise
                 raise AtochaInternalError(
@@ -308,10 +322,16 @@ class FormRenderer:
         normally rendered outside of a table, returned just after the table.
         See the documentation for the particular renderer for details.
 
-        The arguments support both the only/ignore syntax, as well as specifying
-        the names of the fields directly as strings. See the documentation for
-        method Form.select_fields() for the meaning of the 'only' and 'ignore'
-        arguments.
+        Specify the field names as the normal arguments.
+
+        :Keyword Arguments:
+
+        - 'only' and 'ignore': See the documentation for method
+          Form.select_fields() for the meaning of the 'only' and 'ignore'
+          arguments.
+
+        - 'css_class': can be used to add a custom CSS class to this table.
+
         """
         for fname in fieldnames:
             assert isinstance(fname, str)
@@ -319,19 +339,21 @@ class FormRenderer:
         # Process only/ignore field selection.
         only = fieldnames
         if only in kwds:
-            only = only + tuple(kwds['only'])
-        ignore = kwds.get('ignore', None)
+            only = only + tuple(kwds.pop('only'))
+        ignore = kwds.pop('ignore', None)
         fields = self._form.select_fields(only, ignore)
 
         # Render the table given the fields.
-        return self.do_render_table(fields)
+        css_class = kwds.pop('css_class', None)
+        return self.do_render_table(fields, css_class=css_class)
 
-    def table( self, pairs=() ):
+    def table( self, pairs=(), css_class=None ):
         """
         User-callable method for rendering a simple table. 'pairs' is an
-        iterable of (label, value) pairs.
+        iterable of (label, value) pairs.  'css_class' can be used to add a
+        custom CSS class to this table.
         """
-        return self.do_table(pairs)
+        return self.do_table(pairs, css_class=css_class)
 
     def render_field( self, fieldname, state=None ):
         """
@@ -383,7 +405,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_render_table( self, fields ):
+    def do_render_table( self, fields, css_class=None ):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
         types of the return values depends on the renderer.  Hidden fields are
@@ -394,7 +416,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_table( self, pairs=(), extra=None ):
+    def do_table( self, pairs=(), extra=None, css_class=None ):
         """
         Renders a simplistic table, inserting the given list of (label, inputs)
         pairs.  The return value type depend on the renderer.  The
@@ -434,9 +456,10 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def renderField( self, field, state, rvalue, errmsg, required ):
+    def renderField( self, field, renctx ):
         """
         Example of the signature for the methods that must be overriden.
+        See the class RenderContext for more details.
 
         Note that these rendering methods must support rendering normal,
         read-only and disabled fields.
@@ -468,7 +491,7 @@ class FormRenderer:
         Form object between requests.
         """
         assert type(cls) is not FormRenderer and issubclass(cls, FormRenderer)
-        
+
         # Create form to contain buttons.
         if formname is None:
             formname = 'form-buttons'
@@ -539,7 +562,7 @@ class DisplayRendererBase:
         # Return output from the field-specific rendering code.
         return output
 
-    def do_render_display_table( self, fields ):
+    def do_render_display_table( self, fields, css_class=None ):
         """
         Render a table for diplay, honoring the appropriate options.
         """
@@ -553,11 +576,11 @@ class DisplayRendererBase:
             if isinstance(field, FileUploadField):
                 continue
 
-            # If there is an error for the field, return a constant error string. We
-            # do not print replacement values for the display, the value has to be
-            # fully valid.  It may be possible that displaying a field with errors
-            # is not allowed in the code that calls this, but this might change in
-            # the future.
+            # If there is an error for the field, return a constant error
+            # string. We do not print replacement values for the display, the
+            # value has to be fully valid.  It may be possible that displaying a
+            # field with errors is not allowed in the code that calls this, but
+            # this might change in the future.
             if self._errors is not None and field.name in self._errors:
                 rendered = msg_registry['display-error']
 
@@ -589,5 +612,30 @@ class DisplayRendererBase:
 
             visible.append( (self._get_label(field), rendered) )
 
-        return self.do_table(visible)
+        return self.do_table(visible, css_class=css_class)
+
+
+#-------------------------------------------------------------------------------
+#
+class RenderContext:
+    """
+    Simply holds the context data that is used to render a field.
+    Note that this is used for non-hidden fields only.
+    """
+    def __init__( self, state, rvalue, errmsg, required ):
+
+        self.state = state
+        "The final state to render the widgets in."
+
+        self.rvalue = rvalue
+        "The value to be rendered, already converted to a valid render type."
+
+        self.errmsg = errmsg
+        "The error message associated to this field."
+
+        self.required = required
+        """Whether this field is to be marked as required or not (typically
+        adding a star next to the label).  Typically this is not used at all
+        when rendering the actual input but specific renderers may wish to
+        render the actual inputs differently if they are required."""
 

@@ -69,11 +69,14 @@ class TextRenderer(atocha.render.FormRenderer):
             sio = Writer(sio)
         return sio
 
-    def do_table( self, pairs=(), extra=None ):
+    def do_table( self, pairs=(), extra=None, css_class=None ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
-        f.write(u'<table class=%s>' % self.css_table)
+        css = [self.css_table]
+        if css_class:
+            css.append(css_class)
+        f.write(u'<table class=%s>' % ' '.join(css))
         for label, inputs in pairs:
             assert isinstance(label, unicode)
             assert isinstance(inputs, unicode)
@@ -111,11 +114,11 @@ class TextFormRenderer(TextRenderer):
 
     scriptsdir = None
 
-    def _geterror( self, errmsg ):
-        if errmsg:
-            assert isinstance(errmsg, unicode)
+    def _geterror( self, renctx ):
+        if renctx.errmsg:
+            assert isinstance(renctx.errmsg, unicode)
             return (u'<span class="%s">%s</span><br/>' %
-                    (self.css_errors, errmsg))
+                    (self.css_errors, renctx.errmsg))
         else:
             return u''
 
@@ -172,7 +175,7 @@ class TextFormRenderer(TextRenderer):
     def close_container( self ):
         return u'</form>'
 
-    def do_render_table( self, fields ):
+    def do_render_table( self, fields, css_class=None ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
@@ -187,7 +190,7 @@ class TextFormRenderer(TextRenderer):
                     label += u'<span class="%s">*</span>' % self.css_required
                 visible.append( (label, rendered) )
 
-        self.do_table(visible, u'\n'.join(hidden))
+        self.do_table(visible, u'\n'.join(hidden), css_class=css_class)
 
         if self.ofile is None: return f.getvalue()
 
@@ -200,9 +203,10 @@ class TextFormRenderer(TextRenderer):
             f.write(u'<input type="submit" value="%s" />\n' % (_(submit)))
         else:
             assert isinstance(submit, (list, tuple))
-            for value, name in submit:
+            for subvalue, label in submit:
+                assert isinstance(label, msg_type)
                 f.write((u'<input type="submit" name="%s" value="%s" />\n') %
-                        (name, _(value)))
+                        (subvalue, _(label)))
 
         if reset:
             f.write(u'<input type="reset" value="%s" />\n' % _(reset))
@@ -228,27 +232,8 @@ class TextFormRenderer(TextRenderer):
 
     #---------------------------------------------------------------------------
 
-    def renderHidden( self, field, rvalue ):
-        inputs = []
-        # Use the first variable name.
-        varname = field.varnames[0]
-
-        if isinstance(rvalue, unicode):
-            inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                          (varname.decode('ascii'), rvalue))
-        elif isinstance(rvalue, list):
-            for rval in rvalue:
-                inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
-                              (varname.decode('ascii'), rval))
-        else:
-            raise AtochaInternalError("Error: unexpected type '%s' for rendering." %
-                                       type(rvalue))
-
-        return u'\n'.join(inputs)
-
-
-    def _input( self, htmltype, field, state, value, checked=False, label=None,
-                varname=None ):
+    def _input( self, htmltype, field, state, value,
+                checked=False, label=None, varname=None ):
         """
         Render an html input.
         """
@@ -285,13 +270,15 @@ class TextFormRenderer(TextRenderer):
             o += u'/>'
         return o
 
-    def _single( self, htmltype, field, state, value, errmsg,
+    def _single( self, htmltype, field, renctx,
                  checked=False, label=None, varname=None ):
         """
         Render a single field.
         """
-        return self._geterror(errmsg) + \
-               self._input(htmltype, field, state, value, checked, label, varname)
+        return self._geterror(renctx) + \
+               self._input(htmltype, field,
+                           renctx.state, renctx.rvalue,
+                           checked, label, varname)
 
     def _orient( self, field, inputs ):
         """
@@ -307,66 +294,7 @@ class TextFormRenderer(TextRenderer):
         else:
             return u'\n'.join(inputs)
 
-    def renderStringField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderTextAreaField( self, field, state, rvalue, errmsg, required ):
-        opts = []
-        if field.rows:
-            opts.append( ('rows', field.rows) )
-        if field.cols:
-            opts.append( ('cols', field.cols) )
-            
-        if state is Field.DISABLED:
-            opts.append( ('disabled', 1) )
-        elif state is Field.READONLY:
-            opts.append( ('readonly', 1) )
-        else:
-            assert state is Field.NORMAL
-
-        return (self._geterror(errmsg) +
-                u'<textarea name="%s" %s class="%s">%s</textarea>' %
-                (field.varnames[0].decode('ascii'),
-                 ' '.join(['%s="%d"' % x for x in opts]).decode('ascii'),
-                 field.css_class.decode('ascii'), rvalue or u''))
-
-    def renderPasswordField( self, field, state, rvalue, errmsg, required ):
-        return self._single('password', field, state, rvalue, errmsg)
-
-    def renderDateField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderEmailField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderURLField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderIntField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderFloatField( self, field, state, rvalue, errmsg, required ):
-        return self._single('text', field, state, rvalue, errmsg)
-
-    def renderBoolField( self, field, state, rvalue, errmsg, required ):
-        # The render type calls for any value and for the rvalue to determine
-        # whether this will get checked or not.
-        return self._single('checkbox', field, state, u'1', errmsg, rvalue)
-
-    renderAgreeField = renderBoolField
-
-    def renderRadioField( self, field, state, rvalue, errmsg, required ):
-        assert rvalue is not None
-        inputs = []
-        for vname, label in field.choices:
-            checked = bool(vname == rvalue)
-            inputs.append(
-                self._input('radio', field, state, vname, checked, _(label)))
-        output = self._orient(field, inputs)
-        return self._geterror(errmsg) + output
-
-    def _renderMenu( self, field, state, rvalue, errmsg, required,
-                     multiple=None, size=None ):
+    def _renderMenu( self, field, renctx, multiple=None, size=None ):
         "Render a SELECT menu. 'rvalue' is expected to be a list of values."
 
         selopts = []
@@ -375,12 +303,12 @@ class TextFormRenderer(TextRenderer):
         if multiple:
             selopts.append('multiple="1"')
 
-        if field.state is Field.DISABLED:
+        if renctx.state is Field.DISABLED:
             selopts.append( ('disabled="1"') )
-        elif field.state is Field.READONLY:
+        elif renctx.state is Field.READONLY:
             selopts.append( ('readonly="1"') )
         else:
-            assert field.state is Field.NORMAL
+            assert renctx.state is Field.NORMAL
 
         if getattr(field, 'onchange', None):
             selopts.append( ('onchange', field.onchange) )
@@ -391,43 +319,17 @@ class TextFormRenderer(TextRenderer):
             (field.varnames[0], ' '.join(selopts), field.css_class))
         for vname, label in field.choices:
             selstr = u''
-            if vname in rvalue:
+            if vname in renctx.rvalue:
                 selstr = u'selected="selected"'
             lines.append(u'<option value="%s" %s>%s</option>' %
                          (vname, selstr, _(label)))
         lines.append(u'</select>')
-        return self._geterror(errmsg) + u'\n'.join(lines)
+        return self._geterror(renctx) + u'\n'.join(lines)
 
-    def renderMenuField( self, field, state, rvalue, errmsg, required ):
-        return self._renderMenu(field, state, [rvalue], errmsg, required)
-
-    def renderCheckboxesField( self, field, state, rvalue, errmsg, required ):
-        inputs = []
-        for vname, label in field.choices:
-            checked = vname in rvalue
-            inputs.append(
-                self._input('checkbox', field, state, vname, checked, _(label)))
-        output = self._orient(field, inputs)
-        return self._geterror(errmsg) + output
-
-    def renderListboxField( self, field, state, rvalue, errmsg, required ):
-        assert rvalue is not None
-        if not isinstance(rvalue, list):
-            rvalue = [rvalue] # May be a str if not multiple.
-        return self._renderMenu(field, state, rvalue, errmsg, required,
-                                field.multiple, field.size)
-
-    def renderFileUploadField( self, field, state, rvalue, errmsg, required ):
-        return self._single('file', field, state, rvalue, errmsg)
-
-    def renderSetFileField( self, field, state, rvalue, errmsg, required ):
-        filew = self._single('file', field, state, rvalue, errmsg)
-        resetw = self._single('checkbox', field, state, u'1', errmsg, rvalue,
-                              varname=field.varnames[1])
-        return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
-                
-    def _script( self, field, state, errmsg, script, noscript=None ):
-        "Render a script widget."
+    def _script( self, field, renctx, script, noscript=None ):
+        """
+        Render a script widget.
+        """
         varname = field.varnames[0]
         # Note: setting 'name' on a SCRIPT tag is not standard, but it allows us
         # to render the errors later on.
@@ -440,11 +342,122 @@ class TextFormRenderer(TextRenderer):
                 u'<noscript name="%s" class="%s">' % (varname, field.css_class),
                 noscript,
                 u'</noscript>'])
-        return self._geterror(errmsg) + u'\n'.join(lines)
+        return self._geterror(renctx) + u'\n'.join(lines)
 
-    def renderJSDateField( self, field, state, rvalue, errmsg, required ):
+
+    #---------------------------------------------------------------------------
+    
+    def renderHidden( rdr, field, rvalue ):
+        inputs = []
+        # Use the first variable name.
         varname = field.varnames[0]
-        fargs = (varname, rvalue and ", '%s'" % rvalue or '')
+
+        if isinstance(rvalue, unicode):
+            inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
+                          (varname.decode('ascii'), rvalue))
+        elif isinstance(rvalue, list):
+            for rval in rvalue:
+                inputs.append(u'<input name="%s" type="hidden" value="%s" />' %
+                              (varname.decode('ascii'), rval))
+        else:
+            raise AtochaInternalError(
+                "Error: unexpected type '%s' for rendering." % type(rvalue))
+
+        return u'\n'.join(inputs)
+
+    def renderStringField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderTextAreaField( rdr, field, renctx ):
+        opts = []
+        if field.rows:
+            opts.append( ('rows', field.rows) )
+        if field.cols:
+            opts.append( ('cols', field.cols) )
+            
+        if renctx.state is Field.DISABLED:
+            opts.append( ('disabled', 1) )
+        elif renctx.state is Field.READONLY:
+            opts.append( ('readonly', 1) )
+        else:
+            assert renctx.state is Field.NORMAL
+
+        return (rdr._geterror(renctx) +
+                u'<textarea name="%s" %s class="%s">%s</textarea>' %
+                (field.varnames[0].decode('ascii'),
+                 ' '.join(['%s="%d"' % x for x in opts]).decode('ascii'),
+                 field.css_class.decode('ascii'), renctx.rvalue or u''))
+
+    def renderPasswordField( rdr, field, renctx ):
+        return rdr._single('password', field, renctx)
+
+    def renderDateField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderEmailField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderURLField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderIntField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderFloatField( rdr, field, renctx ):
+        return rdr._single('text', field, renctx)
+
+    def renderBoolField( rdr, field, renctx ):
+        # The render type calls for any value and for the rvalue to determine
+        # whether this will get checked or not.
+        checked, renctx.rvalue = renctx.rvalue, u'1'
+        return rdr._single('checkbox', field, renctx, checked)
+
+    renderAgreeField = renderBoolField
+
+    def renderRadioField( rdr, field, renctx ):
+        assert renctx.rvalue is not None
+        inputs = []
+        for vname, label in field.choices:
+            checked = bool(vname == renctx.rvalue)
+            inputs.append(
+                rdr._input('radio', field, renctx.state,
+                            vname, checked, _(label)))
+        output = rdr._orient(field, inputs)
+        return rdr._geterror(renctx) + output
+
+    def renderMenuField( rdr, field, renctx ):
+        renctx.rvalue = [renctx.rvalue]
+        return rdr._renderMenu(field, renctx)
+
+    def renderCheckboxesField( rdr, field, renctx ):
+        inputs = []
+        for vname, label in field.choices:
+            checked = vname in renctx.rvalue
+            inputs.append(
+                rdr._input('checkbox', field, renctx.state,
+                            vname, checked, _(label)))
+        output = rdr._orient(field, inputs)
+        return rdr._geterror(renctx) + output
+
+    def renderListboxField( rdr, field, renctx ):
+        assert renctx.rvalue is not None
+        if not isinstance(renctx.rvalue, list):
+            renctx.rvalue = [renctx.rvalue] # May be a str if not multiple.
+        return rdr._renderMenu(field, renctx, field.multiple, field.size)
+
+    def renderFileUploadField( rdr, field, renctx ):
+        return rdr._single('file', field, renctx)
+
+    def renderSetFileField( rdr, field, renctx ):
+        filew = rdr._single('file', field, renctx)
+        checked, renctx.rvalue = renctx.rvalue, u'1'
+        resetw = rdr._single('checkbox', field, renctx,
+                              checked, varname=field.varnames[1])
+        return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
+
+    def renderJSDateField( rdr, field, renctx ):
+        varname = field.varnames[0]
+        fargs = (varname, renctx.rvalue and ", '%s'" % renctx.rvalue or '')
         script = (u"DateInput('%s', true, 'YYYYMMDD' %s);"
                   u"hideInputs(this);") % fargs
 
@@ -454,11 +467,9 @@ class TextFormRenderer(TextRenderer):
         # not been parsed previously (for example, during the automated form
         # parsing errors).
         noscript = (u'<input name="%s" value="%s"/>' %
-                    (varname, rvalue or ''))
+                    (varname, renctx.rvalue or ''))
 
-        return self._script(field, state, errmsg, script, noscript)
-
-
+        return rdr._script(field, renctx, script, noscript)
 
 
 
@@ -499,11 +510,11 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     def do_render_container( self, action ):
         return ''
 
-    def do_render_table( self, fields ):
+    def do_render_table( self, fields, css_class=None ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
-        self.do_render_display_table(fields)
+        self.do_render_display_table(fields, css_class=css_class)
 
         if self.ofile is None: return f.getvalue()
 
@@ -515,31 +526,35 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
 
     #---------------------------------------------------------------------------
 
-    def renderHidden( self, field, rvalue ):
-        return ''
-
-    def _simple( self, field, state, rvalue, errmsg, required ):
+    def _simple( self, field, renctx ):
         """
         Render a simple field with the given parameters.
         """
-        return rvalue
+        return renctx.rvalue
+
+    #---------------------------------------------------------------------------
+
+    def renderHidden( rdr, field, rvalue ):
+        return ''
 
     renderStringField = _simple
 
-    def renderTextAreaField( self, field, state, rvalue, errmsg, required ):
-        return u'<pre>%s</pre>' % rvalue
+    def renderTextAreaField( rdr, field, renctx ):
+        return u'<pre>%s</pre>' % renctx.rvalue
 
     renderPasswordField = _simple
     renderDateField = _simple
 
-    def renderEmailField( self, field, state, rvalue, errmsg, required ):
-        if rvalue:
-            return u'<a href="mailto:%s">%s</a>' % (rvalue, rvalue)
+    def renderEmailField( rdr, field, renctx ):
+        if renctx.rvalue:
+            return u'<a href="mailto:%s">%s</a>' % (renctx.rvalue,
+                                                    renctx.rvalue)
         return u''
 
-    def renderURLField( self, field, state, rvalue, errmsg, required ):
-        if rvalue:
-            return u'<a href="%s">%s</a>' % (rvalue, rvalue)
+    def renderURLField( rdr, field, renctx ):
+        if renctx.rvalue:
+            return u'<a href="%s">%s</a>' % (renctx.rvalue,
+                                             renctx.rvalue)
         return u''
         
     renderIntField = _simple
@@ -551,7 +566,7 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     renderCheckboxesField = _simple
     renderListboxField = _simple
 
-    def renderFileUploadField( self, field, state, rvalue, errmsg, required ):
+    def renderFileUploadField( rdr, field, renctx ):
         # Never display a file upload. Don't even try.
         return u''
 
