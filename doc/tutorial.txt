@@ -243,22 +243,18 @@ If you want to just render some buttons, you can use an empty form::
 
     form = Form(
         'form-first-login',
-        submit=N_('Edit Profile Now'), method='GET'
-        )
+        submit=N_('Edit Profile Now'))
 
     ...
     TextFormRenderer(form)
     rdr.render(action='/u/%s/profile/general_edit' % u.username)
 
-Or use the convenience method that will do the simple stuff for you::
+Or use the convenience method that will do the simple form creation with the
+appropriate buttons for you::
 
     TextFormRenderer.render_buttons(
-        N_('Edit Profile Now'), 
-        method='GET', 
-        action='/u/%s/profile/general_edit' % u.username)
-
-FIXME todo implement this, see if it's worth it.
-
+        N_('Edit Profile Now'),
+        '/u/%s/profile/general_edit' % u.username))
 
 
 Options

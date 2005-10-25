@@ -65,6 +65,7 @@ class Form:
         assert isinstance(name, str)
         assert name
         self.name = name
+        assert isinstance(name, str)
         "The name of the form, which appears in the HTML rendering as well."
 
         assert isinstance(name, str)
@@ -88,8 +89,10 @@ class Form:
             assert isinstance(self.submit, msg_type)
         assert self.submit
 
-        assert isinstance(name, str)
-        self.method = kwds.get('method', self.__def_method)
+        self.method = kwds.get('method', None)
+        if self.method is None:
+            self.method = self.__def_method
+        assert self.method in ('GET', 'POST')
         "The submit method, GET or POST."
 
         self.enctype = kwds.get('enctype', self.__def_enctype)
@@ -507,6 +510,3 @@ class Form:
                     scripts[fn] = notice
         return scripts
 
-#-------------------------------------------------------------------------------
-#
-def render_buttons

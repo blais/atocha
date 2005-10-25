@@ -22,6 +22,7 @@ import types
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
+from atocha.form import Form
 from field import Field
 import fields
 from atocha.fields.uploads import FileUploadField
@@ -441,6 +442,47 @@ class FormRenderer:
         read-only and disabled fields.
         """
         raise AtochaError("Do not call this.")
+
+
+    #-------------------------------------------------------------------------------
+    #
+    def render_buttons( cls, buttons, action, formname=None, method=None ):
+        """
+        Shorthand convenience function for rendering buttons.  This is a class
+        method that should be invoked from an appropriate derived class.
+
+        :Arguments:
+
+        - 'cls': The renderer class that invokes this method.
+
+        - 'action': The URL of the action to take upon button press.
+
+        - 'buttons': See Form.submit for details.
+
+        - 'formname': The name of the form to use (only important if you're
+          going to have multiple button forms in the same page).
+
+        - 'method': See Form.method for details.
+
+        Note that if you can, if would be more efficient to create and keep a
+        Form object between requests.
+        """
+        assert type(cls) is not FormRenderer and issubclass(cls, FormRenderer)
+        
+        # Create form to contain buttons.
+        if formname is None:
+            formname = 'form-buttons'
+        if not buttons:
+            raise AtochaError("You need to specify some buttons.")
+        form = Form(formname, submit=buttons, action=action, method=method)
+
+        # Create a renderer.
+        rdr = cls(form)
+
+        # Return rendered values.
+        return rdr.render()
+
+    render_buttons = classmethod(render_buttons)
 
 
 #-------------------------------------------------------------------------------

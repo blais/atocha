@@ -54,6 +54,14 @@ class _TextField(Field, OptRequired):
 
 
     def parse_value( self, pvalue ):
+        """
+        See base class.
+
+        This always returns a string, even if the value is not submitted.  Thus
+        all the string values always are assigned an output value of the
+        appropriate type, and never None.
+        """
+
         # Check the required value.
         pvalue = OptRequired.parse_value(self, pvalue)
 

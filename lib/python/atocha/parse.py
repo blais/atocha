@@ -154,7 +154,7 @@ class FormParser:
         perform the parsing.
         """
         # Create a parser.
-        parser = FormParser(form, redir, redirfun)
+        parser = FormParser(form, redir=redir, redirfun=redirfun)
 
         # Parse the given arguments.
         parser.parse_args(args)
@@ -297,11 +297,11 @@ class FormParser:
 
         :Return Values: None.  All the parsed data is available on this object.
         """
+
         # Normalize the submitted arguments if required.
         if self.normalizer:
             args = self.normalizer.normalize(args)
-        else:
-            assert isinstance(args, dict)
+        assert isinstance(args, dict)
 
         # Select the fields.
         fields = self._form.select_fields(only, ignore)

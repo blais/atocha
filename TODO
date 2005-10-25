@@ -5,10 +5,12 @@
 Current Affairs (Requirements Before 1.0 Final Release)
 =======================================================
 
-- Implement buttons array, see tutorial.txt, see form.py
-
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
+
+- Maybe we should make StringField use a default encoding of latin-1 and create
+  a UnicodeField for strings with default encoding 'unicode'.
+
 
 
 
@@ -31,6 +33,10 @@ Known Bugs and Misfeatures
 
 - The tests don't run in optimized mode, this is not really a bug, but rather
   just to the assert function that we use in the test.
+
+- It would be nice to be able to give a special CSS class to a buttons array
+  form, in case we want to specialize its style.  Also, we might want to render
+  the buttons array with the INPUT type 'button' rather than 'submit'.
 
 
 Future New Field Types Ideas
