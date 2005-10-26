@@ -64,12 +64,12 @@ def main():
 
         # Find the public field classes in the module.
         fclasses = []
-        for x in mod.__dict__.itervalues():
+        for xname in mod.__all__:
+            x = getattr(mod, xname)
             if (type(x) is types.ClassType and
                 issubclass(x, atocha.Field) and
                 not x.__name__.startswith('_')):
                 fclasses.append(x)
-        fclasses.remove(atocha.Field)
         fclasses.sort(lambda x, y: cmp(str(x), str(y)))
 
         # Generate the documentation for each of the classes.
