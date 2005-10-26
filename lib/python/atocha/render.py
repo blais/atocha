@@ -85,15 +85,14 @@ def lookup_render_routine( renderer_cls, field_cls ):
     except KeyError:
         try:
             # Try to lookup the render_as class if not found.
-            cls = getattr(field_cls, 'render_as')
-            renfun = reg[field_cls]
+            renfun = reg[field_cls.render_as]
 
             # Cache the value for next time (this has repercussions on how
             # dynamic the registries can be, but they are usually statically
             # defined so we can do this for efficiency).
-            register_render_routine(renderer_cls, field_cls, fun)
+            register_render_routine(renderer_cls, field_cls, renfun)
             
-        except KeyError:
+        except AttributeError:
             raise AtochaInternalError(
                 "Missing rendering routine for renderer '%s', field '%s'." %
                 (renderer_cls.__name__, field_cls.__name__))

@@ -23,6 +23,8 @@ from numeric import *
 from choices import *
 from temporal import *
 from uploads import *
+from users import *
+from extra import *
 
 
 # Export just the stuff defined in the local package.

@@ -4,7 +4,7 @@
 #
 
 """
-Text Fields
+Text-based fields.
 """
 
 # stdlib imports
@@ -17,7 +17,7 @@ from atocha.messages import msg_registry
 
 
 __all__ = ['StringField', 'TextAreaField', 'PasswordField',
-           'EmailField', 'URLField',]
+           'EmailField', 'URLField']
 
 
 #-------------------------------------------------------------------------------
@@ -369,4 +369,41 @@ class URLField(StringField):
         # Note: eventually, we want to parse using urlparse or something.
 
         return dvalue
+
+
+
+#-------------------------------------------------------------------------------
+#
+class URLPathField(StringField):
+    """
+    Field for an URL. We can parse some of the syntax for a valid URL.  This
+    field can also be used by the renderer to automatically add a link to the
+    displayed value, if it is requested to render for display only.  Encoding is
+    fixed to 'ascii', data is stripped automatically.
+    """
+    types_data = (str,)
+    css_class = 'url'
+
+    attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+
+    def __init__( self, name, label=None, **attribs ):
+        URLField.validate_attributes(attribs)
+
+        attribs['encoding'] = 'ascii'
+        attribs['strip'] = True
+        StringField.__init__(self, name, label, **attribs)
+
+    def parse_value( self, pvalue ):
+        dvalue = StringField.parse_value(self, pvalue)
+        assert isinstance(dvalue, str)
+
+        # Check for embedded spaces.
+        if ' ' in dvalue:
+            raise FieldError(msg_registry['url-invalid'],
+                             self.render_value(dvalue.replace(' ', '?')))
+
+        # Note: eventually, we want to parse using urlparse or something.
+
+        return dvalue
+
 

@@ -116,4 +116,13 @@ msg_registry = TranslatorDict({
 
     'agree-required': N_("Please indicate agreement."),
     'agree-display': N_("Agreed."),
+
+    'url-path-invalid': N_("Invalid URL Path."),
+
+    'username-label': N_("Username"),
+    'username-or-email-label': N_("Username or Email"),
+
+    'username-lower-error': N_("Usernames can only contain lowercase letters."),
+    'username-invalid': N_("Invalid username.  Only letters and numbers accepted."),
+    
     })
