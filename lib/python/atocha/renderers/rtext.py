@@ -15,6 +15,7 @@ from os.path import join
 from atocha import AtochaError, AtochaInternalError
 import atocha.render
 from atocha.field import Field, ORI_VERTICAL
+from atocha.fields import *
 from atocha.messages import msg_type
 
 
@@ -106,6 +107,9 @@ class TextFormRenderer(TextRenderer):
     See FormRenderer class for full details.
     """
 
+    # Registry for renderer.
+    renderers_registry = {}
+
     # CSS classes.
     css_input = u'atoinp'
     css_submit = u'atosub'
@@ -166,7 +170,7 @@ class TextFormRenderer(TextRenderer):
             opts.append(('accept-charset', form.accept_charset))
         if form.enctype is not None:
             opts.append(('enctype', form.enctype))
-        
+
         f.write(u'<form %s>\n' %
                 ' '.join(['%s="%s"' % x for x in opts]).decode('ascii'))
 
@@ -217,12 +221,12 @@ class TextFormRenderer(TextRenderer):
     def do_render_scripts( self, scripts ):
         if not scripts:
             return u''
-        
+
         f = self._create_buffer()
         scriptsdir = self.scriptsdir or ''
         for fn, notice in scripts.iteritems():
             f.write(u'<script language="JavaScript" '
-                    u'src="%s" ' % join(scriptsdir, fn) + 
+                    u'src="%s" ' % join(scriptsdir, fn) +
                     u'type="text/javascript">\n')
             if notice:
                 f.write(notice)
@@ -256,7 +260,7 @@ class TextFormRenderer(TextRenderer):
             opts.append( ('readonly', '1') )
         else:
             assert state is Field.NORMAL
-            
+
         if getattr(field, 'onchange', None):
             # Note: we transparently translate to a more portable onclick callback.
             opts.append( ('onclick', field.onchange) )
@@ -346,7 +350,7 @@ class TextFormRenderer(TextRenderer):
 
 
     #---------------------------------------------------------------------------
-    
+
     def renderHidden( rdr, field, rvalue ):
         inputs = []
         # Use the first variable name.
@@ -365,111 +369,120 @@ class TextFormRenderer(TextRenderer):
 
         return u'\n'.join(inputs)
 
-    def renderStringField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+#-------------------------------------------------------------------------------
+#
+def renderStringField( rdr, field, renctx ):
+    return rdr._single('text', field, renctx)
 
-    def renderTextAreaField( rdr, field, renctx ):
-        opts = []
-        if field.rows:
-            opts.append( ('rows', field.rows) )
-        if field.cols:
-            opts.append( ('cols', field.cols) )
-            
-        if renctx.state is Field.DISABLED:
-            opts.append( ('disabled', 1) )
-        elif renctx.state is Field.READONLY:
-            opts.append( ('readonly', 1) )
-        else:
-            assert renctx.state is Field.NORMAL
+def renderTextAreaField( rdr, field, renctx ):
+    opts = []
+    if field.rows:
+        opts.append( ('rows', field.rows) )
+    if field.cols:
+        opts.append( ('cols', field.cols) )
 
-        return (rdr._geterror(renctx) +
-                u'<textarea name="%s" %s class="%s">%s</textarea>' %
-                (field.varnames[0].decode('ascii'),
-                 ' '.join(['%s="%d"' % x for x in opts]).decode('ascii'),
-                 field.css_class.decode('ascii'), renctx.rvalue or u''))
+    if renctx.state is Field.DISABLED:
+        opts.append( ('disabled', 1) )
+    elif renctx.state is Field.READONLY:
+        opts.append( ('readonly', 1) )
+    else:
+        assert renctx.state is Field.NORMAL
 
-    def renderPasswordField( rdr, field, renctx ):
-        return rdr._single('password', field, renctx)
+    return (rdr._geterror(renctx) +
+            u'<textarea name="%s" %s class="%s">%s</textarea>' %
+            (field.varnames[0].decode('ascii'),
+             ' '.join(['%s="%d"' % x for x in opts]).decode('ascii'),
+             field.css_class.decode('ascii'), renctx.rvalue or u''))
 
-    def renderDateField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+def renderPasswordField( rdr, field, renctx ):
+    return rdr._single('password', field, renctx)
 
-    def renderEmailField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+def renderBoolField( rdr, field, renctx ):
+    # The render type calls for any value and for the rvalue to determine
+    # whether this will get checked or not.
+    checked, renctx.rvalue = renctx.rvalue, u'1'
+    return rdr._single('checkbox', field, renctx, checked)
 
-    def renderURLField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+def renderRadioField( rdr, field, renctx ):
+    assert renctx.rvalue is not None
+    inputs = []
+    for vname, label in field.choices:
+        checked = bool(vname == renctx.rvalue)
+        inputs.append(
+            rdr._input('radio', field, renctx.state,
+                        vname, checked, _(label)))
+    output = rdr._orient(field, inputs)
+    return rdr._geterror(renctx) + output
 
-    def renderIntField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+def renderMenuField( rdr, field, renctx ):
+    renctx.rvalue = [renctx.rvalue]
+    return rdr._renderMenu(field, renctx)
 
-    def renderFloatField( rdr, field, renctx ):
-        return rdr._single('text', field, renctx)
+def renderCheckboxesField( rdr, field, renctx ):
+    inputs = []
+    for vname, label in field.choices:
+        checked = vname in renctx.rvalue
+        inputs.append(
+            rdr._input('checkbox', field, renctx.state,
+                        vname, checked, _(label)))
+    output = rdr._orient(field, inputs)
+    return rdr._geterror(renctx) + output
 
-    def renderBoolField( rdr, field, renctx ):
-        # The render type calls for any value and for the rvalue to determine
-        # whether this will get checked or not.
-        checked, renctx.rvalue = renctx.rvalue, u'1'
-        return rdr._single('checkbox', field, renctx, checked)
+def renderListboxField( rdr, field, renctx ):
+    assert renctx.rvalue is not None
+    if not isinstance(renctx.rvalue, list):
+        renctx.rvalue = [renctx.rvalue] # May be a str if not multiple.
+    return rdr._renderMenu(field, renctx, field.multiple, field.size)
 
-    renderAgreeField = renderBoolField
+def renderFileUploadField( rdr, field, renctx ):
+    return rdr._single('file', field, renctx)
 
-    def renderRadioField( rdr, field, renctx ):
-        assert renctx.rvalue is not None
-        inputs = []
-        for vname, label in field.choices:
-            checked = bool(vname == renctx.rvalue)
-            inputs.append(
-                rdr._input('radio', field, renctx.state,
-                            vname, checked, _(label)))
-        output = rdr._orient(field, inputs)
-        return rdr._geterror(renctx) + output
+def renderSetFileField( rdr, field, renctx ):
+    filew = rdr._single('file', field, renctx)
+    checked, renctx.rvalue = renctx.rvalue, u'1'
+    resetw = rdr._single('checkbox', field, renctx,
+                          checked, varname=field.varnames[1])
+    return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
 
-    def renderMenuField( rdr, field, renctx ):
-        renctx.rvalue = [renctx.rvalue]
-        return rdr._renderMenu(field, renctx)
+def renderJSDateField( rdr, field, renctx ):
+    varname = field.varnames[0]
+    fargs = (varname, renctx.rvalue and ", '%s'" % renctx.rvalue or '')
+    script = (u"DateInput('%s', true, 'YYYYMMDD' %s);"
+              u"hideInputs(this);") % fargs
 
-    def renderCheckboxesField( rdr, field, renctx ):
-        inputs = []
-        for vname, label in field.choices:
-            checked = vname in renctx.rvalue
-            inputs.append(
-                rdr._input('checkbox', field, renctx.state,
-                            vname, checked, _(label)))
-        output = rdr._orient(field, inputs)
-        return rdr._geterror(renctx) + output
+    # We must be able to accept both the string version and the datetime
+    # version because of the different paths of argument parsing... it's
+    # possible that we get asked to render something using values that have
+    # not been parsed previously (for example, during the automated form
+    # parsing errors).
+    noscript = (u'<input name="%s" value="%s"/>' %
+                (varname, renctx.rvalue or ''))
 
-    def renderListboxField( rdr, field, renctx ):
-        assert renctx.rvalue is not None
-        if not isinstance(renctx.rvalue, list):
-            renctx.rvalue = [renctx.rvalue] # May be a str if not multiple.
-        return rdr._renderMenu(field, renctx, field.multiple, field.size)
+    return rdr._script(field, renctx, script, noscript)
 
-    def renderFileUploadField( rdr, field, renctx ):
-        return rdr._single('file', field, renctx)
 
-    def renderSetFileField( rdr, field, renctx ):
-        filew = rdr._single('file', field, renctx)
-        checked, renctx.rvalue = renctx.rvalue, u'1'
-        resetw = rdr._single('checkbox', field, renctx,
-                              checked, varname=field.varnames[1])
-        return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
+#-------------------------------------------------------------------------------
+# Register rendering routines.
+TextFormRenderer_routines = ((StringField, renderStringField),
+                             (TextAreaField, renderTextAreaField),
+                             (PasswordField, renderPasswordField),
+                             (DateField, renderStringField),
+                             (EmailField, renderStringField),
+                             (URLField, renderStringField),
+                             (IntField, renderStringField),
+                             (FloatField, renderStringField),
+                             (BoolField, renderBoolField),
+                             (AgreeField, renderBoolField),
+                             (RadioField, renderRadioField),
+                             (MenuField, renderMenuField),
+                             (CheckboxesField, renderCheckboxesField),
+                             (ListboxField, renderListboxField),
+                             (FileUploadField, renderFileUploadField),
+                             (SetFileField, renderSetFileField),
+                             (JSDateField, renderJSDateField),)
 
-    def renderJSDateField( rdr, field, renctx ):
-        varname = field.varnames[0]
-        fargs = (varname, renctx.rvalue and ", '%s'" % renctx.rvalue or '')
-        script = (u"DateInput('%s', true, 'YYYYMMDD' %s);"
-                  u"hideInputs(this);") % fargs
-
-        # We must be able to accept both the string version and the datetime
-        # version because of the different paths of argument parsing... it's
-        # possible that we get asked to render something using values that have
-        # not been parsed previously (for example, during the automated form
-        # parsing errors).
-        noscript = (u'<input name="%s" value="%s"/>' %
-                    (varname, renctx.rvalue or ''))
-
-        return rdr._script(field, renctx, script, noscript)
+for fcls, fun in TextFormRenderer_routines:
+    atocha.render.register_render_routine(TextFormRenderer, fcls, fun)
 
 
 
@@ -482,6 +495,9 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
 
     Note: we do not render the errors.
     """
+
+    # Registry for renderer.
+    renderers_registry = {}
 
     # CSS classes.
     css_label = u'atodlbl'
@@ -524,52 +540,54 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     def do_render_scripts( self ):
         return ''
 
-    #---------------------------------------------------------------------------
-
-    def _simple( self, field, renctx ):
-        """
-        Render a simple field with the given parameters.
-        """
-        return renctx.rvalue
-
-    #---------------------------------------------------------------------------
-
     def renderHidden( rdr, field, rvalue ):
         return ''
 
-    renderStringField = _simple
 
-    def renderTextAreaField( rdr, field, renctx ):
-        return u'<pre>%s</pre>' % renctx.rvalue
+#-------------------------------------------------------------------------------
+#
+def displayValue( rdr, field, renctx ):
+    return renctx.rvalue
 
-    renderPasswordField = _simple
-    renderDateField = _simple
+def displayTextAreaField( rdr, field, renctx ):
+    return u'<pre>%s</pre>' % renctx.rvalue
 
-    def renderEmailField( rdr, field, renctx ):
-        if renctx.rvalue:
-            return u'<a href="mailto:%s">%s</a>' % (renctx.rvalue,
-                                                    renctx.rvalue)
-        return u''
+def displayEmailField( rdr, field, renctx ):
+    if renctx.rvalue:
+        return u'<a href="mailto:%s">%s</a>' % (renctx.rvalue,
+                                                renctx.rvalue)
+    return u''
 
-    def renderURLField( rdr, field, renctx ):
-        if renctx.rvalue:
-            return u'<a href="%s">%s</a>' % (renctx.rvalue,
-                                             renctx.rvalue)
-        return u''
-        
-    renderIntField = _simple
-    renderFloatField = _simple
-    renderBoolField = _simple
-    renderAgreeField = renderBoolField
-    renderRadioField = _simple
-    renderMenuField = _simple
-    renderCheckboxesField = _simple
-    renderListboxField = _simple
+def displayURLField( rdr, field, renctx ):
+    if renctx.rvalue:
+        return u'<a href="%s">%s</a>' % (renctx.rvalue,
+                                         renctx.rvalue)
+    return u''
 
-    def renderFileUploadField( rdr, field, renctx ):
-        # Never display a file upload. Don't even try.
-        return u''
+def displayFileUploadField( rdr, field, renctx ):
+    # Never display a file upload. Don't even try.
+    return u''
 
-    renderSetFileField = renderFileUploadField
+#-------------------------------------------------------------------------------
+# Register rendering routines.
+TextDisplayRenderer_routines = ((StringField, displayValue),
+                                (TextAreaField, displayTextAreaField),
+                                (PasswordField, displayValue),
+                                (DateField, displayValue),
+                                (EmailField, displayEmailField),
+                                (URLField, displayURLField),
+                                (IntField, displayValue),
+                                (FloatField, displayValue),
+                                (BoolField, displayValue),
+                                (AgreeField, displayValue),
+                                (RadioField, displayValue),
+                                (MenuField, displayValue),
+                                (CheckboxesField, displayValue),
+                                (ListboxField, displayValue),
+                                (FileUploadField, displayFileUploadField),
+                                (SetFileField, displayFileUploadField),
+                                (JSDateField, displayValue),)
 
-    renderJSDateField = _simple
+for fcls, fun in TextDisplayRenderer_routines:
+    atocha.render.register_render_routine(TextDisplayRenderer, fcls, fun)
+

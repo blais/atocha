@@ -76,6 +76,19 @@ class Field:
     - 'types_render' -> tuple: possible types for values for prepared to be used
       for rendering.
 
+    Rendering
+    ---------
+
+    For the full details on how to associate rendering routines for a specific
+    renderer and field class, see the render.py file.
+
+    There is a special class attribute that can be used on new, derived fields,
+    if you do not want to redefine rendering routines for it: you can set
+    'render_as' on the class, to a class that will be used to lookup the
+    rendering routines for all renderers.  This is just a convenience for a
+    common case.
+
+
     Important note about usage of required fields
     ---------------------------------------------
 

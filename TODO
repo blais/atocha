@@ -5,6 +5,9 @@
 Current Affairs (Requirements Before 1.0 Final Release)
 =======================================================
 
+Documentation
+-------------
+
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
 
@@ -13,16 +16,6 @@ Current Affairs (Requirements Before 1.0 Final Release)
 
 - Add a section in document about dealing with multiple submit buttons and an
   example.
-
-- Add a section in document about extending with new fields and how to register
-  new rendering methods for each renderer from outside the library (Note: right
-  now the only way would be to derived form the renderer class, which is
-  obviously not acceptable--at least not in Python.  We need to implement a
-  double-dispatch mechanism).
-
-  WE NEED TO HAVE A DOUPLE-DISPATCH MECHANISM FOR EXTENDING NICELY WITH CUSTOM
-  RENDERING BEFORE WE RELEASE THIS.
-
 
 
 

@@ -18,7 +18,7 @@ rendering to a tree of elements which gets flattenned out later.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
-import types
+from types import ClassType
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
@@ -31,6 +31,75 @@ from parse import FormParser
 
 
 __all__ = ['FormRenderer']
+
+
+#-------------------------------------------------------------------------------
+#
+def register_render_routine( renderer_cls, field_cls, fun, override=False ):
+    """
+    Register a rendering routine for a specific renderer class and specific
+    field class.  'fun' is the function that is to be registered, and must
+    accept 3 arguments, e.g. renderBliField( rdr, field, ctxt ):
+
+    - 'rdr': a renderer instance;
+    - 'field': a field instance;
+    - 'ctxt: a RenderContext instance, which contains information about the
+      rendering for the given field.
+
+    The type of the value returned depends on the renderer class.
+    """
+    assert isinstance(renderer_cls, ClassType)
+    assert isinstance(field_cls, ClassType)
+
+    # Get the registry.
+    reg = renderer_cls.renderers_registry
+
+    # Check for collisions.
+    if not override:
+        assert field_cls not in reg
+        
+    # Add the function to the registry.
+    reg[field_cls] = fun
+
+#-------------------------------------------------------------------------------
+#
+def lookup_render_routine( renderer_cls, field_cls ):
+    """
+    Lookup the rendering routine associated with render 'renderer_cls' and field
+    'field_cls', or with 'field_cls.render_as', if present.
+    """
+    assert isinstance(renderer_cls, ClassType)
+    assert isinstance(field_cls, ClassType)
+
+    # Get the registry from the renderer class.  This is where we store the
+    # registry.
+    try:
+        reg = renderer_cls.renderers_registry
+    except KeyError:
+        raise AtochaInternalError(
+            "Missing renderers registry for '%s'." % renderer.__class__)
+
+    # Fetch the function.
+    try:
+        renfun = reg[field_cls]
+    except KeyError:
+        try:
+            # Try to lookup the render_as class if not found.
+            cls = getattr(field_cls, 'render_as')
+            renfun = reg[field_cls]
+
+            # Cache the value for next time (this has repercussions on how
+            # dynamic the registries can be, but they are usually statically
+            # defined so we can do this for efficiency).
+            register_render_routine(renderer_cls, field_cls, fun)
+            
+        except KeyError:
+            raise AtochaInternalError(
+                "Missing rendering routine for renderer '%s', field '%s'." %
+                (renderer_cls.__name__, field_cls.__name__))
+
+    return renfun
+    
 
 
 #-------------------------------------------------------------------------------
@@ -206,32 +275,28 @@ class FormRenderer:
             output = renderer.renderHidden(field, rvalue)
 
         else:
-            # Dispatch to function with name renderXXX() on type field, for
-            # example, renderStringField().  Your derived class must have
-            # methods render<type>.
+            # Dispatch to functions for (renderer class, field class).  No
+            # search is performed in the inheritance tree, so every class must
+            # be registered to be able to render (we avoid this for now in the
+            # interest of speed).
             #
+            # This allows us some freedom in terms of where to place extension
+            # code for new fields and/or new renderers.  In this code the
+            # rendering routines are located alongside the renderers, but in
+            # extension classes they might be defined next to the fields.
+            # 
             # Note: we could use the visitor pattern but we would need to
-            # customize all the field classes to support it.
-
-            # Search the classes in order of inheritance.
-            clsstack = [field.__class__]
-            method = None
-            while method is None:
-                cls = clsstack.pop()
-                mname = 'render%s' % cls.__name__
-                method = getattr(renderer, mname, None)
-                clsstack.extend(cls.__bases__)
-
-            if method is None:
-                raise AtochaInternalError(
-                    "Error: renderer has no method for '%s'." %
-                    field.__class__)
-
+            # customize all the field classes to support it.  We prefer this
+            # simpler approach.
+            #
+            # The rendering routines have to be registered using the appropriate
+            # function for this in this file.
+            
+            renfun = lookup_render_routine(renderer.__class__, field.__class__)
             renctx = RenderContext(state, rvalue, errmsg, field.isrequired())
             try:
-                output = method(field, renctx)
+                output = renfun(renderer, field, renctx)
             except Exception, e:
-                raise
                 raise AtochaInternalError(
                     "Error: While attempting to render field '%s': %s" %
                     (field, str(e)))

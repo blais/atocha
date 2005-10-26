@@ -28,7 +28,7 @@ entered by the user::
 
    myform = Form(
        'person-form',
-   
+
        # Normal unicode string.
        StringField('firstname', N_("First name")),
        StringField('lastname', N_("Last name")),
@@ -40,7 +40,7 @@ entered by the user::
        DateField('birthday', N_("Birthday")),
 
        # A menu.
-       MenuField('gender', [('m', N_('Male')), 
+       MenuField('gender', [('m', N_('Male')),
                             ('f', N_('Female'))], N_('Gender')),
 
        # Radio buttons.
@@ -50,7 +50,7 @@ entered by the user::
                               ('o', N_('N/A'))],
                   N_('Military Service'), orient=ORI_HORIZONTAL,
                   initial='o'),
-   
+
        action='/person/handler')
 
 This form can be created at global module level, and does not have to be
@@ -66,21 +66,21 @@ render the form on a page for the user to fill in::
    # In resource: /person/edit...
 
    rdr = TextFormRenderer(myform, values, errors)
-   
+
    # Print some HTML
    #...
 
    # Render the form.
-   sys.stdout.write( rdr.render(action='handle.cgi') ) 
+   sys.stdout.write( rdr.render(action='handle.cgi') )
 
    # Complete the page rendering.
-   # ...   
+   # ...
 
 
 Note that a set of initial values and errors is specified for the renderer to
 use, and usually will come from session data to provide error feedback if the
 form is being re-rendered for errors from user input.
-  
+
 Breaking down the Rendering
 ---------------------------
 
@@ -98,9 +98,9 @@ wherever you want within your system::
 
    rdr = TextFormRenderer(myform, values, errors,
                         output_encoding='latin-1')
-         
+
    print rdr.render_container(action='/edit/handler2')
-         
+
    print "<div id="email">
    print "<p>Your email, please:</p>
    print rdr.render_fields('email')     # Render just the email field.
@@ -108,7 +108,7 @@ wherever you want within your system::
 
 You could easily use this system to embed Atocha in your favourite templating
 system.  Atocha does not bind to a templating system and is entirely orthogonal
-to any web application framework.  
+to any web application framework.
 
 You could create some kind of syntax in HTML for your templating system for
 specifying that a field's inputs should be rendered in-place, e.g.::
@@ -134,7 +134,7 @@ If you need to render menus, listboxes, radio buttons, checkbox lists that are
 generated dynamically, you can simply set the list of valid choices on the field
 before rendering or parsing, in the renderer::
 
- 
+
    form['matches'].setchoices(found_matches)
    ...
    rdr.render_fields('matches')
@@ -192,19 +192,19 @@ to either redirect or start using the values, e.g.::
    # In resource, e.g. /person/handle that gets called from a form...
    # The resource receives the arguments 'args'.
    parser = FormParser(myform, args, '/person/edit')
-   
+
    # Custom validation
    if parser.o.gender == 'f' and parser.o.milserv != 'o':
        parser.error(u'Please fix error in military service below.',
            milserv=(u"Women should specify no military service.", 'o'))
-   
+
    # ... more validation code...
 
    # Indicate the end of parsing.  Redirection may occur here if there
    # are errors.  Otherwise we get an object whose attributes correspond to the
    # parsed arguments.  This object is also available as 'parser.o'.
    o = parser.end()
-   
+
    # Set final data in database and remove session data.
    #...  use o.gender, o.milserv, o.firstname, etc.
 
@@ -222,14 +222,14 @@ Display Renderers
 The form object can also be used to display parsed values in a nice-looking
 table, without editing capabilities.  This is simply accomplished by using a
 special kind of renderer, that I call "display renderers", and which instead of
-rendering inputs outputs a table with rendered values. 
+rendering inputs outputs a table with rendered values.
 
 This is useful because much information about presentation of a form's data is
 already present in the form definition::
 
    # Create display renderer to display the data.
    rdr = TextDisplayRenderer(myform, values)
-         
+
    print "<div id="person">
    print "<p>Person Profile:</p>
    print rdr.render()  # Renders a table.
@@ -263,6 +263,43 @@ Options
 The ``Form``, ``FormRenderer`` and ``FormParser`` and ``Field`` classes support
 many options for various parameters depending on their specific application.
 Visit the source code to find out what the specific options are.
+
+
+Extending Atocha
+================
+
+You can also write your own field classes and register rendering routines for
+them.  For example, if you often use the same parameters, you may define a
+subclass of one of the fields, e.g.::
+
+    class UsernameField(StringField):
+        """
+        Username field with a maximum length and which automatically lowercases the
+        parsed value.
+        """
+
+        attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+        render_as = StringField
+
+        def __init__( self, name, label=None, **attribs ):
+            # Set some fixed parameters of the field.
+            attribs['encoding'] = 'ascii'
+            attribs['strip'] = True
+            attribs['minlen'], attribs['maxlen'] = common.username_lengths
+            if label is None:
+                label = N_("Username")
+            StringField.__init__(self, name, label, **attribs)
+
+        def parse_value( self, pvalue ):
+            dvalue = StringField.parse_value(self, pvalue)
+
+            # Do some additional checking for the username...
+            # ...
+
+            return dvalue
+
+You may also write a particular rendering routine for this field and register it
+separately.  Rendering routines can be defined for each (renderer, field) pairs.
 
 
 Online Demo
