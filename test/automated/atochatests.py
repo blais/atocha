@@ -92,6 +92,12 @@ class TestRender(Test):
         p = TextFormRenderer(f, incomplete=1)
         self.assertRaises(AtochaError, p.render)
 
+        # Render a hidden bool
+        f = Form('test-form', BoolField('beep', state=Field.HIDDEN))
+        args = {'beep': True}
+        p = TextFormRenderer(f, incomplete=1)
+        self.assertRaises(AtochaError, p.render)
+
     def test_incomplete( self ):
         'Test rendering incompletely.'
 
@@ -434,6 +440,14 @@ class TestFields(Test):
         self.assert_(not p.haserrors() and p['agree'] is True)
 
         p = FormParser(f, {'agree': ''})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['agree'] is False)
+
+        p = FormParser(f, {'agree': '1'})
+        o = p.end()
+        self.assert_(not p.haserrors() and p['agree'] is True)
+
+        p = FormParser(f, {'agree': '0'})
         o = p.end()
         self.assert_(not p.haserrors() and p['agree'] is False)
 

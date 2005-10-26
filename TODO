@@ -8,6 +8,15 @@ Current Affairs (Requirements Before 1.0 Final Release)
 Documentation
 -------------
 
+- IMPORTANT BUG! When parser.error() has been called but without a specific
+  error field, haserrors() is False and no redirection occurs!  You need to fix
+  that.  Write an automated test, and fix this!
+
+
+
+
+
+
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
 

@@ -28,7 +28,7 @@ class BoolField(Field):
     """
     types_data = (bool,)
     types_parse = (NoneType, unicode,)
-    types_render = (bool,)
+    types_render = (unicode,)
     css_class = 'bool'
 
     attributes_declare = (
@@ -54,12 +54,24 @@ class BoolField(Field):
         # Accept a missing argument or an empty string as False value (browsers
         # don't submit the argument for a checkbox input when it is not
         # checked).
-        return bool(pvalue is not None and pvalue)
+        if pvalue is None:
+            return False
+        assert isinstance(pvalue, unicode)
+
+        # Parse '0' string as False, since this is how a hidden bool field will
+        # render.
+        if pvalue == u'0':
+            return False
+        else:
+            return bool(pvalue)
 
     def render_value( self, dvalue ):
         if dvalue is None:
             return False
-        return dvalue
+        if dvalue:
+            return u'1'
+        else:
+            return u'0' # Render false.
 
     def display_value( self, dvalue ):
         if dvalue:
