@@ -30,5 +30,8 @@ scrips or to incorporate it in your favourite web application framework
       author_email="blais@furius.ca",
       url="http://furius.ca/atocha",
       package_dir = {'': 'lib/python'},
-      packages = ['atocha', 'atocha.renderers', 'atocha.fields'],
+      packages = ['atocha',
+                  'atocha.fields',
+                  'atocha.renderers',
+                  'atocha.norms'],
      )
