@@ -5,12 +5,40 @@
 Current Affairs (Requirements Before 1.0 Final Release)
 =======================================================
 
-Documentation
--------------
+Bugs and Things to Fix
+----------------------
 
 - IMPORTANT BUG! When parser.error() has been called but without a specific
   error field, haserrors() is False and no redirection occurs!  You need to fix
   that.  Write an automated test, and fix this!
+
+- In the automated tests, you could configure the parser to raise an exception
+  on error and catch it with assertRaises
+
+Documentation
+-------------
+
+- Do we need to apply the copyright to each and every file? ::
+
+    #  Atocha -- A web forms rendering and handling Python library.
+    #  Copyright (C) 2005  Martin Blais
+    #
+    #  This program is free software; you can redistribute it and/or modify
+    #  it under the terms of the GNU General Public License as published by
+    #  the Free Software Foundation; either version 2 of the License, or
+    #  (at your option) any later version.
+    #
+    #  This program is distributed in the hope that it will be useful,
+    #  but WITHOUT ANY WARRANTY; without even the implied warranty of
+    #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    #  GNU General Public License for more details.
+    #
+    #  You should have received a copy of the GNU General Public License
+    #  along with this program; if not, write to the Free Software
+    #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+  YES.  This is web code, and face it, web developers are a bunch of copycats,
+  so make sure they know they need to contribute fixes back to the community.
 
 
 
@@ -28,31 +56,10 @@ Documentation
 
 
 
+
+
 Known Bugs and Misfeatures
 ==========================
-
-Double-Dispatch Mechanism
--------------------------
-
-- You need to think more about the double-dispatch mechanism for extending the
-  renderer or creating new fields, in particular:
-
-  - Derived field classes should either be handled automatically, or there
-    should be a way for them to decide which method is to be used for rendering;
-
-  - Renderers could choose not to implement certain methods, instead letting the
-    inheritance decide which method is invoked.
-
-  We could use a multimethods package to implement this more cleanly, because
-  right now derivation from the renderer classes is required, and that's just
-  not nice enough.  Extending the system with a new field, it should be possible
-  to provide not only the field but to register custom rendering methods that
-  depend both on the renderer class and obviously to be dispatched from the type
-  of the new field.
-
-
-Other
------
 
 - There is a circular dependency between the parser and its accessor object and
   this causes the GC to be invoked.
@@ -94,30 +101,6 @@ Other
   kludgy approach we're using now.
 
 
-Future New Field Types Ideas
-============================
-
-- Complete the SetFileField with some JavaScript to hide the file input field
-  when the reset button is checked.
-
-- Implement a CaptchaField which generates a captcha image automatically.
-
-- Maybe derive from FileUpload and implement a Photograph field that reads the
-  value entirely and can print it and display it.  That field could also have
-  some Javascript to reset that field automatically.
-
-- Implement a BoolField that requires being checked (AgreeField).
-
-- Grab some of the fields from other libraries and adapt.  Also look at widgets
-  from FormEncode and see if some of them can be adapted to my framework.
-
-- Implement a menu that redirects on change based on this:
-  http://cscie12.dce.harvard.edu/lecture_notes/20050316/slide50.html
-
-- Something to fix eventually: the JSDateField script has hardcoded paths for
-  its accompanying images... not sure what to do about this yet. I suppose the
-  user has to copy the files anyway, so it might be ok to assume he might edit
-  the scripts somewhat.
 
 
 Ideas
@@ -168,15 +151,36 @@ Ideas
   args which have no corresponding field in the form (if that never becomes
   necessary, don't do so).
 
-- For Menus: 
+- For Menus:
 
   * Support disabled state for single options.
   * Support option groups and associated disabled state.
 
+- Restructure tests to automate all fields for four cases: hidden, valid,
+  invalid, empty.
 
 
-More Tests
-==========
+Future New Field Types
+----------------------
 
-- Automate tests for four cases: hidden, valid, invalid, empty.
+- Complete the SetFileField with some JavaScript to hide the file input field
+  when the reset button is checked.
 
+- Implement a CaptchaField which generates a captcha image automatically.
+
+- Maybe derive from FileUpload and implement a Photograph field that reads the
+  value entirely and can print it and display it.  That field could also have
+  some Javascript to reset that field automatically.
+
+- Implement a BoolField that requires being checked (AgreeField).
+
+- Grab some of the fields from other libraries and adapt.  Also look at widgets
+  from FormEncode and see if some of them can be adapted to my framework.
+
+- Implement a menu that redirects on change based on this:
+  http://cscie12.dce.harvard.edu/lecture_notes/20050316/slide50.html
+
+- Something to fix eventually: the JSDateField script has hardcoded paths for
+  its accompanying images... not sure what to do about this yet. I suppose the
+  user has to copy the files anyway, so it might be ok to assume he might edit
+  the scripts somewhat.

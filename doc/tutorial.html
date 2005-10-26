@@ -37,8 +37,10 @@ Atocha library provides for the web developer.</p>
 </ul>
 </li>
 <li><a class="reference" href="#display-renderers" id="id10" name="id10">Display Renderers</a></li>
-<li><a class="reference" href="#options" id="id11" name="id11">Options</a></li>
-<li><a class="reference" href="#online-demo" id="id12" name="id12">Online Demo</a></li>
+<li><a class="reference" href="#rendering-buttons-only" id="id11" name="id11">Rendering Buttons Only</a></li>
+<li><a class="reference" href="#options" id="id12" name="id12">Options</a></li>
+<li><a class="reference" href="#extending-atocha" id="id13" name="id13">Extending Atocha</a></li>
+<li><a class="reference" href="#online-demo" id="id14" name="id14">Online Demo</a></li>
 </ul>
 </div>
 <div class="section">
@@ -68,7 +70,7 @@ myform = Form(
     DateField('birthday', N_(&quot;Birthday&quot;)),
 
     # A menu.
-    MenuField('gender', [('m', N_('Male')), 
+    MenuField('gender', [('m', N_('Male')),
                          ('f', N_('Female'))], N_('Gender')),
 
     # Radio buttons.
@@ -97,10 +99,10 @@ rdr = TextFormRenderer(myform, values, errors)
 #...
 
 # Render the form.
-sys.stdout.write( rdr.render(action='handle.cgi') ) 
+sys.stdout.write( rdr.render(action='handle.cgi') )
 
 # Complete the page rendering.
-# ...   
+# ...
 </pre>
 <p>Note that a set of initial values and errors is specified for the renderer to
 use, and usually will come from session data to provide error feedback if the
@@ -120,9 +122,9 @@ wherever you want within your system:</p>
 <pre class="literal-block">
 rdr = TextFormRenderer(myform, values, errors,
                      output_encoding='latin-1')
-      
+
 print rdr.render_container(action='/edit/handler2')
-      
+
 print &quot;&lt;div id=&quot;email&quot;&gt;
 print &quot;&lt;p&gt;Your email, please:&lt;/p&gt;
 print rdr.render_fields('email')     # Render just the email field.
@@ -239,7 +241,7 @@ already present in the form definition:</p>
 <pre class="literal-block">
 # Create display renderer to display the data.
 rdr = TextDisplayRenderer(myform, values)
-      
+
 print &quot;&lt;div id=&quot;person&quot;&gt;
 print &quot;&lt;p&gt;Person Profile:&lt;/p&gt;
 print rdr.render()  # Renders a table.
@@ -247,13 +249,68 @@ print &quot;&lt;/div&gt;
 </pre>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id11" id="options" name="options">Options</a></h1>
+<h1><a class="toc-backref" href="#id11" id="rendering-buttons-only" name="rendering-buttons-only">Rendering Buttons Only</a></h1>
+<p>If you want to just render some buttons, you can use an empty form:</p>
+<pre class="literal-block">
+form = Form(
+    'form-first-login',
+    submit=N_('Edit Profile Now'))
+
+...
+TextFormRenderer(form)
+rdr.render(action='/u/%s/profile/general_edit' % u.username)
+</pre>
+<p>Or use the convenience method that will do the simple form creation with the
+appropriate buttons for you:</p>
+<pre class="literal-block">
+TextFormRenderer.render_buttons(
+    N_('Edit Profile Now'),
+    '/u/%s/profile/general_edit' % u.username))
+</pre>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id12" id="options" name="options">Options</a></h1>
 <p>The <tt class="docutils literal"><span class="pre">Form</span></tt>, <tt class="docutils literal"><span class="pre">FormRenderer</span></tt> and <tt class="docutils literal"><span class="pre">FormParser</span></tt> and <tt class="docutils literal"><span class="pre">Field</span></tt> classes support
 many options for various parameters depending on their specific application.
 Visit the source code to find out what the specific options are.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id12" id="online-demo" name="online-demo">Online Demo</a></h1>
+<h1><a class="toc-backref" href="#id13" id="extending-atocha" name="extending-atocha">Extending Atocha</a></h1>
+<p>You can also write your own field classes and register rendering routines for
+them.  For example, if you often use the same parameters, you may define a
+subclass of one of the fields, e.g.:</p>
+<pre class="literal-block">
+class UsernameField(StringField):
+    &quot;&quot;&quot;
+    Username field with a maximum length and which automatically lowercases the
+    parsed value.
+    &quot;&quot;&quot;
+
+    attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+    render_as = StringField
+
+    def __init__( self, name, label=None, **attribs ):
+        # Set some fixed parameters of the field.
+        attribs['encoding'] = 'ascii'
+        attribs['strip'] = True
+        attribs['minlen'], attribs['maxlen'] = common.username_lengths
+        if label is None:
+            label = N_(&quot;Username&quot;)
+        StringField.__init__(self, name, label, **attribs)
+
+    def parse_value( self, pvalue ):
+        dvalue = StringField.parse_value(self, pvalue)
+
+        # Do some additional checking for the username...
+        # ...
+
+        return dvalue
+</pre>
+<p>You may also write a particular rendering routine for this field and register it
+separately.  Rendering routines can be defined for each (renderer, field) pairs.</p>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id14" id="online-demo" name="online-demo">Online Demo</a></h1>
 <p>Try the <a class="reference" href="../test/demo/cgi-bin/display.cgi">online demo</a> which features an instance of most of the fields, to
 quickly see what the library can do.</p>
 </div>

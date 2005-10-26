@@ -14,18 +14,19 @@ from os.path import *
 projects_root = dirname(dirname(dirname(dirname(dirname(sys.argv[0])))))
 import os
 
-# htmlout imports.
-sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
-try:
-    import htmlout
-    from htmlout import *
-except ImportError:
-    pass # We won't be able to test the htmlout renderers.
-
 # atocha imports.
 sys.path.append(join(projects_root, 'atocha', 'lib', 'python'))
 from atocha import *
 from atocha.norms.ncgi import CGINormalizer
+
+# htmlout imports (if available).
+sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
+try:
+    import htmlout
+    from htmlout import *
+    from atocha.renderers.rhtmlout import *
+except ImportError:
+    pass # We won't be able to test the htmlout renderers.
 
 # atocha demo imports.
 sys.path.append(join(projects_root, 'atocha', 'test', 'demo'))

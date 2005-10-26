@@ -21,7 +21,7 @@ from atocha.messages import msg_type
 try:
     from htmlout import *
 except ImportError:
-    raise SystemExit(
+    raise ImportError(
         'Error: You need to install the htmlout library to use this module.')
 
 

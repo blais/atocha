@@ -64,6 +64,7 @@ Some documents:
 - `Design Notes <doc/design.html>`_
 - `Data Flow and Data Paths <doc/handpath.html>`_
 - `Developer's Guide <doc/develop.html>`_
+- `FAQ <doc/faq.html>`_
 
 
 Features
@@ -141,31 +142,8 @@ through the basic features of the library.
 Links
 =====
 
-- Another similar project is the FormEncode library (author: Ian Bicking):
+- Another similar project is the FormEncode_ library (author: Ian Bicking):
   http://formencode.org/.
-
-  FormEncode_ is a nice effort, which aims at solving the very same problem as
-  this project.  My comments on FormEncode_, in comparison to Atocha:
-
-  * I don't like having to write validator classes, I like to put my validation
-    code inside my resource handler code, because it is pretty much always
-    different for every form, so there is not much opportunity for reuse anyway.
-    For the few cases where I do validate results the same way, I simply write a
-    function that uses the parser object;
-
-  * I find all the metaclass stuff in FormEncode_ entirely unnecessary and very
-    distracting.  I like code that is lean and simple;
-
-  * I need to use an HTML output library that is a tree of nodes (htmlout) and
-    so I really needed to have decoupled renderer code that produces only nodes
-    rather than text;
-
-  * I don't know if the kind of per-error message with the ability to specify an
-    invalid replacement value for re-rendering can be produced as easily as with
-    Atocha (I would need to study FormEncode to find out).
-
-  That being said, I did not really make an effort to try to use FormEncode_, at
-  the time when I discovered it I had already pretty much finished my library.
 
 .. _FormEncode: http://formencode.org/
 

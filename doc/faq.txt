@@ -1,0 +1,64 @@
+============================================
+  atocha: Frequently Asked Questions (FAQ)
+============================================
+
+:Abstract: 
+
+   A list of some frequently asked questions, with answers.
+
+
+.. contents::
+
+
+What is htmlout?  Why is it not included with Atocha?
+=====================================================
+
+htmlout is a simplistic library to perform HTML output from Python, similar to
+Nevow's Stan library.   It is also written by the author of Atocha, but never
+has had the time to clean it up enough to want to share it.  It is still
+changing and requires some review before making it open source.
+
+However, the renderers for htmlout that come with Atocha can serve as a nice
+basis for creating other renderers which also use trees of nodes to create html
+output.
+
+Do I need htmlout?
+==================
+
+No.  You can use the text renderers that comes with Atocha or write your own
+renderer if you want.
+
+
+How does Atocha compare with FormEncode?
+========================================
+
+FormEncode_ is a nice effort, which aims at solving the very same problem as
+this project.  My personal views on FormEncode_, with respect to Atocha:
+
+* I don't like having to write validator classes, I like to put my validation
+  code inside my resource handler code, because it is pretty much always
+  different for every form, so there is not much opportunity for reuse anyway.
+  For the few cases where I do validate results the same way, I simply write a
+  function that uses the parser object;
+
+* I find all the metaclass stuff in FormEncode_ entirely unnecessary and very
+  distracting.  I like code that is lean and simple;
+
+* I need to use an HTML output library that is a tree of nodes (htmlout) and
+  so I really needed to have decoupled renderer code that produces only nodes
+  rather than text;
+
+* I don't know if the kind of per-error message with the ability to specify an
+  invalid replacement value for re-rendering can be produced as easily as with
+  Atocha (I would need to study FormEncode to find out).
+
+* When I built Atocha, I was having lots of trouble with types, and I wanted to
+  build my stuff on ultra-defensive programming, with lots of assertions, so
+  that I could easily find problems when they occur.  I'm not sure how
+  FormEncode's type conditions are setup.
+
+That being said, I did not really make an effort to try to use FormEncode_, at
+the time when I discovered it I had almost finished my library.
+
+.. _FormEncode: http://formencode.org/
+

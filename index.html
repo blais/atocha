@@ -90,6 +90,7 @@ give you a taste for what the library can do for you.</p>
 <li><a class="reference" href="doc/design.html">Design Notes</a></li>
 <li><a class="reference" href="doc/handpath.html">Data Flow and Data Paths</a></li>
 <li><a class="reference" href="doc/develop.html">Developer's Guide</a></li>
+<li><a class="reference" href="doc/faq.html">FAQ</a></li>
 </ul>
 </div>
 <div class="section">
@@ -152,29 +153,9 @@ through the basic features of the library.</p>
 </div>
 <div class="section">
 <h1><a class="toc-backref" href="#id13" id="links" name="links">Links</a></h1>
-<ul>
-<li><p class="first">Another similar project is the FormEncode library (author: Ian Bicking):
-<a class="reference" href="http://formencode.org/">http://formencode.org/</a>.</p>
-<p><a class="reference" href="http://formencode.org/">FormEncode</a> is a nice effort, which aims at solving the very same problem as
-this project.  My comments on <a class="reference" href="http://formencode.org/">FormEncode</a>, in comparison to Atocha:</p>
 <ul class="simple">
-<li>I don't like having to write validator classes, I like to put my validation
-code inside my resource handler code, because it is pretty much always
-different for every form, so there is not much opportunity for reuse anyway.
-For the few cases where I do validate results the same way, I simply write a
-function that uses the parser object;</li>
-<li>I find all the metaclass stuff in <a class="reference" href="http://formencode.org/">FormEncode</a> entirely unnecessary and very
-distracting.  I like code that is lean and simple;</li>
-<li>I need to use an HTML output library that is a tree of nodes (htmlout) and
-so I really needed to have decoupled renderer code that produces only nodes
-rather than text;</li>
-<li>I don't know if the kind of per-error message with the ability to specify an
-invalid replacement value for re-rendering can be produced as easily as with
-Atocha (I would need to study FormEncode to find out).</li>
-</ul>
-<p>That being said, I did not really make an effort to try to use <a class="reference" href="http://formencode.org/">FormEncode</a>, at
-the time when I discovered it I had already pretty much finished my library.</p>
-</li>
+<li>Another similar project is the <a class="reference" href="http://formencode.org/">FormEncode</a> library (author: Ian Bicking):
+<a class="reference" href="http://formencode.org/">http://formencode.org/</a>.</li>
 </ul>
 </div>
 <div class="section">

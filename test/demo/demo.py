@@ -14,19 +14,24 @@ You might define something similar for your own environment.
 import sys, os, StringIO, base64, shelve
 from os.path import *
 
-# htmlout imports.
-try:
-    from htmlout import *
-except ImportError:
-    pass # We won't be able to test the htmlout renderers.
+# Current renderer type for demo/tests: 'text' or 'htmlout'.
+rtype = 'htmlout'
 
 # atocha imports.
 from atocha import *
 
+# htmlout imports.
+if rtype == 'htmlout':
+    try:
+        from htmlout import *
+        from atocha.renderers.rhtmlout import *
+        rtype = 'htmlout'
+    except ImportError:
+        # We won't be able to test the htmlout renderers.
+        print >> sys.stderr, ('Warning: htmlout not available, '
+                              'falling back on text renderers.')
+        rtype = 'text'
 
-#-------------------------------------------------------------------------------
-#
-rtype = 'htmlout' # Renderer type for demo/tests: 'text' or 'htmlout'
 
 #-------------------------------------------------------------------------------
 #
