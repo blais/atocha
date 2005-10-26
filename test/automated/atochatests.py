@@ -252,6 +252,10 @@ class TestFields(Test):
         args = {'name': 'Martin'}
         o = FormParser.parse(f, args)
         self.assert_(o.name)
+        
+        args = {}
+        o = FormParser.parse(f, args) # No error, we accept an empty string too.
+        self.assert_(o.name == '')
 
         args = {'name': 'Jon'}
         o = FormParser.parse(f, args)
