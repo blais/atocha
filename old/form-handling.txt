@@ -1,0 +1,213 @@
+====================
+Form Handling Design
+====================
+
+:Author: Martin Blais <blais@furius.ca>
+:Date: 2005-02-08
+:Abstract:
+
+   Design details for form handling.
+
+Blog
+----
+
+Hi Ian
+
+This is an interesting little problem that i had to face also
+a few weeks ago when I wrote part of a web application
+framework.  I took a really simple approach which works well
+with my framework (I like simple things, this is one of the
+reasons I like Python) and I will describe it below.
+
+BTW, I find your log entry a little bit difficult to
+understand for someone that is not familiar with your formkit
+code, and I think the problem is interesting enough that it
+deserves more details.  It would be great if you could write
+your thoughts in a self-contained document with clearer
+definitions of the problem to be solved, etc.  i.e. not just a
+blog entry, but a design doc.  Just an idea.
+
+Here is how I solved it in my framework (this is tested code
+and running in a web app).
+
+
+Components
+----------
+
+In summary, this problem can consists of separate components
+which interact in well-defined ways, here are the definitions
+of my components:
+
+1. *form definition*: listing the names, types, constraints
+   and labels of the forms;
+
+2. *rendering a form*: this involves taking the form
+   definition, a set of initial values and generating an
+   output that represents the corresponding HTML (or directly
+   outputting HTML text);
+
+3. *error markup*: taking potential errors from a previous
+   request adding markup to indicate errors near the
+   corresponding input fields;
+
+4. *validation*: taking the values sent from the submit of a
+   form and validating the constraints on the widgets,
+   potentially returning the user to the form if there are
+   errors;
+
+5. *conversion*: converting the string values from the form
+   submit to Python data types.
+
+
+Rendering HTML
+--------------
+
+Before I go on, I must mention that in my framework I do not
+output HTML as I go.  Instead, I build a tree of HTML tags in
+memory (using a special, really really simple library that I
+built for this purpose (``htmlout``), I can provide it if you
+want); this allows me to manipulate various parts of my
+document in any order before rendering it, remove stuff,
+change attributes, classes, etc.
+
+Using this method, I build a custom Python class to define a
+template for each of my page layouts.  These classes have
+methods for each layout component,
+e.g. ``add_sidebar_paragraph(text)``. This is a good way to
+force yourself to "design" most of the layout upfront.
+
+I very much prefer this approach to any of the billion text
+templating systems because I can change parts of my documents
+in any order, and I can add many "smarts" to my template
+layouts.  It's code, it's dynamic, rather than blobs of text
+to be pasted together.  Note that this can only work out if I
+don't collaborate with artists (which is my case at the
+moment), i.e. you have to write Python code to generate the
+HTML.  I suppose if I did work with designers I would have to
+hook a templating system in.
+
+This might have had an impact on the design of my system, but
+I think most of the ideas below still apply with a usual
+templating system.
+
+
+Form definition
+---------------
+
+I defined a library with a "widget" object for each type of
+entry (string, multi-line text, menus, radiobuttons, file
+upload, date, etc.).  In that library, there is a "form" class
+that acts as a container of these widgets.  It can return the
+list of labels, names, widgets, and can parse a dict with data
+coming in from a request.  If some validation fails it raises
+an exception.  After parsing, a new dict is returned with the
+string input values converted into Python native values
+(e.g. a datetime object, a unicode string, a file buffer,
+etc.).  This library contains no rendering code.
+
+
+Validation, Conversion and Signaling Errors To The User
+-------------------------------------------------------
+
+I wrote a simple convenience method that calls the form
+parsing and catches the form error exception; if an exception
+is raised, it sets a status message (in per-session dat) for
+the next request to render (a message to be written to the
+user), and serializes the parsed input values (a dict) AND a
+list of error fieldnames and error messages (a dict also) into
+per-session data in a database.  Then I redirect to the render
+request(*).
+
+Conversion occurs at the same time as validation.  This is for
+efficiency: oftentimes validation requires conversion.  I have
+not seen any problem with this approach yet, since converting
+is always done at the same time as validation.  This is the
+first thing I do in a form handler method (after
+authentication checks).
+
+
+(*) Note: the redirect is not really necessary, I suppose I
+    could save a request by calling the handler directly with
+    the values dict and error dict.
+
+
+Rendering a form
+----------------
+
+I have separate renderer objects that implement rendering
+using single-dispatch on the form widgets (i.e. ``def
+render_StringField``, ``def render_FileUpload``, etc.).  I
+have three:
+
+1. one renderer that can generate an entire form generically;
+   useful for debugging, but if you build fancy website you
+   almost always need to organize the inputs nicely and
+   customize in a way that usually cannot be figured out
+   generically; so most of the time I use...
+
+2. another renderer that generate mini-tables for a sublist of
+   widgets that are defined in the form.  I call something
+   like::
+
+       section.append(
+            H3(_("Travel Parameters")),
+            form_renderer.rendertable(
+	        form, values, fields=['departure', 'passengers']
+            )
+	 )
+
+3. a "display" renderer that generates tables for display
+   purposes only, using the form definition, and using again a
+   sublist of widgets/values to render.  This is useful
+   because oftentimes you want to display the data and much of
+   the information about how to display it is already
+   encapsulated in the form.
+
+   And since the renderers and the form definitions are not
+   dependent on each other, it is easy to do that.  I suppose
+   I could add other types of renderer if I can find other
+   uses for the form definition.
+
+In all cases, I pass in the values dict that is read from the
+per-session data and the renderer code knows how to undo the
+conversion and fill in the values.  There is also a phase for
+the widgets to "prepare" the input values before the renderer
+uses them. I use this to undo some of the conversion.
+
+A note about internationalization: if the form definition
+occurs when loading the modules, the renderer has to know to
+``gettext()`` the labels before rendering them.
+
+
+Error Markup
+------------
+
+When I want to "render" errors, the handler code passes the
+HTML form tree generated by the code above (including custom
+HTML formatting that is added to make the form look good,
+sectioning, fieldsets, etc) to an error renderer method.
+
+That renderer runs down the tree and finds the first input
+that corresponds to an error field and inserts appropriate
+marker HTML to indicate to the user where the errors are
+located and adds some CSS classes to the HTML inputs.  I think
+this is equivalent to the ``htmlfill`` library, but it might
+be more efficient because I don't need to "parse" the text.
+This happens before flattening the form into text.
+
+
+Conclusion
+----------
+
+I agree with you that implementing these different components
+separately is much better than a fully integrated approach.
+It is also true that they pretty much always interact in the
+same way.
+
+Any comments welcome!
+
+cheers,
+
+
+--
+Martin Blais <blais@furius.ca>
