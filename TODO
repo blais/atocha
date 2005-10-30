@@ -159,6 +159,9 @@ Ideas
 - Restructure tests to automate all fields for four cases: hidden, valid,
   invalid, empty.
 
+- We could consider automatically generating an SQLObject description from the
+  Form description.
+
 
 Future New Field Types
 ----------------------

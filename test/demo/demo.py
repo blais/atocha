@@ -7,7 +7,9 @@
 """
 Common definitions for demo and interactive tests.
 
-You might define something similar for your own environment.
+You might define something similar for your own environment.  I admin that this
+demo script is overly complex because I'm trying to showcase most of the basic
+features of Atocha.  Your code could be much simpler.
 """
 
 # stdlib imports.
