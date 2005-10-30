@@ -67,7 +67,7 @@ class BoolField(Field):
 
     def render_value( self, dvalue ):
         if dvalue is None:
-            return False
+            return u'0'
         if dvalue:
             return u'1'
         else:
@@ -110,7 +110,7 @@ class AgreeField(BoolField):
 
     def render_value( self, dvalue ):
         # Always render False, to be accepted.
-        return False
+        return u'0'
     
     def parse_value( self, pvalue ):
         dvalue = BoolField.parse_value(self, pvalue)

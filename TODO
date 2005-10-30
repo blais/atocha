@@ -8,12 +8,9 @@ Current Affairs (Requirements Before 1.0 Final Release)
 Bugs and Things to Fix
 ----------------------
 
-- IMPORTANT BUG! When parser.error() has been called but without a specific
-  error field, haserrors() is False and no redirection occurs!  You need to fix
-  that.  Write an automated test, and fix this!
-
 - In the automated tests, you could configure the parser to raise an exception
-  on error and catch it with assertRaises
+  on error (without changing the parser code) and catch it with assertRaises.
+
 
 Documentation
 -------------
@@ -39,8 +36,6 @@ Documentation
 
   YES.  This is web code, and face it, web developers are a bunch of copycats,
   so make sure they know they need to contribute fixes back to the community.
-
-
 
 
 

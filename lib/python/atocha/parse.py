@@ -406,14 +406,6 @@ class FormParser:
                         pass
             return vcopy
         
-    def geterrors( self ):
-        """
-        Returns the accumulated errors, a dict of (message, repl_rvalue) tuples
-        for each field name.  This can be used by the form renderer to render
-        the errors near the corresponding input values in the HTML form.
-        """
-        return self._errors
-
     def haserror( self, fieldname ):
         """
         Returns true if the given field already has an error.
@@ -424,7 +416,15 @@ class FormParser:
         """
         Returns true if some errors have already been signaled.
         """
-        return bool(self._errors)
+        return bool(self._errors or self._message or self._status)
+
+    def geterrors( self ):
+        """
+        Returns the accumulated field errors, a dict of (message, repl_rvalue)
+        tuples for each field name.  This can be used by the form renderer to
+        render the errors near the corresponding input values in the HTML form.
+        """
+        return self._errors
 
     def geterrorfields( self ):
         """
@@ -487,6 +487,10 @@ class FormParser:
         in this call will be the only errors signaled during the entire parsing.
         If this method is called more than once, a generic error message is
         substituted, such as 'Please fix errors.'
+
+        Also, you can signal an error without specifying any error fields if you
+        do not have field-specific messages to indicate.  This will still put
+        the parser in an error state.
         """
 
 	# If there are already errors...
@@ -500,6 +504,8 @@ class FormParser:
             assert self._message == u''
             self._status = status
             self._message = message or msg_registry['generic-ui-message']
+        # Note: the above marks the parser as having had errors, even if there
+        # are no field-specific error messages. See haserrors().
 
         #
         # Update errors.

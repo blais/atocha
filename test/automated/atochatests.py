@@ -665,3 +665,27 @@ class TestFields(Test):
         o = p.end()
         self.assert_(p['setfile'] is False)
 
+
+
+#-------------------------------------------------------------------------------
+#
+class TestParser(Test):
+    """
+    Tests for parser.
+    """
+
+    def test_errstatus( self ):
+        "Test error status."
+        f = Form('test-form', IntField('numbah'))
+
+        p = FormParser(f, {})
+        self.assert_(p.haserrors() is False)
+
+        # Signal error without a specific error field.
+        p.error("Some error message!")
+        self.assert_(p.haserrors() is True)
+
+        # Signal error with a specific error field.
+        p = FormParser(f, {})
+        p.error("Some error message!", numbah=1)
+        self.assert_(p.haserrors() is True)
