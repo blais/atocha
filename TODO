@@ -8,37 +8,20 @@ Current Affairs (Requirements Before 1.0 Final Release)
 Bugs and Things to Fix
 ----------------------
 
+- Maybe it would be nice to be able to end() multiple times... maybe we should
+  rename the call to check()?
+
+
+
+- Release on freshmeat when I'll be ready to make an announcement.
+- Complete the PKGINFO file before making a release.
+
 - In the automated tests, you could configure the parser to raise an exception
   on error (without changing the parser code) and catch it with assertRaises.
 
 
 Documentation
 -------------
-
-- Do we need to apply the copyright to each and every file? ::
-
-    #  Atocha -- A web forms rendering and handling Python library.
-    #  Copyright (C) 2005  Martin Blais
-    #
-    #  This program is free software; you can redistribute it and/or modify
-    #  it under the terms of the GNU General Public License as published by
-    #  the Free Software Foundation; either version 2 of the License, or
-    #  (at your option) any later version.
-    #
-    #  This program is distributed in the hope that it will be useful,
-    #  but WITHOUT ANY WARRANTY; without even the implied warranty of
-    #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    #  GNU General Public License for more details.
-    #
-    #  You should have received a copy of the GNU General Public License
-    #  along with this program; if not, write to the Free Software
-    #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  YES.  This is web code, and face it, web developers are a bunch of copycats,
-  so make sure they know they need to contribute fixes back to the community.
-
-
-
 
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.

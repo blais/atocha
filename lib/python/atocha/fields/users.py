@@ -2,6 +2,22 @@
 #
 # $Id$
 #
+#  Atocha -- A web forms rendering and handling Python library.
+#  Copyright (C) 2005  Martin Blais
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 """
 Fields for usernames
@@ -66,18 +82,18 @@ class UsernameField(StringField):
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
 
-        UsernameField.validate_username(dvalue)
+        UsernameField.validate_username(dvalue, self.autolower)
 
         return dvalue
 
-    def validate_username( dvalue ):
+    def validate_username( dvalue, autolower ):
         """
         Validate the the value is an acceptable username.
         """
         # Raise error if the name is not lowercase.
         dvalue_low = dvalue.lower()
         if dvalue_low != dvalue:
-            if self.autolower:
+            if autolower:
                 dvalue = dvalue_low
             else:
                 raise FieldError(msg_registry['username-lower-error'],
@@ -121,7 +137,10 @@ class UsernameOrEmailField(EmailField):
         # Check if the value is a user-id or email address.
         if '@' not in dvalue:
             # It's a username, validate for usernames.
-            UsernameField.validate_username(dvalue)
+            #
+            # By default, auto-lower, because this field will never be used to
+            # register, and we want to make the user's life as easy as possible.
+            UsernameField.validate_username(dvalue, autolower=True)
 
         return dvalue
 

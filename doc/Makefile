@@ -1,5 +1,5 @@
 #
-# Makefile for documentation.
+# Makefile for Atocha documentation.
 #
 
 PYTHON = python
@@ -23,8 +23,8 @@ OUTPUTS = ../index.html $(SIMPLE_REST_SOURCES:.txt=.html) fields.html
 all : $(OUTPUTS)
 
 # Auto-generated fields.
-fields.html: $(wildcard ../lib/python/atocha/fields/*.py) \
-		../lib/python/atocha/field.py \
+fields.html: $(wildcard ../lib/python/atocha/fields/*.py)	\
+		../lib/python/atocha/field.py			\
 		atocha-gen-fields-doc.py
 	$(PYTHON) atocha-gen-fields-doc.py
 

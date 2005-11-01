@@ -1,12 +1,13 @@
-====================
-Form Handling Design
-====================
+==========================
+   Form Handling Design
+==========================
 
 :Author: Martin Blais <blais@furius.ca>
 :Date: 2005-02-08
 :Abstract:
 
-   Design details for form handling.
+   Design details for form handling.  This is a message I posted on Ian
+   Bicking's blog after some comments he made about FormEncode on it.
 
 Blog
 ----
