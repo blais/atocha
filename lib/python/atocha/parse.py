@@ -143,7 +143,7 @@ class FormParser:
     exception.
     """
 
-    __generic_status = 'error-invalid-input'
+    __generic_status = 'error-field'
     __generic_status_many = 'error-many'
 
     # Function called to perform redirection if present.
@@ -334,16 +334,15 @@ class FormParser:
                 assert repl_rvalue is None or \
                        isinstance(repl_rvalue, fi.types_render)
 
-                # Set this as the error.
-                self._errors[fi.name] = retvalue
-
-        # If there were errors...
-        if self._errors:
-            # Set generic status for errors.
-            #
-            # Note: if there is a single error, we could decide to use the
-            # error's message for the UI message.
-            self.error(status=self.__generic_status, **self._errors)
+                # Indicate an error.
+                #
+                # Use generic status for errors.  Maybe in the future a field
+                # error will be able to indicate a specific status as well.
+                #
+                # Note: if there is a single error, we could decide to use the
+                # error's message for the UI message.
+                self.error(**{'_status': self.__generic_status,
+                              fi.name: retvalue})
 
         # Parse the submit buttons.
         self.parse_submit(args)
@@ -422,9 +421,17 @@ class FormParser:
                         pass
             return vcopy
         
+    def ok( self, fieldname ):
+        """
+        Returns false if the given field has an error associated to it.
+        See haserror() below.
+        """
+        return fieldname not in self._errors
+
     def haserror( self, fieldname ):
         """
-        Returns true if the given field already has an error.
+        Returns true if the given field has an error associated to it.
+        See ok() above.
         """
         return fieldname in self._errors
 
@@ -477,20 +484,20 @@ class FormParser:
         return error
     _normalize_error = staticmethod(_normalize_error)
 
-    def error( self, message=None, status='error', errorfields=[], **kwds ):
+    def error( self, _message=None, _status='error', _names=[], **kwds ):
         """
         Adds an error to the current state.
 
         :Arguments:
 
-        - 'message' -> str: is the global error message to be used for this set
+        - '_message' -> str: is the global error message to be used for this set
           of errors, if and only if there is no other error set.
 
-        - 'status' -> str (optional, default is 'error'): is the global error
+        - '_status' -> str (optional, default is 'error'): is the global error
           status to be used for this set of errors, if and only if there is no
           other error set, in which case a generic error status will be set.
 
-        - 'errorfields' -> list of str: field names which should be marked as
+        - '_names' -> list of str: field names which should be marked as
           erroneous, without a specific error message nor replacement values.  A
           generic error message will be substituted automatically, such as
           'Invalid value.'.
@@ -518,8 +525,8 @@ class FormParser:
             # Set the current status and message as given.
             assert self._status is None
             assert self._message == u''
-            self._status = status
-            self._message = message or msg_registry['generic-ui-message']
+            self._status = _status
+            self._message = _message or msg_registry['generic-ui-message']
         # Note: the above marks the parser as having had errors, even if there
         # are no field-specific error messages. See haserrors().
 
@@ -528,7 +535,7 @@ class FormParser:
         #
 
         # Merge the errors in the keywords (we'll check everything below).
-        for e in errorfields:
+        for e in _names:
             assert isinstance(e, str)
             assert e not in kwds
             kwds[e] = True

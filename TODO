@@ -11,8 +11,6 @@ Bugs and Things to Fix
 - Maybe it would be nice to be able to end() multiple times... maybe we should
   rename the call to check()?
 
-
-
 - Release on freshmeat when I'll be ready to make an announcement.
 - Complete the PKGINFO file before making a release.
 
@@ -26,6 +24,16 @@ Documentation
 - Write more complete usage documentation for Atocha, in LaTeX using the
   standard Python tools.
 
+- Add documentation on the checks that should be made between parsing and
+  ending, to see if a field has no error before attempting to validate it, e.g.
+
+    f = FormParser(form, args, 'showform')
+
+    if f.ok('apples') and f.o.apples > 4:
+        f.error(apples=(_("You must specify more than 4", 4))
+
+    o = f.end()
+
 - Maybe we should make StringField use a default encoding of latin-1 and create
   a UnicodeField for strings with default encoding 'unicode'.
 
@@ -38,6 +46,15 @@ Documentation
 
 Known Bugs and Misfeatures
 ==========================
+
+- FieldErrors should perhaps support a status field, so that individual field
+  validation could set a specific status, which would help indicate globally
+  what the error is when there is a single one.
+
+  You need to decide if/when the error-many gets used and if/when it does not.
+  This is important, because right now error-many is set when there is a single
+  error but no message at all.  Should FieldError be able to carry a status as
+  well?  e.g. UsernameField could generate a invalid-username error...?
 
 - There is a circular dependency between the parser and its accessor object and
   this causes the GC to be invoked.

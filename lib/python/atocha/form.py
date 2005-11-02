@@ -481,10 +481,11 @@ class Form:
             # We check that the data type of the error replacement value is
             # a valid data type for that field.
             if (repl_rvalue is not None and 
-                isinstance(repl_rvalue, fi.types_render)):
+                not isinstance(repl_rvalue, fi.types_render)):
                 raise AtochaInternalError(
-                    "Invalid data type '%s' for field '%s'." %
-                    (repr(repl_rvalue), fi.name))
+                    ("Invalid data type of %s for field '%s', "
+                     "we were expecting %s.") %
+                    (repr(repl_rvalue), fi.name, repr(fi.types_render)))
 
             # Return error produced by the field.
             return (1, (msg, repl_rvalue))

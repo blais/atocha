@@ -82,7 +82,7 @@ class UsernameField(StringField):
     def parse_value( self, pvalue ):
         dvalue = StringField.parse_value(self, pvalue)
 
-        UsernameField.validate_username(dvalue, self.autolower)
+        dvalue = UsernameField.validate_username(dvalue, self.autolower)
 
         return dvalue
 
@@ -97,11 +97,12 @@ class UsernameField(StringField):
                 dvalue = dvalue_low
             else:
                 raise FieldError(msg_registry['username-lower-error'],
-                                 dvalue_low)
+                                 dvalue_low.decode('ascii', 'replace'))
 
         # Check against regexp.
         if not UsernameField.__username_re.match(dvalue):
-            raise FieldError(msg_registry['username-lower-error'], dvalue)
+            raise FieldError(msg_registry['username-lower-error'],
+                             dvalue.decode('ascii', 'replace'))
         
         return dvalue
     
@@ -140,7 +141,7 @@ class UsernameOrEmailField(EmailField):
             #
             # By default, auto-lower, because this field will never be used to
             # register, and we want to make the user's life as easy as possible.
-            UsernameField.validate_username(dvalue, autolower=True)
+            dvalue = UsernameField.validate_username(dvalue, autolower=True)
 
         return dvalue
 
