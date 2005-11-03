@@ -44,7 +44,7 @@ class BoolField(Field):
     """
     types_data = (bool,)
     types_parse = (NoneType, unicode,)
-    types_render = (unicode,)
+    types_render = (bool,)
     css_class = 'bool'
 
     attributes_declare = (
@@ -83,11 +83,11 @@ class BoolField(Field):
 
     def render_value( self, dvalue ):
         if dvalue is None:
-            return u'0'
+            return False
         if dvalue:
-            return u'1'
+            return True
         else:
-            return u'0' # Render false.
+            return False # Render false.
 
     def display_value( self, dvalue ):
         if dvalue:

@@ -236,6 +236,8 @@ class HoutFormRenderer(HoutRenderer):
             inpu.attrib['value'] = value
         if label is not None:
             inpu.text = label
+
+        assert isinstance(checked, bool)
         if checked:
             inpu.attrib['checked'] = '1'
         if getattr(field, 'size', None):
@@ -406,7 +408,7 @@ def renderFileUploadField( rdr, field, renctx ):
 
 def renderSetFileField( rdr, field, renctx ):
     filew = rdr._single('file', field, renctx)
-    checked, renctx.rvalue = renctx.rvalue, u'1'
+    checked, renctx.rvalue = False, u'1'
     resetw = rdr._single('checkbox', field, renctx,
                           checked, varname=field.varnames[1])
     return [filew, _(field.remlabel), resetw]

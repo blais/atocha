@@ -323,6 +323,8 @@ class FormRenderer:
             renctx = RenderContext(state, rvalue, errmsg, field.isrequired())
             try:
                 output = renfun(renderer, field, renctx)
+            except AssertionError, e:
+                raise
             except Exception, e:
                 raise AtochaInternalError(
                     "Error: While attempting to render field '%s': %s" %

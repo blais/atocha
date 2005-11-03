@@ -293,8 +293,11 @@ class TextFormRenderer(TextRenderer):
         opts = [('name', varname),
                 ('type', htmltype),
                 ('class', field.css_class),]
+
+        assert isinstance(checked, bool)
         if checked:
             opts.append( ('checked', '1') )
+
         if getattr(field, 'size', None):
             opts.append( ('size', field.size) )
         if getattr(field, 'maxlen', None):

@@ -197,9 +197,16 @@ class _OneChoiceField(_MultipleField):
     Such fields are naturally required by default, since there is always at
     least one choice that must be selected.
     """
-    types_data = (str,)
+    types_data = (str, NoneType) # NoneType if allow_missing is on.
     types_parse = (NoneType, unicode, list)
     types_render = (str,)
+
+    attributes_declare = (
+        ('allow_missing', 'bool',
+         """If this is set, allow missing values, i.e. if the value is not sent
+         by the browser, do not raise an error.  This is useful if the widget
+         may be hidden conditionally."""),
+        )
 
     def __init__( self, name, choices, label, attribs ):
 
@@ -212,6 +219,8 @@ class _OneChoiceField(_MultipleField):
             assert isinstance(initial, (NoneType,) + _OneChoiceField.types_data)
             attribs['initial'] = initial
                 
+        self.allow_missing = attribs.pop('allow_missing', False)
+
         # Initialize base classes, always set as required.
         _MultipleField.__init__(self, name, choices, label, attribs)
 
@@ -221,15 +230,18 @@ class _OneChoiceField(_MultipleField):
         # in parse_value() docstring.
 
         if pvalue is None or pvalue == u'':
-            # We indicate a required error: one of the radio buttons or menu
-            # items should always be set. An empty value should never occur,
-            # this could be indicated as an internal error.  However, if this is
-            # a browser problem, it is possible that the browser has a bug that
-            # it allows a radio button or menu field to not be set to at least
-            # one value, in which case it is not really the user's fault, and
-            # the right thing to do is to return an error to the user so that he
-            # can make the desired choice.
-            raise FieldError(msg_registry['one-choice-required'])
+            if self.allow_missing:
+                return None
+            else:
+                # We indicate a required error: one of the radio buttons or menu
+                # items should always be set. An empty value should never occur,
+                # this could be indicated as an internal error.  However, if
+                # this is a browser problem, it is possible that the browser has
+                # a bug that it allows a radio button or menu field to not be
+                # set to at least one value, in which case it is not really the
+                # user's fault, and the right thing to do is to return an error
+                # to the user so that he can make the desired choice.
+                raise FieldError(msg_registry['one-choice-required'])
 
         if isinstance(pvalue, list):
             # We really should not be receiving more than one value here.

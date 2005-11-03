@@ -533,6 +533,8 @@ provide at least one value, use the 'required' option.</p>
 <dd>Default value that is used for         rendering the field with known initial conditions if no value is given         for it.  Important note:  this value is not used by the parsing at all.         If an argument is missing during parsing, the value associated with the         field will be set to None. This is NOT a default value to be provided by         the parser if the field is not submitted.</dd>
 <dt>nocheck  --&gt; bool (Optional)</dt>
 <dd>Set this to True if you want to prevent the parser from          cross-checking the values against the choices set in the instance of          this field.  When parsing, do not perform checks specific to the          choices set on against the received values. This is useful if the set          of choices for this field is generated dynamically and you will do your          validation by hand.  Another thing that can be done is to not use this          but to call setchoice() before running the parser on the arguments, if          in the handler you know which choices are possibly valid and would like          to use the parsing code provided in this field.</dd>
+<dt>allow_missing  --&gt; bool (Optional)</dt>
+<dd>If this is set, allow missing values, i.e. if the value is not sent          by the browser, do not raise an error.  This is useful if the widget          may be hidden conditionally.</dd>
 <dt>required  --&gt; bool (Optional)</dt>
 <dd>Indicates that if the value is missing from the arguments during         parsing, and error will be signaled for that input.  If 'required' is         not set, a missing argument will produce a value of None in the parser         for the corresponding field.</dd>
 <dt>multiple  --&gt; bool (Optional)</dt>
@@ -563,6 +565,8 @@ choice among many.</p>
 <dd>Default value that is used for         rendering the field with known initial conditions if no value is given         for it.  Important note:  this value is not used by the parsing at all.         If an argument is missing during parsing, the value associated with the         field will be set to None. This is NOT a default value to be provided by         the parser if the field is not submitted.</dd>
 <dt>nocheck  --&gt; bool (Optional)</dt>
 <dd>Set this to True if you want to prevent the parser from          cross-checking the values against the choices set in the instance of          this field.  When parsing, do not perform checks specific to the          choices set on against the received values. This is useful if the set          of choices for this field is generated dynamically and you will do your          validation by hand.  Another thing that can be done is to not use this          but to call setchoice() before running the parser on the arguments, if          in the handler you know which choices are possibly valid and would like          to use the parsing code provided in this field.</dd>
+<dt>allow_missing  --&gt; bool (Optional)</dt>
+<dd>If this is set, allow missing values, i.e. if the value is not sent          by the browser, do not raise an error.  This is useful if the widget          may be hidden conditionally.</dd>
 <dt>onchange  --&gt; str (JavaScript) (Optional)</dt>
 <dd>JavaScript to run when the selector changes.</dd>
 </dl>
@@ -589,6 +593,8 @@ choice among many.  This field is rendered in a specific orientation.</p>
 <dd>Default value that is used for         rendering the field with known initial conditions if no value is given         for it.  Important note:  this value is not used by the parsing at all.         If an argument is missing during parsing, the value associated with the         field will be set to None. This is NOT a default value to be provided by         the parser if the field is not submitted.</dd>
 <dt>nocheck  --&gt; bool (Optional)</dt>
 <dd>Set this to True if you want to prevent the parser from          cross-checking the values against the choices set in the instance of          this field.  When parsing, do not perform checks specific to the          choices set on against the received values. This is useful if the set          of choices for this field is generated dynamically and you will do your          validation by hand.  Another thing that can be done is to not use this          but to call setchoice() before running the parser on the arguments, if          in the handler you know which choices are possibly valid and would like          to use the parsing code provided in this field.</dd>
+<dt>allow_missing  --&gt; bool (Optional)</dt>
+<dd>If this is set, allow missing values, i.e. if the value is not sent          by the browser, do not raise an error.  This is useful if the widget          may be hidden conditionally.</dd>
 <dt>orient  --&gt; One of ORI_VERTICAL, ORI_HORIZONTAL (Optional)</dt>
 <dd>Orientation of the mini-table for layout of multiple inputs.</dd>
 </dl>
