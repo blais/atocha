@@ -197,7 +197,7 @@ class Form:
             varnames.extend(fi.varnames)
         return varnames
 
-    def labels( self, fieldnames=None ):
+    def labels( self, *fieldnames ):
         """
         Returns a list of the labels of the fields.
         """

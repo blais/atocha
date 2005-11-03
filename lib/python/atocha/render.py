@@ -163,6 +163,18 @@ class FormRenderer:
             raise AtochaError(
                 "Error: Form renderer did not render form completely.")
 
+    def getform( self ):
+        """
+        Return the form that this renderer is processing.
+        """
+        return self._form
+        
+    def getvalues( self ):
+        """
+        Return the values that this renderer is processing.
+        """
+        return self._values
+
     def _render_field( self, field, state ):
         """
         Render a single field (implementation).
@@ -435,6 +447,14 @@ class FormRenderer:
         """
         return self.do_table(pairs, css_class=css_class)
 
+    def ctable( self, pairs=(), css_class=None ):
+        """
+        User-callable method for rendering a simple table. 'pairs' is an
+        iterable of (label, value) pairs.  'css_class' can be used to add a
+        custom CSS class to this table.
+        """
+        return self.do_ctable(pairs, css_class=css_class)
+
     def render_field( self, fieldname, state=None ):
         """
         Render given field (by name).
@@ -547,7 +567,7 @@ class FormRenderer:
         raise AtochaError("Do not call this.")
 
 
-    #-------------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
     #
     def render_buttons( cls, buttons, action, formname=None, method=None ):
         """

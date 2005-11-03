@@ -53,6 +53,9 @@ class TextRenderer(atocha.render.FormRenderer):
     css_table = u'atotbl'
     css_label = u'atolbl'
 
+    # Default value.
+    label_semicolon = False
+
     def __init__( self, *args, **kwds ):
         """
         Grab the encoding parameter on top of the basic form renderer
@@ -70,8 +73,11 @@ class TextRenderer(atocha.render.FormRenderer):
             self.label_semicolon = kwds['labelsemi']
             del kwds['labelsemi']
         except KeyError:
-            self.label_semicolon = False
+            self.label_semicolon = TextRenderer.label_semicolon
         """Whether we automatically add a semicolon to the labels or not."""
+
+        self.ofile = None
+        """Output file object."""
 
         atocha.render.FormRenderer.__init__(self, *args, **kwds)
 
@@ -87,10 +93,36 @@ class TextRenderer(atocha.render.FormRenderer):
         return sio
 
     def do_table( self, pairs=(), extra=None, css_class=None ):
+        """
+        Implementation of instance method version of table().
+        """
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
 
-        css = [self.css_table]
+        self.do_table_imp(self, pairs, extra, css_class, f)
+        
+        if self.ofile is None: return f.getvalue()
+
+    def do_ctable( cls, pairs=(), extra=None, css_class=None, outenc=None ):
+        """
+        Class method version of table().
+        """
+        sio = StringIO.StringIO()
+        if outenc is not None:
+            Writer = codecs.getwriter(self.outenc)
+            sio = Writer(sio)
+
+        cls.do_table_imp(cls, pairs, extra, css_class, f)
+
+        return sio.getvalue()
+
+    do_ctable = staticmethod(do_ctable)
+
+    def do_table_imp( rdr, pairs, extra, css_class, f ):
+        """
+        Common implementation for table() methods.
+        """
+        css = [rdr.css_table]
         if css_class:
             css.append(css_class)
         f.write(u'<table class=%s>' % ' '.join(css))
@@ -98,20 +130,18 @@ class TextRenderer(atocha.render.FormRenderer):
             assert isinstance(label, unicode)
             assert isinstance(inputs, unicode)
 
-            if self.label_semicolon:
+            if rdr.label_semicolon:
                 label += ':'
             f.write((u'<tr><td class="%s">%s</td>\n'
                      u'    <td class="%s">%s</td></tr>\n') %
-                    (self.css_label, label, self.css_input, inputs or u''))
+                    (rdr.css_label, label, rdr.css_input, inputs or u''))
         if extra:
             assert isinstance(extra, unicode)
             f.write(extra)
             f.write(u'\n')
         f.write(u'</table>\n')
 
-        if self.ofile is None: return f.getvalue()
-
-
+    do_table_imp = staticmethod(do_table_imp)
 
 
 #-------------------------------------------------------------------------------

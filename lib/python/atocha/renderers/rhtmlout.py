@@ -59,6 +59,9 @@ class HoutRenderer(atocha.render.FormRenderer):
     css_table = u'atotbl'
     css_label = u'atolbl'
 
+    # Default value.
+    label_semicolon = False
+
     def __init__( self, *args, **kwds ):
         """
         Grab the encoding parameter on top of the basic form renderer
@@ -69,13 +72,31 @@ class HoutRenderer(atocha.render.FormRenderer):
             self.label_semicolon = kwds['labelsemi']
             del kwds['labelsemi']
         except KeyError:
-            self.label_semicolon = False
+            self.label_semicolon = HoutRenderer.label_semicolon
         """Whether we automatically add a semicolon to the labels or not."""
 
         atocha.render.FormRenderer.__init__(self, *args, **kwds)
 
+
     def do_table( self, pairs=(), extra=None, css_class=None ):
-        css = [self.css_table]
+        """
+        Implementation of instance method version of table().
+        """
+        return self.do_table_imp(self, pairs, extra, css_class)
+
+    def do_ctable( cls, pairs=(), extra=None, css_class=None ):
+        """
+        Class method version of table().
+        """
+        return cls.do_table_imp(cls, pairs, extra, css_class)
+
+    do_ctable = classmethod(do_ctable)
+
+    def do_table_imp( rdr, pairs=(), extra=None, css_class=None ):
+        """
+        Static method version of table().
+        """
+        css = [rdr.css_table]
         if css_class:
             css.append(css_class)
         table = TABLE(CLASS=' '.join(css))
@@ -84,15 +105,17 @@ class HoutRenderer(atocha.render.FormRenderer):
             assert isinstance(label, (unicode, list))
             assert isinstance(inputs, (unicode, list))
 
-            if self.label_semicolon:
+            if rdr.label_semicolon:
                 label.tail += ':'
             table.append(TR(
-                TD(label, CLASS=self.css_label),
-                TD(inputs, CLASS=self.css_input) ))
+                TD(label, CLASS=rdr.css_label),
+                TD(inputs, CLASS=rdr.css_input) ))
         if extra:
             assert isinstance(extra, list)
             table.append(extra)
         return table
+
+    do_table_imp = staticmethod(do_table_imp)
 
 
 #-------------------------------------------------------------------------------
@@ -228,7 +251,8 @@ class HoutFormRenderer(HoutRenderer):
             assert state is Field.NORMAL
 
         if getattr(field, 'onchange', None):
-            # Note: we transparently translate to a more portable onclick callback.
+            # Note: we transparently translate to a more portable onclick
+            # callback.
             inpu.attrib['onclick'] = field.onchange
 
         return inpu
@@ -308,8 +332,8 @@ class HoutFormRenderer(HoutRenderer):
                 inputs.append(
                     INPUT(name=varname, type="hidden", value=rval))
         else:
-            raise AtochaInternalError("Error: unexpected type '%s' for rendering." %
-                                       type(rvalue))
+            raise AtochaInternalError(
+                "Error: unexpected type '%s' for rendering." % type(rvalue))
 
         return inputs
 
