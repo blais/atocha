@@ -141,4 +141,6 @@ msg_registry = TranslatorDict({
     'username-lower-error': N_("Usernames can only contain lowercase letters."),
     'username-invalid': N_("Invalid username.  Only letters and numbers accepted."),
     
+    'phone-invalid': N_("Invalid phone number: '%s'."),
+
     })

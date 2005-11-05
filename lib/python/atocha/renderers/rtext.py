@@ -30,7 +30,7 @@ from os.path import join
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
 import atocha.render
-from atocha.field import Field, ORI_VERTICAL
+from atocha.field import *
 from atocha.fields import *
 from atocha.messages import msg_type
 
@@ -311,7 +311,8 @@ class TextFormRenderer(TextRenderer):
             assert state is Field.NORMAL
 
         if getattr(field, 'onchange', None):
-            # Note: we transparently translate to a more portable onclick callback.
+            # Note: we transparently translate to a more portable onclick
+            # callback.
             opts.append( ('onclick', field.onchange) )
 
         o = u'<input ' + ' '.join(['%s="%s"' % x for x in opts]).decode('ascii')
@@ -344,8 +345,10 @@ class TextFormRenderer(TextRenderer):
                 s.write(u'<tr><td>%s</td></tr>\n' % i)
             s.write(u'</table>\n')
             return s.getvalue()
-        else:
+        elif field.orient in (ORI_HORIZONTAL, ORI_RAW):
             return u'\n'.join(inputs)
+        else:
+            assert False
 
     def _renderMenu( self, field, renctx, multiple=None, size=None ):
         "Render a SELECT menu. 'rvalue' is expected to be a list of values."

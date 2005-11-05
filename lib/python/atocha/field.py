@@ -35,7 +35,8 @@ from atocha import AtochaError, AtochaInternalError
 from messages import msg_registry, msg_type
 
 
-__all__ = ['Field', 'FieldError', 'ORI_HORIZONTAL', 'ORI_VERTICAL',
+__all__ = ['Field', 'FieldError',
+           'ORI_HORIZONTAL', 'ORI_VERTICAL', 'ORI_RAW',
            'OptRequired', 'Orientable',]
 
 
@@ -174,6 +175,18 @@ class Field:
         If an argument is missing during parsing, the value associated with the
         field will be set to None. This is NOT a default value to be provided by
         the parser if the field is not submitted. """),
+
+        ('starred', 'book',
+         """Mark field label as being a required input field.  Fields which are
+         optionally required, i.e. those fields which accept the 'required'
+         option, are automatically starred if they are required.
+
+         This can be used in the case where many fields are used for entering
+         one value, and for example, some are selectively hidden by JavaScript
+         code, and even though the fields are not required by the automated
+         parsing, you need to add a star marker to some of those fields, to let
+         the user know he has to enter a value there.
+         """),
         )
 
     attributes_delete = ()
@@ -271,6 +284,9 @@ class Field:
         self.initial = attribs.pop('initial', None)
         assert isinstance(self.initial, (NoneType,) + self.types_data)
 
+        self.starred = attribs.pop('starred', False)
+        assert isinstance(self.starred, bool)
+
         # Check that all attributes have been popped.
         if attribs:
             raise AtochaError(
@@ -291,18 +307,20 @@ class Field:
 
     def isrequired( self ):
         """
-        Returns whether this field is required (optionally or not) or not.
-        This is meant to be used exclusively for rendering purpose (e.g. to
-        put some kind of indicator in the output that the user has to fill
-        in certain values).
+        Returns whether this field is required (optionally or not) or not
+        required.  This is meant to be used exclusively for rendering purpose
+        (e.g. to put some kind of indicator in the output that the user has to
+        fill in certain values).
 
         There is a subtletly about this that you must be aware: optionally
         required fields can be required, other fields cannot.  See class
         OptRequired for more details.
         """
-        try:
-            isreq = getattr(self, 'required')
-        except AttributeError:
+        if self.starred:
+            isreq = True
+        elif hasattr(self, 'required'):
+            isreq = self.required
+        else:
             isreq = False
         return isreq
 
@@ -446,8 +464,9 @@ class OptRequired:
 
 #-------------------------------------------------------------------------------
 #
-ORI_HORIZONTAL = 1
-ORI_VERTICAL = 2
+ORI_HORIZONTAL = 1   # Horizontal widgets/table.
+ORI_VERTICAL = 2     # Vertical table.
+ORI_RAW = 3          # Just the inputs.
 
 class Orientable:
     """
@@ -465,7 +484,7 @@ class Orientable:
     def __init__( self, attribs ):
 
         self.orient = attribs.pop('orient', ORI_VERTICAL)
-        assert self.orient in [ORI_HORIZONTAL, ORI_VERTICAL]
+        assert self.orient in [ORI_HORIZONTAL, ORI_VERTICAL, ORI_RAW]
         """Orientation of the field for rendering."""
 
 

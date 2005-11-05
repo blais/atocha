@@ -27,7 +27,7 @@ See class FormParser (below).
 
 # atocha imports.
 from atocha import AtochaError
-from fields.uploads import FileUploadField
+from fields.uploads import FileUpload
 from messages import msg_registry
 
 
@@ -227,7 +227,9 @@ class FormParser:
 
         self._values = {}
         """A dict of the successfully parsed values of the arguments.  Arguments
-        which had errors are not present in this dict."""
+        which had errors are not present in this dict.  The names correspond to
+        the field names and there may be some extra data stored via the store()
+        method."""
 
         self._errors = {}
         """A dict of field names to errors in the form of (message,
@@ -385,7 +387,38 @@ class FormParser:
             except KeyError:
                 raise KeyError("Invalid field name '%s'." % fname)
 
-    def getvalues( self, cullfiles=True ):
+    def __setitem__( self, fname, value ):
+        """
+        See store() method.
+        """
+        return self.store(fname, value)
+    
+    def __contains__( self, fname ):
+        """
+        Membership test.
+        """
+        return fname in self._values
+
+    def store( self, name, value ):
+        """
+        Store some extra data that is not associated with any field, but that
+        will get routed through the form data system if an error occurs.
+
+        In exceptional cases, this can also be used to replace the kind of data
+        that will be used to fill a field on re-render, use with care.
+
+        This is useful if your fields have some extra state that needs to be
+        kept in parallel with the state in the widgets.  The (name, value) pair
+        is stored along with the values dictionary, and therefore the name must
+        not coincide with a valid field name.
+        """
+        # Do not check that the fieldname does not exist in the form.
+        # assert name not in self._form.names()
+
+        # Store along with the values dict.
+        self._values[name] = value
+
+    def getvalues( self, cullfiles=False ):
         """
         Returns the parsed arguments (dict).  This is intended as a convenience
         if you need to store or pass around the arguments, rather than having to
@@ -406,6 +439,9 @@ class FormParser:
         # Make a copy of the values to be returned and remove all the file
         # uploads parsed values, because we won't be able to fill the file
         # widget with the uploaded data, it would not make sense.
+        #
+        # Note: we make sure to also copy the extra values data that was added
+        # via the store() method.
         if not cullfiles:
             # Note: we don't return a copy for efficiency and because we think
             # that at that point the user will not use the parser anymore, so
@@ -413,10 +449,10 @@ class FormParser:
             return self._values
         else:
             vcopy = self._values.copy()
-            for field in self._form.fields():
-                if isinstance(field, FileUploadField):
+            for name, val in self._values.iteritems():
+                if isinstance(val, FileUpload):
                     try:
-                        del vcopy[field.name]
+                        del vcopy[name]
                     except KeyError:
                         pass
             return vcopy
@@ -628,7 +664,7 @@ class FormParser:
         rurl = redir or self._redirurl
 
         return fun(rurl, self._form, self._status, self._message,
-                   self.getvalues(False), self._errors)
+                   self.getvalues(True), self._errors)
 
     def do_redirect( url, form, status, message, values, errors ):
         """

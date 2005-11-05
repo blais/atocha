@@ -34,7 +34,7 @@ from atocha.fields.texts import StringField
 from atocha.messages import msg_registry
 
 
-__all__ = ['URLPathField']
+__all__ = ['URLPathField', 'PhoneField']
 
 
 #-------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ class URLPathField(StringField):
 
     attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
 
-    render_as = StringField  # Won't be used much anyway.
+    render_as = StringField
     
     __urlpath_re = re.compile('[/a-zA-Z0-9]+$')
 
@@ -69,9 +69,47 @@ class URLPathField(StringField):
         assert isinstance(dvalue, str)
 
         # Check for embedded spaces.
-        if not __urlpath_re.match(dvalue):
+        if not self.__urlpath_re.match(dvalue):
             raise FieldError(msg_registry['url-path-invalid'],
                              self.render_value(dvalue.replace(' ', '?')))
+
+        return dvalue
+
+
+#-------------------------------------------------------------------------------
+#
+class PhoneField(StringField):
+    """
+    A valid URL path.
+
+    This is mostly used to accept return addresses in handlers.  This is always
+    a hidden field.
+    """
+
+    types_data = (str,)
+    css_class = 'phone'
+
+    attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
+
+    render_as = StringField
+    
+    __valid_re = re.compile('^[0-9\-\.\+\(\)\ ext]+$')
+
+    def __init__( self, name, label=None, **attribs ):
+        PhoneField.validate_attributes(attribs)
+
+        attribs['encoding'] = 'ascii'
+        attribs['strip'] = True
+        StringField.__init__(self, name, label, **attribs)
+
+    def parse_value( self, pvalue ):
+        dvalue = StringField.parse_value(self, pvalue)
+        assert isinstance(dvalue, str)
+
+        # Check for embedded spaces.
+        if dvalue and not self.__valid_re.match(dvalue):
+            raise FieldError(msg_registry['phone-invalid'] % dvalue,
+                             self.render_value(dvalue))
 
         return dvalue
 

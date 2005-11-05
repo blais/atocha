@@ -29,7 +29,7 @@ from os.path import join
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
 import atocha.render
-from atocha.field import Field, ORI_VERTICAL
+from atocha.field import *
 from atocha.fields import *
 from atocha.messages import msg_type
 
@@ -279,8 +279,10 @@ class HoutFormRenderer(HoutRenderer):
             for i in inputs:
                 table.append(TR(TD(i)))
             return [table]
-        else:
+        elif field.orient in (ORI_VERTICAL, ORI_RAW):
             return inputs
+        else:
+            assert False
 
     def _renderMenu( self, field, renctx, multiple=None, size=None ):
         "Render a SELECT menu. 'rvalue' is expected to be a list of values."
@@ -329,13 +331,19 @@ class HoutFormRenderer(HoutRenderer):
         if isinstance(rvalue, unicode):
             inputs.append(
                 INPUT(name=varname, type="hidden", value=rvalue))
+
+        elif isinstance(rvalue, bool):
+            inputs.append(
+                INPUT(name=varname, type="hidden", value=rvalue and '1' or '0'))
+
         elif isinstance(rvalue, list):
             for rval in rvalue:
                 inputs.append(
                     INPUT(name=varname, type="hidden", value=rval))
         else:
             raise AtochaInternalError(
-                "Error: unexpected type '%s' for rendering." % type(rvalue))
+                "Error: unexpected type '%s' for rendering field '%s'." %
+                (type(rvalue), field.name))
 
         return inputs
 

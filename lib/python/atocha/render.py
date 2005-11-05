@@ -263,7 +263,11 @@ class FormRenderer:
         # the data values from the all the types that they declare into a
         # rendereable value type.
         if dorender:
-            assert dvalue is None or isinstance(dvalue, field.types_data)
+            if not (dvalue is None or isinstance(dvalue, field.types_data)):
+                raise AtochaError(
+                    ("Error: dvalue '%s' is invalid (expecting %s) for "
+                    "field '%s'") %
+                    (repr(dvalue), repr(field.types_data), field.name))
             rvalue = field.render_value(dvalue)
 
         if not isinstance(rvalue, field.types_render):
@@ -273,7 +277,7 @@ class FormRenderer:
 
         # Dispatch to renderer.
         output = self._dispatch_render(field, rvalue, errmsg, state)
-
+        
         # Mark this fields as having been rendered.
         self._rendered.add(field.name)
 
@@ -449,13 +453,15 @@ class FormRenderer:
         """
         return self.do_table(pairs, css_class=css_class)
 
-    def ctable( self, pairs=(), css_class=None ):
+    def ctable( cls, pairs=(), css_class=None ):
         """
         User-callable method for rendering a simple table. 'pairs' is an
         iterable of (label, value) pairs.  'css_class' can be used to add a
         custom CSS class to this table.
         """
-        return self.do_ctable(pairs, css_class=css_class)
+        return cls.do_ctable(pairs, css_class=css_class)
+
+    ctable = classmethod(ctable)
 
     def render_field( self, fieldname, state=None ):
         """

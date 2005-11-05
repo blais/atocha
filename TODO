@@ -101,6 +101,14 @@ Known Bugs and Misfeatures
 Ideas
 =====
 
+- Maybe at some point we should fully recognize that the FormParser is really
+  just the temporary runaround dict and make it derive from dict rather than
+  provide alternative methods and to make it behave somewhat like a
+  dict... maybe this would make more sense.
+
+- We could make the MenuField convert the data to be returned from a specific
+  type, e.g. int, to avoid client code.
+
 - Write a simple example of templating library integration, something simple
   that everyone can understand, just replacing div tags with ids by regexps or
   something.
