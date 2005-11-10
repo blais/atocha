@@ -126,7 +126,7 @@ class AgreeField(BoolField):
 
     def render_value( self, dvalue ):
         # Always render False, to be accepted.
-        return u'0'
+        return False
     
     def parse_value( self, pvalue ):
         dvalue = BoolField.parse_value(self, pvalue)
