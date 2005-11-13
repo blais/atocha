@@ -105,12 +105,15 @@ wherever you want within your system::
    print "<p>Your email, please:</p>
    print rdr.render_fields('email')     # Render just the email field.
    print "</div>
+   print "</form>
+
 
 You could easily use this system to embed Atocha in your favourite templating
 system.  Atocha does not bind to a templating system and is entirely orthogonal
 to any web application framework.
 
-You could create some kind of syntax in HTML for your templating system for
+
+You *could* create some kind of syntax in HTML for your templating system for
 specifying that a field's inputs should be rendered in-place, e.g.::
 
     <div>

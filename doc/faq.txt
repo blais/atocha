@@ -57,8 +57,8 @@ this project.  My personal views on FormEncode_, with respect to Atocha:
   that I could easily find problems when they occur.  I'm not sure how
   FormEncode's type conditions are setup.
 
-That being said, I did not really make an effort to try to use FormEncode_, at
-the time when I discovered it I had almost finished my library.
+That being said, I did not really make a huge effort to try to use FormEncode_,
+at the time when I discovered it I had almost finished my library.
 
 .. _FormEncode: http://formencode.org/
 
