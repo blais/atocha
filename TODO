@@ -1,27 +1,38 @@
 ================
   atocha: TODO
 ================
+:Author: Martin Blais <blais@furius.ca>
 
-Current Affairs (Requirements Before 1.0 Final Release)
-=======================================================
+.. contents::
+..
+    1  Current Affairs
+    2  Bugs and Things to Fix
+    3  Documentation
+    4  Testing
+    5  Known Bugs and Misfeatures
+    6  Ideas
+    7  Future New Field Types
+
+
+Current Affairs
+===============
+
+
+
+
+
 
 Bugs and Things to Fix
-----------------------
+======================
 
 - Maybe it would be nice to be able to end() multiple times... maybe we should
   rename the call to check()?
 
-- Release on freshmeat when I'll be ready to make an announcement.
-- Complete the PKGINFO file before making a release.
-
-- In the automated tests, you could configure the parser to raise an exception
-  on error (without changing the parser code) and catch it with assertRaises.
-
 
 Documentation
--------------
+=============
 
-- Write more complete usage documentation for Atocha, in LaTeX using the
+- Write more complete usage documentation for Atocha, in LaTeX, using the
   standard Python tools.
 
 - Add documentation on the checks that should be made between parsing and
@@ -34,13 +45,16 @@ Documentation
 
     o = f.end()
 
-- Maybe we should make StringField use a default encoding of latin-1 and create
-  a UnicodeField for strings with default encoding 'unicode'.
-
 - Add a section in document about dealing with multiple submit buttons and an
   example.
 
 
+
+Testing
+=======
+
+- In the automated tests, you could configure the parser to raise an exception
+  on error (without changing the parser code) and catch it with assertRaises.
 
 
 
@@ -100,6 +114,9 @@ Known Bugs and Misfeatures
 
 Ideas
 =====
+
+- Maybe we should make StringField use a default encoding of latin-1 and create
+  a UnicodeField for strings with default encoding 'unicode'.
 
 - Maybe at some point we should fully recognize that the FormParser is really
   just the temporary runaround dict and make it derive from dict rather than
@@ -167,7 +184,7 @@ Ideas
 
 
 Future New Field Types
-----------------------
+======================
 
 - Complete the SetFileField with some JavaScript to hide the file input field
   when the reset button is checked.
