@@ -10,14 +10,15 @@
     3   Features
     4   Online Demo
     5   Download
-    6   Reporting Bugs
-      6.1  Bugs
-      6.2  Support and Stability
-    7   Links
-    8   Installation and Dependencies
-    9   Copyright and License
-    10  Acknowledgements
-    11  Author
+    6   Mailing-Lists
+    7   Reporting Bugs
+      7.1  Bugs
+      7.2  Support and Stability
+    8   Links
+    9   Installation and Dependencies
+    10  Copyright and License
+    11  Acknowledgements
+    12  Author
 
 
 Description
@@ -132,6 +133,14 @@ Snapshots of the latest atocha source code can be found in the Download_ area.
 If you make any modification to the source, please update and run the tests.
 
 .. _Download: /downloads/atocha
+
+
+Mailing-Lists
+=============
+
+The atocha-discuss mailing-list for the project can be found at
+http://lists.sourceforge.net/lists/listinfo/atocha-discuss
+
 
 Reporting Bugs
 ==============
