@@ -338,7 +338,7 @@ class TextFormRenderer(TextRenderer):
         """
         Place the given list of inputs in a small vertical table if necessary.
         """
-        if field.orient is ORI_VERTICAL:
+        if field.orient == ORI_VERTICAL:
             s = StringIO.StringIO()
             s.write(u'<table class="%s">\n' % self.css_vertical)
             for i in inputs:

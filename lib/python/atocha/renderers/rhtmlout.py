@@ -274,12 +274,12 @@ class HoutFormRenderer(HoutRenderer):
         """
         Place the given list of inputs in a small vertical table if necessary.
         """
-        if field.orient is ORI_VERTICAL:
+        if field.orient == ORI_VERTICAL:
             table = TABLE(CLASS=self.css_vertical)
             for i in inputs:
                 table.append(TR(TD(i)))
             return [table]
-        elif field.orient in (ORI_VERTICAL, ORI_RAW):
+        elif field.orient in (ORI_HORIZONTAL, ORI_RAW):
             return inputs
         else:
             assert False
