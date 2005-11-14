@@ -21,9 +21,9 @@ setup(name="atocha",
       description=\
       "A web forms handling and rendering library.",
       long_description="""
-Atocha is a Python library for parsing and rendering data from web forms.  It is
-framework-agnostic, generic, and it should be possible to use it even with CGI
-scrips or to incorporate it in your favourite web application framework
+Atocha is a Python library for rendering web forms and parsing submitted data.
+It is framework-agnostic, generic, and it should be possible to use it even with
+CGI scrips or to incorporate it in your favourite web application framework
 """,
       license="GPL",
       author="Martin Blais",
