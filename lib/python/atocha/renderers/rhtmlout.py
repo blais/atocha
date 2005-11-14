@@ -191,7 +191,11 @@ class HoutFormRenderer(HoutRenderer):
                     label = [label, SPAN('*', CLASS=self.css_required)]
                 visible.append( (label, rendered) )
 
-        return self.do_table(visible, hidden, css_class=css_class)
+        # Don't render a table if there are no visible widgets.
+        if visible:
+            return self.do_table(visible, hidden, css_class=css_class)
+        else:
+            return hidden
 
     def do_render_submit( self, submit, reset ):
         nodes = []
