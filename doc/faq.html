@@ -54,17 +54,19 @@ different for every form, so there is not much opportunity for reuse anyway.
 For the few cases where I do validate results the same way, I simply write a
 function that uses the parser object;</li>
 <li>I find all the metaclass stuff in <a class="reference" href="http://formencode.org/">FormEncode</a> entirely unnecessary and very
-distracting.  I like code that is lean and simple;</li>
+distracting.  I value code that is really simple;</li>
 <li>I need to use an HTML output library that is a tree of nodes (htmlout) and
 so I really needed to have decoupled renderer code that produces only nodes
 rather than text;</li>
 <li>I don't know if the kind of per-error message with the ability to specify an
 invalid replacement value for re-rendering can be produced as easily as with
-Atocha (I would need to study FormEncode to find out).</li>
+Atocha (I would need to study FormEncode more to find out);</li>
 <li>When I built Atocha, I was having lots of trouble with types, and I wanted to
 build my stuff on ultra-defensive programming, with lots of assertions, so
 that I could easily find problems when they occur.  I'm not sure how
-FormEncode's type conditions are setup.</li>
+FormEncode's type conditions are setup;</li>
+<li>I had a large codebase to port with minimal effort, so reinventing the wheel
+was not entirely out of the question.</li>
 </ul>
 <p>That being said, I did not really make a huge effort to try to use <a class="reference" href="http://formencode.org/">FormEncode</a>,
 at the time when I discovered it I had almost finished my library.</p>

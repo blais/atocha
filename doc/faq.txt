@@ -42,7 +42,7 @@ this project.  My personal views on FormEncode_, with respect to Atocha:
   function that uses the parser object;
 
 * I find all the metaclass stuff in FormEncode_ entirely unnecessary and very
-  distracting.  I like code that is lean and simple;
+  distracting.  I value code that is really simple;
 
 * I need to use an HTML output library that is a tree of nodes (htmlout) and
   so I really needed to have decoupled renderer code that produces only nodes
@@ -50,12 +50,15 @@ this project.  My personal views on FormEncode_, with respect to Atocha:
 
 * I don't know if the kind of per-error message with the ability to specify an
   invalid replacement value for re-rendering can be produced as easily as with
-  Atocha (I would need to study FormEncode to find out).
+  Atocha (I would need to study FormEncode more to find out);
 
 * When I built Atocha, I was having lots of trouble with types, and I wanted to
   build my stuff on ultra-defensive programming, with lots of assertions, so
   that I could easily find problems when they occur.  I'm not sure how
-  FormEncode's type conditions are setup.
+  FormEncode's type conditions are setup;
+
+* I had a large codebase to port with minimal effort, so reinventing the wheel
+  was not entirely out of the question.
 
 That being said, I did not really make a huge effort to try to use FormEncode_,
 at the time when I discovered it I had almost finished my library.
