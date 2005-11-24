@@ -34,7 +34,7 @@ rendering to a tree of elements which gets flattenned out later.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
-from types import ClassType
+from types import ClassType, NoneType
 
 # atocha imports.
 from atocha import AtochaError, AtochaInternalError
