@@ -178,7 +178,7 @@ class TestRender(Test):
             print html
             print
         
-        if 0:
+        if 1:
             # Also print output to a file that a browser can point at.
             file(self.tmpfilename, 'w').write(html.encode('utf-8'))
 
@@ -207,6 +207,22 @@ class TestRender(Test):
         p = TextFormRenderer(f, values, errors, incomplete=1)
         self.print_render(p.render())
 
+
+    def test_none( self ):
+        'Test providing a value of None for rendering a string.'
+
+        f = Form('test-form',
+             StringField('name', N_("Person's name")),
+             action='handler')
+
+        values = {'name': None}
+        p = TextFormRenderer(f, values, {})
+        self.print_render(p.render())
+
+        # This won't work, we know about it:
+        # values = {'name': None}
+        # p = TextDisplayRenderer(f, values, {})
+        # self.print_render(p.render())
 
 
 #-------------------------------------------------------------------------------

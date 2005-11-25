@@ -18,6 +18,9 @@ Current Affairs
 ===============
 
 
+- Spaces in email addresses are simply removed and they should instead generate
+  some kind of error.
+
 
 
 Bugs and Things to Fix

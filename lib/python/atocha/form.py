@@ -207,12 +207,13 @@ class Form:
             fields = self._fields
         return [x.label for x in fields]
 
-    def fetchnames( self, obj, exceptions=[] ):
+    def fetchnames( self, obj, exceptions=[], default=None ):
         """
         Fetches attributes corresponding to the form field names from the given
         object 'obj' and returns a mapping with those values.  This can be
         useful if 'obj' is an object with the values that we want to fetch to
-        initialize a map before rendering a form.
+        initialize a map before rendering a form.  'default' is used to set a
+        value for fields that have a value of None.
 
         Note: this does not use the field variable names, but rather the actual
         field names (in fact, this is one of the places where having a different
@@ -223,7 +224,9 @@ class Form:
             if field.name in exceptions:
                 continue
             try:
-                values[field.name] = getattr(obj, field.name)
+                v = values[field.name] = getattr(obj, field.name)
+                if v is None and default is not None:
+                    values[field.name] = default
             except AttributeError:
                 pass
         return values
