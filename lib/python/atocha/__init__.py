@@ -99,6 +99,16 @@ class AtochaError(Exception):
     
 #-------------------------------------------------------------------------------
 #
+class AtochaDelError(AtochaError):
+    """
+    Exception used within constructors and destructors.
+    """
+    def __str__( self ):
+        return "<AtochaDelError %s>" % self.args[0]
+
+
+#-------------------------------------------------------------------------------
+#
 class AtochaInternalError(AtochaError):
     """
     Internal errors probably due to a bug in the Atocha library.

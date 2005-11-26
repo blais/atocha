@@ -37,7 +37,7 @@ if sys.version_info[:2] < (2, 4):
 from types import ClassType, NoneType
 
 # atocha imports.
-from atocha import AtochaError, AtochaInternalError
+from atocha import AtochaError, AtochaInternalError, AtochaDelError
 from atocha.form import Form
 from field import Field
 import fields
@@ -160,8 +160,9 @@ class FormRenderer:
             # This gets ignored to some extent, because it is called within the
             # destructor, and only outputs a message to stderr, but it should be
             # ugly enough in the program's logs to show up.
-            raise AtochaError(
-                "Error: Form renderer did not render form completely.")
+            msg = ("Error: Form renderer for form named '%s' did not "
+                   "render form completely.") % self._form.name
+            raise AtochaDelError(msg)
 
     def getform( self ):
         """
