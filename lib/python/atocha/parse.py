@@ -636,6 +636,15 @@ class FormParser:
         # the appropriate values.  This works similarly to optparse.
         return self._accessor
 
+    def cancel( self ):
+        """
+        Cancel this parser.  It is important to use this method if you have not
+        called end() on a parser when you do not intend to later end() it,
+        because otherwise it will raise an assert to alert you that your parsing
+        was not complete.
+        """
+        self._ended = 1  # Mark as ended.
+
     def redirect( self, redir=None ):
         """
         Force redirection.  To be able to redirect, at least one error must have

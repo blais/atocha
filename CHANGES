@@ -2,3 +2,4 @@
   atocha: CHANGES
 ===================
 
+- Added cancel() method.
