@@ -280,6 +280,10 @@ class FormRenderer:
         output = self._dispatch_render(field, rvalue, errmsg, state)
         
         # Mark this fields as having been rendered.
+        if field.name in self._rendered:
+            raise AtochaError(
+                "Error: field '%s' being rendered more than once." %
+                field.name)
         self._rendered.add(field.name)
 
         # Return output from the field-specific rendering code.
@@ -403,7 +407,7 @@ class FormRenderer:
         return self.do_render(fields,
                               action or self._form.action,
                               submit or self._form.submit)
-
+    
     def render_container( self, action=None ):
         """
         Renders the form prefix only.  There returned value should be the
@@ -478,6 +482,13 @@ class FormRenderer:
         if state is None:
             state = field.state
         return self._render_field(field, state)
+
+    def ignore( self, *fieldnames ):
+        """
+        Mark field as rendered, for insuring completion of the form.
+        """
+        for fname in fieldnames:
+            self._rendered.add(fname)
 
     def render_submit( self, submit=None ):
         """
@@ -666,6 +677,10 @@ class DisplayRendererBase:
         output = self._dispatch_render(field, uvalue, None, Field.NORMAL)
 
         # Mark this fields as having been rendered.
+        if field.name in self._rendered:
+            raise AtochaError(
+                "Error: field '%s' being rendered more than once." %
+                field.name)
         self._rendered.add(field.name)
 
         # Return output from the field-specific rendering code.
