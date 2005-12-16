@@ -62,18 +62,11 @@ class TextRenderer(atocha.render.FormRenderer):
         construction parameters.
         """
 
-        try:
-            self.outenc = kwds['output_encoding']
-            del kwds['output_encoding']
-        except KeyError:
-            self.outenc = self.default_encoding
+        self.outenc = kwds.pop('output_encoding', self.default_encoding)
         """Encoding for output strings produced by this renderer."""
 
-        try:
-            self.label_semicolon = kwds['labelsemi']
-            del kwds['labelsemi']
-        except KeyError:
-            self.label_semicolon = TextRenderer.label_semicolon
+        self.label_semicolon = kwds.pop('labelsemi',
+                                        TextRenderer.label_semicolon)
         """Whether we automatically add a semicolon to the labels or not."""
 
         self.ofile = None

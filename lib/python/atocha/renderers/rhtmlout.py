@@ -68,11 +68,8 @@ class HoutRenderer(atocha.render.FormRenderer):
         construction parameters.
         """
 
-        try:
-            self.label_semicolon = kwds['labelsemi']
-            del kwds['labelsemi']
-        except KeyError:
-            self.label_semicolon = HoutRenderer.label_semicolon
+        self.label_semicolon = kwds.pop('labelsemi',
+                                        HoutRenderer.label_semicolon)
         """Whether we automatically add a semicolon to the labels or not."""
 
         atocha.render.FormRenderer.__init__(self, *args, **kwds)
@@ -105,10 +102,11 @@ class HoutRenderer(atocha.render.FormRenderer):
             assert isinstance(label, (unicode, list))
             assert isinstance(inputs, (unicode, list))
 
+            tdlabel = TD(label, CLASS=rdr.css_label)
             if rdr.label_semicolon:
-                label.tail += ':'
+                tdlabel.append(':')
             table.append(TR(
-                TD(label, CLASS=rdr.css_label),
+                tdlabel,
                 TD(inputs, CLASS=rdr.css_input) ))
         if extra:
             assert isinstance(extra, list)
