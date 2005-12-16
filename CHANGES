@@ -2,4 +2,5 @@
   atocha: CHANGES
 ===================
 
+- Fixed bug with rendering with labelsemi option.
 - Added cancel() method.
