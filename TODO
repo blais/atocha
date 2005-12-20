@@ -6,7 +6,7 @@
 .. contents::
 ..
     1  Current Affairs
-    2  Bugs and Things to Fix
+    2  Bugs and Minor Things to Fix
     3  Documentation
     4  Testing
     5  Known Bugs and Misfeatures
@@ -18,13 +18,16 @@ Current Affairs
 ===============
 
 
+
+
+
+
+
+Bugs and Minor Things to Fix
+============================
+
 - Spaces in email addresses are simply removed and they should instead generate
   some kind of error.
-
-
-
-Bugs and Things to Fix
-======================
 
 - Maybe it would be nice to be able to end() multiple times... maybe we should
   rename the call to check()?
@@ -48,7 +51,6 @@ Documentation
 
 - Add a section in document about dealing with multiple submit buttons and an
   example.
-
 
 
 Testing

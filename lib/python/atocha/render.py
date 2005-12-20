@@ -162,7 +162,9 @@ class FormRenderer:
             # ugly enough in the program's logs to show up.
             msg = ("Error: Form renderer for form named '%s' did not "
                    "render form completely.") % self._form.name
-            raise AtochaDelError(msg)
+
+            missing = ', '.join(set(self._form.names()) - self._rendered)
+            raise AtochaDelError(msg, self._form.name, missing)
 
     def getform( self ):
         """
