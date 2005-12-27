@@ -2,5 +2,17 @@
   atocha: CHANGES
 ===================
 
+
+Version 1.0b2
+-------------
+
+- Added new exception that will render with more details in log files,
+  when a rendering is incomplete.
 - Fixed bug with rendering with labelsemi option.
-- Added cancel() method.
+- Added cancel() method on parser.
+
+
+Version 1.0b1
+-------------
+
+- Initial release.

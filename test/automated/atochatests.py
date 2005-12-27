@@ -178,7 +178,7 @@ class TestRender(Test):
             print html
             print
         
-        if 1:
+        if 0:
             # Also print output to a file that a browser can point at.
             file(self.tmpfilename, 'w').write(html.encode('utf-8'))
 
