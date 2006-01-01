@@ -129,7 +129,7 @@ class FormRenderer:
     it gets deleted.
     """
     def __init__( self, form, values=None, errors=None, incomplete=False ):
-        assert form is not None
+        assert isinstance(form, Form)
         self._form = form
         "The form instance that we're rendering."
 
