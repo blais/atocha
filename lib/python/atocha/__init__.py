@@ -133,3 +133,9 @@ from norm import *
 # Note: we don't import the htmlout renderer automatically.
 from renderers.rtext import *
 
+
+# Set this global to True if you want to indicate errors when forms are not
+# completely rendered or parsed.  This raises an exception in the destructor of
+# the renderer or parser.
+completeness_errors = False
+

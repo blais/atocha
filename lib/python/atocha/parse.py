@@ -26,7 +26,7 @@ See class FormParser (below).
 """
 
 # atocha imports.
-from atocha import AtochaError
+import atocha
 from fields.uploads import FileUpload
 from messages import msg_registry
 
@@ -276,8 +276,10 @@ class FormParser:
         """
         Destructor override that just makes sure that we ended the parser.
         """
-        if __debug__ and not self._ended:
-            raise AtochaError("Form parser not ended properly.")
+        if atocha.completeness_errors:
+            if not self._ended:
+                raise atocha.AtochaDelError("Form parser not ended properly.",
+                                            self._form.name)
 
 
     def parse_args( self, args, only=None, ignore=None ):
@@ -514,7 +516,7 @@ class FormParser:
         elif isinstance(error, tuple):
             assert len(error) == 2
         else:
-            raise AtochaError(
+            raise atocha.AtochaError(
                 "Error: invalid type for error message: %s" %
                 repr(error))
         return error

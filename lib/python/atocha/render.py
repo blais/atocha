@@ -37,7 +37,8 @@ if sys.version_info[:2] < (2, 4):
 from types import ClassType, NoneType
 
 # atocha imports.
-from atocha import AtochaError, AtochaInternalError, AtochaDelError
+import atocha
+from atocha import AtochaError, AtochaInternalError
 from atocha.form import Form
 from field import Field
 import fields
@@ -156,15 +157,16 @@ class FormRenderer:
         Destructor override that just makes sure that we rendered all the fields
         of the given form before we got destroyed.
         """
-        if not self._incomplete and set(self._form.names()) != self._rendered:
-            # This gets ignored to some extent, because it is called within the
-            # destructor, and only outputs a message to stderr, but it should be
-            # ugly enough in the program's logs to show up.
-            msg = ("Error: Form renderer for form named '%s' did not "
-                   "render form completely.") % self._form.name
+        if atocha.completeness_errors:
+            if not self._incomplete and set(self._form.names()) != self._rendered:
+                # This gets ignored to some extent, because it is called within the
+                # destructor, and only outputs a message to stderr, but it should be
+                # ugly enough in the program's logs to show up.
+                msg = ("Error: Form renderer for form named '%s' did not "
+                       "render form completely.") % self._form.name
 
-            missing = ', '.join(set(self._form.names()) - self._rendered)
-            raise AtochaDelError(msg, self._form.name, missing)
+                missing = ', '.join(set(self._form.names()) - self._rendered)
+                raise atocha.AtochaDelError(msg, self._form.name, missing)
 
     def getform( self ):
         """
