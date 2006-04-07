@@ -87,7 +87,7 @@ class _MultipleField(Field):
          choices set on against the received values. This is useful if the set
          of choices for this field is generated dynamically and you will do your
          validation by hand.  Another thing that can be done is to not use this
-         but to call setchoice() before running the parser on the arguments, if
+         but to call setchoices() before running the parser on the arguments, if
          in the handler you know which choices are possibly valid and would like
          to use the parsing code provided in this field."""),
         )
@@ -142,8 +142,8 @@ class _MultipleField(Field):
 
                 else:
                     raise AtochaError(
-                        "Error: wrong type of choice in initializer element: %s."
-                        % type(el))
+                        "Error: wrong type of choice in "
+                        "initializer element: %s." % type(el))
 
                 # Convert integer choice into string if necessary.
                 if isinstance(choice, int):
@@ -343,7 +343,8 @@ class _ManyChoicesField(_MultipleField):
                         assert isinstance(el, str)
                     newinitial.append(el)
                 initial = newinitial
-            assert isinstance(initial, (NoneType,) + _ManyChoicesField.types_data)
+            assert isinstance(initial,
+                              (NoneType,) + _ManyChoicesField.types_data)
             attribs['initial'] = initial
 
         # Initialize base classes, always set as required.

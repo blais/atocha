@@ -29,7 +29,7 @@ from types import NoneType
 
 # atocha imports.
 from atocha import AtochaInternalError
-from atocha.field import Field, FieldError
+from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 from texts import StringField
 
@@ -152,7 +152,7 @@ class DateField(StringField):
 
 #-------------------------------------------------------------------------------
 #
-class JSDateField(Field): # Is always required.
+class JSDateField(Field, OptRequired):
     """
     A fancy Javascript-based date field.
 
@@ -161,7 +161,7 @@ class JSDateField(Field): # Is always required.
     conditions of utilisation of that code is that a notice should be present
     and kept intact somewhere in the comments.
     """
-    types_data = (datetime.date,)
+    types_data = (datetime.date, NoneType)
     types_parse = (NoneType, unicode,)
     types_render = (unicode,)
     css_class = 'jsdate'
@@ -185,34 +185,42 @@ class JSDateField(Field): # Is always required.
         # required for the JS calendar.
         assert re.match(JSDateField.__script_re, name)
 
+        OptRequired.__init__(self, attribs, True)
         Field.__init__(self, name, label, attribs)
+        
+        self.required = bool(attribs.pop('required', False))
+        assert isinstance(self.required, bool)
+
 
     def parse_value( self, pvalue ):
-        if pvalue is None:
-            # No value submitted... this is strange, since this field should
-            # always send us a value, always, even without user edits. Raise a
-            # strange user error.
-            raise FieldError(msg_registry['date-invalid'] % u'')
+        # Check if no value submitted... this would be strange, since this field
+        # should always send us a value (except when not required explicitly),
+        # even without user edits.
+        pvalue = OptRequired.parse_value(self, pvalue)
 
-        # Encode value into ascii.
-        try:
-            dvalue = pvalue.encode('ascii')
-        except UnicodeEncodeError:
-            # This should not happen if the value comes from the code.
-            raise AtochaInternalError(
-                "Error: internal error with input from JSDateField.")
+        if pvalue:
+            # Encode value into ascii.
+            try:
+                dvalue = pvalue.encode('ascii')
+            except UnicodeEncodeError:
+                # This should not happen if the value comes from the code.
+                raise AtochaInternalError(
+                    "Error: internal error with input from JSDateField.")
 
-        # Match the given string, it should always match.
-        mo = JSDateField.__date_re.match(dvalue)
-        if mo is None:
-            raise AtochaInternalError(
-                "Error: internal error with input from JSDateField.")
+            # Match the given string, it should always match.
+            mo = JSDateField.__date_re.match(dvalue)
+            if mo is None:
+                raise AtochaInternalError(
+                    "Error: internal error with input from JSDateField.")
 
-        # Convert into date.
-        try:
-            dvalue = datetime.date(*map(int, mo.groups()))
-        except ValueError, e:
-            raise FieldError(msg_registry['date-invalid'] % pvalue)
+            # Convert into date.
+            try:
+                dvalue = datetime.date(*map(int, mo.groups()))
+            except ValueError, e:
+                raise FieldError(msg_registry['date-invalid'] % pvalue)
+        else:
+            assert not self.required
+            dvalue = None
 
         return dvalue
 

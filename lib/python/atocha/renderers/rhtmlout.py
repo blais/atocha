@@ -426,8 +426,7 @@ def renderSetFileField( rdr, field, renctx ):
 def renderJSDateField( rdr, field, renctx ):
     varname = field.varnames[0]
     fargs = (varname, renctx.rvalue and ", '%s'" % renctx.rvalue or '')
-    script = (u"DateInput('%s', true, 'YYYYMMDD'%s);"
-              u"hideInputs(this);") % fargs
+    script = (u"DateInput('%s', true, 'YYYYMMDD'%s);") % fargs
 
     # We must be able to accept both the string version and the datetime
     # version because of the different paths of argument parsing... it's

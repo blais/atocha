@@ -139,7 +139,8 @@ msg_registry = TranslatorDict({
     'username-or-email-label': N_("Username or Email"),
 
     'username-lower-error': N_("Usernames can only contain lowercase letters."),
-    'username-invalid': N_("Invalid username.  Only letters and numbers accepted."),
+    'username-invalid':
+    N_("Invalid username.  Only letters and numbers accepted."),
     
     'phone-invalid': N_("Invalid phone number: '%s'."),
 

@@ -2,6 +2,12 @@
   atocha: CHANGES
 ===================
 
+Version 1.0
+-----------
+
+- Made the JSDateField optionally required, with default being required=True.
+- Fixed minor typos (not bugs).
+
 
 Version 1.0b2
 -------------

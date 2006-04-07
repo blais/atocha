@@ -446,8 +446,8 @@ class OptRequired:
         for the corresponding field."""),
         )
 
-    def __init__( self, attribs ):
-        self.required = bool(attribs.pop('required', False))
+    def __init__( self, attribs, def_required=False ):
+        self.required = bool(attribs.pop('required', def_required))
         assert isinstance(self.required, bool)
 
     def parse_value( self, pvalue ):
