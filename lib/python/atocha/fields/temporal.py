@@ -55,7 +55,7 @@ class DateField(StringField):
 
     __def_display_fmt = '%a, %d %B %Y' # or '%x'
 
-    # Support ISO-8601 format.  
+    # Support ISO-8601 format.
     __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
 
     # Support a natural format, like 11 Sep 2001, or Sep 11, 2001
@@ -76,7 +76,7 @@ class DateField(StringField):
     def parse_value( self, pvalue ):
         value = StringField.parse_value(self, pvalue)
         assert isinstance(value, unicode)
-        
+
         # Indicate that this field has not been sent.
         if not value:
             return None
@@ -112,7 +112,7 @@ class DateField(StringField):
                         msg_registry['date-invalid-month'] % nmonth, value)
 
         assert type(month) is int
-            
+
         # Convert into date.
         try:
             dvalue = datetime.date(year, month, day)
@@ -173,7 +173,7 @@ class JSDateField(Field, OptRequired):
 
         OptRequired.__init__(self, attribs, True)
         Field.__init__(self, name, label, attribs)
-        
+
         self.required = bool(attribs.pop('required', False))
         assert isinstance(self.required, bool)
 
@@ -229,19 +229,17 @@ class JSDateField(Field, OptRequired):
 class DateMenuField(MenuField):
     """
     A field that offers dates in close proximity, via a select menu.
+
+    Extra choices can be added to the menu, and in this case a string type is
+    returned (therefore, when you accept the data, you will need to check the
+    returned datatype for a str or a date object.)
     """
-    types_data = (datetime.date, NoneType,)
+    types_data = (datetime.date, str, NoneType,)
     css_class = 'datemenu'
 
     attributes_delete = ('choices', 'nocheck')
 
     attributes_declare = (
-        ('any', 'str',
-         """Set this to some string if the field should support entering a value
-         for any/unspecified date.  The string will be displayed in the dates
-         menu and a value of None will be returned by the widget if it is
-         selected."""),
-
         ('nbdays', 'int',
          """The number of days to display from today."""),
         )
@@ -251,22 +249,22 @@ class DateMenuField(MenuField):
     __value_fmt = '%Y-%m-%d'
     __def_display_fmt = '%a, %d %B %Y' # or '%x'
 
-    # Support ISO-8601 format.  
+    # Support ISO-8601 format.
     __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__( self, name, label=None, extra_choices=None, **attribs ):
         DateMenuField.validate_attributes(attribs)
 
         self.nbdays = int(attribs.pop('nbdays', self.__def_nbdays))
         assert isinstance(self.nbdays, int)
         assert self.nbdays > 0
 
-        self.any = attribs.pop('any', None)
-        if self.any:
-            assert isinstance(self.any, str)
-
         attribs['nocheck'] = True
         MenuField.__init__(self, name, [], label, **attribs)
+
+        # Parse the extra choices and save them for later.
+        self.extra_choices, self.extra_choiceset = \
+            self.parse_choices(extra_choices)
 
         # Note: The set of dates will be filled in every time we render this
         # field, rather than at initialization time, to avoid long-running
@@ -280,19 +278,19 @@ class DateMenuField(MenuField):
         if not value:
             return None
 
-        # Support the 'any' value.
-        if value == 'any':
-            assert self.any
-            return None
-
-        # Convert from value string to a datetime.date object.
-        mo = self.__date_re1.match(value)
-        if not mo:
-            raise FieldError(msg_registry['date-invalid'] % value, value)
-        try:
-            dvalue = datetime.date(*map(int, mo.groups()))
-        except ValueError, e:
-            raise FieldError(msg_registry['date-invalid'] % value, value)
+        # Support the extra values.
+        if value in self.extra_choiceset:
+            # Return a str for the extra choices.
+            dvalue = value
+        else:
+            # Convert from value string to a datetime.date object.
+            mo = self.__date_re1.match(value)
+            if not mo:
+                raise FieldError(msg_registry['date-invalid'] % value, value)
+            try:
+                dvalue = datetime.date(*map(int, mo.groups()))
+            except ValueError, e:
+                raise FieldError(msg_registry['date-invalid'] % value, value)
 
         return dvalue
 
@@ -301,34 +299,35 @@ class DateMenuField(MenuField):
 
         # Convert date to its corresponding value string.
         rvalue = None
-        if dvalue is not None:
+        if isinstance(dvalue, datetime.date):
             rvalue = dvalue.strftime(self.__value_fmt)
+        elif isinstance(dvalue, str):
+            rvalue = dvalue
         else:
-            if self.any:
-                rvalue = 'any'
-            else:
-                raise AtochaInternalError(
-                    "Error: internal error rendering DateMenuField.")
+            raise AtochaInternalError(
+                "Error: internal error rendering DateMenuField.")
 
         return rvalue
 
     def display_value( self, dvalue ):
         if dvalue is None:
             return u''
-        return time_to_string(dvalue, self.__def_display_fmt)
+        elif dvalue in self.extra_choiceset:
+            return self.extra_choiceset.get(dvalue, dvalue)
+        else:
+            return time_to_string(dvalue, self.__def_display_fmt)
 
     def _reset_dates( self ):
         """
         Reset the list of dates (choices) for this menu.
         """
-        choices = []
-        if self.any:
-            choices.append( ('any', self.any) )
-            
+        choices = list(self.extra_choices)
+
         # Set the list of dates to this choice field.
         for d in date_range(self.nbdays):
             choices.append( (d.strftime(self.__value_fmt),
                              time_to_string(d, self.__def_display_fmt)) )
+
         self.setchoices(choices)
 
 

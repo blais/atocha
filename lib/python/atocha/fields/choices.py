@@ -109,25 +109,19 @@ class _MultipleField(Field):
         # Set the initial choices for this field.
         self.setchoices(choices)
 
-
-    def setchoices( self, choices ):
-        """
-        Set the choices that this field renders and parses.  'choices' is of the
-        same types as described in the attributes.
-        """
-        self.choiceset = {}
-        self.choices = []
+    @staticmethod
+    def parse_choices( in_choices ):
+        choiceset = {}
+        choices = []
 
         # Accumulator for the normalized choices.
         normchoices = []
 
-        if choices is None:
-            return
-        else:
-            assert isinstance(choices, (list, tuple))
+        if in_choices is not None:
+            assert isinstance(in_choices, (list, tuple))
 
             # Normalize all the choices into pairs.
-            for el in choices:
+            for el in in_choices:
 
                 choice = label = None
 
@@ -164,9 +158,17 @@ class _MultipleField(Field):
 
                 # We add the new pair to our internal, normalized set of
                 # choices.
-                self.choices.append( (choice, label) )
-                self.choiceset[choice] = label
+                choices.append( (choice, label) )
+                choiceset[choice] = label
 
+        return choices, choiceset
+
+    def setchoices( self, choices ):
+        """
+        Set the choices that this field renders and parses.  'choices' is of the
+        same types as described in the attributes.
+        """
+        self.choices, self.choiceset = self.parse_choices(choices)
 
     def checkvalues( self, values ):
         """
