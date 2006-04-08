@@ -212,6 +212,7 @@ class StringField(_TextField):
         else:
             return rvalue
 
+
 #-------------------------------------------------------------------------------
 #
 class TextAreaField(_TextField):

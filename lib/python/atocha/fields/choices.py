@@ -266,9 +266,10 @@ class _OneChoiceField(_MultipleField):
             if self.choices:
                 return self.choices[0][0]
             else:
-                # Not sure what to do if there are not field values.
-                raise AtochaError("Error: single selection field without "
-                                   "values... cannot set default state.")
+                # Not sure what to do if there are no field values.
+                raise AtochaError(
+                    "Error: single selection field without choices... cannot "
+                    "set default choice on '%s'." % self.name)
 
         # Nothing special to do, the selection string should remain that way
         # for the renderer to do its thing.

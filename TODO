@@ -109,6 +109,10 @@ Known Bugs and Misfeatures
 Ideas
 =====
 
+- attributes_declare should perhaps include the default values, and when we
+  validate the attributes those default values could be set for later access to
+  set the default values when popping the keyword arguments.
+
 - Maybe we should make StringField use a default encoding of latin-1 and create
   a UnicodeField for strings with default encoding 'unicode'.
 
@@ -175,6 +179,10 @@ Ideas
 
 - We could consider automatically generating an SQLObject description from the
   Form description.
+
+- Perhaps we should renamed "Field" to "Control"?  That would be more intuitive,
+  as the meaning of "Field" is rather vague (in Atocha, a Field may contain many
+  HTML widgets/inputs).
 
 
 Future New Field Types

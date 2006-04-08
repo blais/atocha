@@ -456,7 +456,8 @@ HoutFormRenderer_routines = ((StringField, renderStringField),
                              (ListboxField, renderListboxField),
                              (FileUploadField, renderFileUploadField),
                              (SetFileField, renderSetFileField),
-                             (JSDateField, renderJSDateField),)
+                             (JSDateField, renderJSDateField),
+                             (DateMenuField, renderMenuField),)
 
 for fcls, fun in HoutFormRenderer_routines:
     atocha.render.register_render_routine(HoutFormRenderer, fcls, fun)
@@ -546,7 +547,9 @@ HoutDisplayRenderer_routines = ((StringField, displayValue),
                                 (ListboxField, displayValue),
                                 (FileUploadField, displayFileUploadField),
                                 (SetFileField, displayFileUploadField),
-                                (JSDateField, displayValue),)
+                                (JSDateField, displayValue),
+                                (DateMenuField, displayValue),)
+
 
 for fcls, fun in HoutDisplayRenderer_routines:
     atocha.render.register_render_routine(HoutDisplayRenderer, fcls, fun)

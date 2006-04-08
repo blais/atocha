@@ -93,7 +93,7 @@ class TextRenderer(atocha.render.FormRenderer):
         f = self.ofile or self._create_buffer()
 
         self.do_table_imp(self, pairs, extra, css_class, f)
-        
+
         if self.ofile is None: return f.getvalue()
 
     def do_ctable( cls, pairs=(), extra=None, css_class=None, outenc=None ):
@@ -524,7 +524,8 @@ TextFormRenderer_routines = ((StringField, renderStringField),
                              (ListboxField, renderListboxField),
                              (FileUploadField, renderFileUploadField),
                              (SetFileField, renderSetFileField),
-                             (JSDateField, renderJSDateField),)
+                             (JSDateField, renderJSDateField),
+                             (DateMenuField, renderMenuField),)
 
 for fcls, fun in TextFormRenderer_routines:
     atocha.render.register_render_routine(TextFormRenderer, fcls, fun)
@@ -631,7 +632,8 @@ TextDisplayRenderer_routines = ((StringField, displayValue),
                                 (ListboxField, displayValue),
                                 (FileUploadField, displayFileUploadField),
                                 (SetFileField, displayFileUploadField),
-                                (JSDateField, displayValue),)
+                                (JSDateField, displayValue),
+                                (DateMenuField, displayValue),)
 
 for fcls, fun in TextDisplayRenderer_routines:
     atocha.render.register_render_routine(TextDisplayRenderer, fcls, fun)

@@ -88,10 +88,13 @@ class Field:
       None as a possibility.
 
     - 'types_parse' -> tuple: possible types that are given to us from the web
-      application framework to parse.
+      application framework to parse.  This represents the set of all possible
+      data types for the widgets of this field that can be passed via the
+      arguments, in the handler.
 
-    - 'types_render' -> tuple: possible types for values for prepared to be used
-      for rendering.
+    - 'types_render' -> tuple: possible types for values prepared to be used for
+      rendering.  The renderer must be able to accept all and only those
+      declared value types.
 
     Rendering
     ---------
@@ -176,7 +179,7 @@ class Field:
         field will be set to None. This is NOT a default value to be provided by
         the parser if the field is not submitted. """),
 
-        ('starred', 'book',
+        ('starred', 'bool',
          """Mark field label as being a required input field.  Fields which are
          optionally required, i.e. those fields which accept the 'required'
          option, are automatically starred if they are required.
@@ -297,8 +300,11 @@ class Field:
         """
         Returns a human-readable version of the field.
         """
-        return "<Field name=%s>" % self.name
+        return "<%s name='%s'>" % (self.__class__.__name__, self.name)
 
+    # This is also useful for reading debugging output.
+    __repr__ = __str__
+    
     def ishidden( self ):
         """
         Returns true if this field is hidden.
