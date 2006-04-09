@@ -155,7 +155,7 @@ class FormParser:
     # expecting.
     normalizer = None
 
-    
+
     def parse( form, args, redir=None, redirfun=None ):
         """
         Creates a FormParser, applies the arguments to be parsed, and completes
@@ -173,7 +173,7 @@ class FormParser:
 
         # Parse the given arguments.
         parser.parse_args(args)
-        
+
         # Complete the parsing.
         return parser.end()
 
@@ -394,7 +394,7 @@ class FormParser:
         See store() method.
         """
         return self.store(fname, value)
-    
+
     def __contains__( self, fname ):
         """
         Membership test.
@@ -419,6 +419,15 @@ class FormParser:
 
         # Store along with the values dict.
         self._values[name] = value
+
+    def clear( self, name ):
+        """
+        Clear the given value.
+        """
+        try:
+            del self._values[name]
+        except KeyError:
+            pass
 
     def getvalues( self, cullfiles=False ):
         """
@@ -458,7 +467,7 @@ class FormParser:
                     except KeyError:
                         pass
             return vcopy
-        
+
     def ok( self, fieldname ):
         """
         Returns false if the given field has an error associated to it.
@@ -590,6 +599,18 @@ class FormParser:
             # necessarily a (message, repl_rvalue) tuple.
             self._errors[fname] = error
 
+    def clear_errors( self, *names ):
+        """
+        Clear the errors associated with the given fields.
+        """
+        for name in names:
+            try:
+                del self._errors[name]
+            except KeyError:
+                pass
+
+        if not self._errors:
+            self._status, self._message = None, u''
 
     def set_redirect( self, redir ):
         """
@@ -617,7 +638,7 @@ class FormParser:
           customization, this method will be allowed to return 'None' (or the
           value of the redirect function) and the caller can check this to
           perform the redirection manually if necessary.
-        
+
         If there is NO error...
 
         - This method returns an instance which has its attributes set to the
@@ -649,23 +670,18 @@ class FormParser:
 
     def redirect( self, redir=None ):
         """
-        Force redirection.  To be able to redirect, at least one error must have
-        occured, and the parser must be complete/ended.
+        Force redirection.  To be able to redirect, the parser must be
+        complete/ended.
         """
-
-        assert self._ended and self.haserrors()
+        assert self._ended
 
         # Note: we do not make sure that at some point a redirection URL was
         # specified.  Within the specific framework where this is getting used,
         # there might be a way to automatically get the referer of the page and
         # to automatically redirect to that.  By not including the following
         # check, it is possible to leave the redirection URL unset and to use
-        # that state as a way to let the processor find the referer.
-        # assert rurl
-
-        # Make sure that a status and a message have been set.
-        assert self._status
-        assert self._message
+        # that state as a way to let the processor find the referer.  assert
+        # rurl
 
         # Delegate to the derived class to redirect.
         fun = self.redirect_func
@@ -706,7 +722,7 @@ class ParserAccessor(object):
 
     def getsubmit( self ):
         return self._parser.getsubmit()
-    
+
     def getvalues( self ):
         return self._parser.getvalues()
 

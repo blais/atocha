@@ -2,6 +2,14 @@
   atocha: CHANGES
 ===================
 
+Current Version
+---------------
+
+- Loosened the requirements for FormParser.redirect()
+- Created a new DateMenuField control, that allows us to select a date from a
+  menu
+
+
 Version 1.0
 -----------
 
