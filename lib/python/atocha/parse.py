@@ -612,6 +612,12 @@ class FormParser:
         if not self._errors:
             self._status, self._message = None, u''
 
+    def clear_message( self ):
+        """
+        Clear the UI message that is to be displayed for errors.
+        """
+        self._message = u''
+
     def set_redirect( self, redir ):
         """
         (Re-)Set the redirection URL.
