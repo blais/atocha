@@ -87,7 +87,7 @@ Notes
 
 """
 
-# Note: we declare those before due to cycle.
+# Note: we declare those before due to cycles.
 #-------------------------------------------------------------------------------
 #
 class AtochaError(Exception):
@@ -130,7 +130,9 @@ from render import *
 from norm import *
 
 # Renderers.
-# Note: we don't import the htmlout renderer automatically.
+#
+# Note: we don't import the htmlout renderer automatically, because most people
+# just will not have htmlout on their systems.
 from renderers.rtext import *
 
 
