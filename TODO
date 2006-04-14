@@ -109,6 +109,10 @@ Known Bugs and Misfeatures
 Ideas
 =====
 
+- We should add an option to tell Atocha to expect strings that are already
+  translated.  This would be useful for people who do not have an appropriate
+  i18n setup instead of a ``_ = lambda x: x`` solution.
+
 - attributes_declare should perhaps include the default values, and when we
   validate the attributes those default values could be set for later access to
   set the default values when popping the keyword arguments.
