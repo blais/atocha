@@ -145,7 +145,7 @@ class HoutFormRenderer(HoutRenderer):
 
     def do_render( self, fields, action, submit ):
         # Create the form container.
-        hform = self.do_render_container(action)
+        hform = self.render_container(action)
 
         # Create and append the table contained inside.
         hform.append( self.do_render_table(fields) )
@@ -158,17 +158,17 @@ class HoutFormRenderer(HoutRenderer):
         # Return the form container.
         return hform
 
-    def do_render_container( self, action ):
+    def do_render_container( self, action_url ):
         form = self._form
 
-        if action is None:
+        if action_url is None:
             raise AtochaError('Error: You must specify a non-null action '
                                'for rendering this form.')
 
         # Other options.
         opts = [('id', form.name),
                 ('name', form.name),
-                ('action', action),
+                ('action', action_url),
                 ('method', form.method),]
         if form.accept_charset is not None:
             opts.append(('accept-charset', form.accept_charset))
@@ -489,7 +489,7 @@ class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
         # We only need return the table.
         return self.do_render_table(fields)
 
-    def do_render_container( self, action ):
+    def do_render_container( self, action_url ):
         return None
 
     def do_render_table( self, fields, css_class=None ):

@@ -74,7 +74,7 @@ def register_render_routine( renderer_cls, field_cls, fun, override=False ):
     # Check for collisions.
     if not override:
         assert field_cls not in reg
-        
+
     # Add the function to the registry.
     reg[field_cls] = fun
 
@@ -108,14 +108,14 @@ def lookup_render_routine( renderer_cls, field_cls ):
             # dynamic the registries can be, but they are usually statically
             # defined so we can do this for efficiency).
             register_render_routine(renderer_cls, field_cls, renfun)
-            
+
         except AttributeError:
             raise AtochaInternalError(
                 "Missing rendering routine for renderer '%s', field '%s'." %
                 (renderer_cls.__name__, field_cls.__name__))
 
     return renfun
-    
+
 
 
 #-------------------------------------------------------------------------------
@@ -129,6 +129,17 @@ class FormRenderer:
     check to make sure that all the fields in a form have been renderer before
     it gets deleted.
     """
+
+    action_evaluator = None
+    """Evaluation function for transforming actions into URLs.  If this is not
+    set, it's a identity function, i.e. given actions are expected to be URLs.
+    If you need this, this should be setup once globally from your favourite
+    application framework to customize the behaviour of Atocha for evaluating
+    actions.  An example of such a use would be if you have some kind of global
+    registry of the URLs of your application and want to specify those rather
+    than actual URLs.  See project Ranvier for an example of this."""
+
+
     def __init__( self, form, values=None, errors=None, incomplete=False ):
         assert isinstance(form, Form)
         self._form = form
@@ -158,10 +169,12 @@ class FormRenderer:
         of the given form before we got destroyed.
         """
         if atocha.completeness_errors:
-            if not self._incomplete and set(self._form.names()) != self._rendered:
-                # This gets ignored to some extent, because it is called within the
-                # destructor, and only outputs a message to stderr, but it should be
-                # ugly enough in the program's logs to show up.
+            if (not self._incomplete and
+                set(self._form.names()) != self._rendered):
+
+                # This gets ignored to some extent, because it is called within
+                # the destructor, and only outputs a message to stderr, but it
+                # should be ugly enough in the program's logs to show up.
                 msg = ("Error: Form renderer for form named '%s' did not "
                        "render form completely.") % self._form.name
 
@@ -173,7 +186,7 @@ class FormRenderer:
         Return the form that this renderer is processing.
         """
         return self._form
-        
+
     def getvalues( self ):
         """
         Return the values that this renderer is processing.
@@ -282,7 +295,7 @@ class FormRenderer:
 
         # Dispatch to renderer.
         output = self._dispatch_render(field, rvalue, errmsg, state)
-        
+
         # Mark this fields as having been rendered.
         if field.name in self._rendered:
             raise AtochaError(
@@ -324,14 +337,14 @@ class FormRenderer:
             # code for new fields and/or new renderers.  In this code the
             # rendering routines are located alongside the renderers, but in
             # extension classes they might be defined next to the fields.
-            # 
+            #
             # Note: we could use the visitor pattern but we would need to
             # customize all the field classes to support it.  We prefer this
             # simpler approach.
             #
             # The rendering routines have to be registered using the appropriate
             # function for this in this file.
-            
+
             renfun = lookup_render_routine(renderer.__class__, field.__class__)
             renctx = RenderContext(state, rvalue, errmsg, field.isrequired())
             try:
@@ -383,6 +396,14 @@ class FormRenderer:
 
     validate_renderer = classmethod(validate_renderer)
 
+    def eval_action( self, action ):
+        """
+        Evaluation the action with the action processor, if there is one.
+        """
+        if self.action_evaluator is not None:
+            action = self.action_evaluator(action)
+        return action
+
 
     #---------------------------------------------------------------------------
     # Public methods that you can use.
@@ -411,7 +432,7 @@ class FormRenderer:
         return self.do_render(fields,
                               action or self._form.action,
                               submit or self._form.submit)
-    
+
     def render_container( self, action=None ):
         """
         Renders the form prefix only.  There returned value should be the
@@ -420,7 +441,10 @@ class FormRenderer:
 
         An alternate action from the one that is in the form can be specified.
         """
-        return self.do_render_container(action or self._form.action)
+        # Evaluate the action into a URL here.
+        action_url = self.eval_action(action or self._form.action)
+
+        return self.do_render_container(action_url)
 
     def render_table( self, *fieldnames, **kwds ):
         """
@@ -522,7 +546,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_render_container( self, action ):
+    def do_render_container( self, action_url ):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm for the form container.
@@ -602,7 +626,9 @@ class FormRenderer:
 
         - 'cls': The renderer class that invokes this method.
 
-        - 'action': The URL of the action to take upon button press.
+        - 'action': The URL string of the action to take upon button press (or
+          any other data type that your renderer supports for delayed evaluation
+          of the action target).
 
         - 'buttons': See Form.submit for details.
 

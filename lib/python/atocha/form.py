@@ -66,7 +66,9 @@ class Form:
       pairs for each submit button to be rendered, to indicate multiple submit
       buttons.;
 
-    - 'action': the action type, a URL for the handler for this form;
+    - 'action': the action type, usually a URL for the handler for this form,
+      but this can be any data type, so that we can implement delayed evaluation
+      of the action target in a given renderer;
 
     - 'method': the submit method (GET or POST);
 
@@ -88,13 +90,12 @@ class Form:
         Form creation.  You can specify 'action', 'submit' (button name) and
         'method' (GET or POST) here.
         """
-        assert isinstance(name, str)
-        assert name
+        assert name and isinstance(name, str)
         self.name = name
-        assert isinstance(name, str)
         "The name of the form, which appears in the HTML rendering as well."
 
-        assert isinstance(name, str)
+        # assert isinstance(action, str) # Accept any data type to support
+                                         # delayed evaluation.
         self.action = kwds.get('action', self.__def_action)
         """The action of the form. This is the URL which will handle the form
         submit."""
@@ -111,7 +112,8 @@ class Form:
                 if isinstance(n, tuple):
                     assert isinstance(n[1], msg_type)
                 else:
-                    raise AtochaInternalError("Internal error with submit types.")
+                    raise AtochaInternalError(
+                        "Internal error with submit types.")
         else:
             assert isinstance(self.submit, msg_type)
         assert self.submit

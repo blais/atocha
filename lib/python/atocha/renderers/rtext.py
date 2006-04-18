@@ -170,10 +170,10 @@ class TextFormRenderer(TextRenderer):
             # File object that gets set as a side-effect.
             self.ofile = f = self._create_buffer()
 
-            # (Side-effect will add to the file.)
-            self.do_render_container(action)
+            # (Side-effect will add to the file declared above.)
+            self.render_container(action)
 
-            # (Side-effect will add to the file.)
+            # (Side-effect will add to the file declared above.)
             self.do_render_table(fields)
 
             # Render submit buttons.
@@ -191,19 +191,19 @@ class TextFormRenderer(TextRenderer):
         return f.getvalue()
 
 
-    def do_render_container( self, action ):
+    def do_render_container( self, action_url ):
         # Use side-effect for efficiency if requested.
         f = self.ofile or self._create_buffer()
         form = self._form
 
-        if action is None:
+        if action_url is None:
             raise AtochaError('Error: You must specify a non-null action '
                                'for rendering this form.')
 
         # Other options.
         opts = [('id', form.name),
                 ('name', form.name),
-                ('action', action),
+                ('action', action_url),
                 ('method', form.method),]
         if form.accept_charset is not None:
             opts.append(('accept-charset', form.accept_charset))
@@ -553,7 +553,7 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
         atocha.render.DisplayRendererBase.__init__(self, kwds)
         TextRenderer.__init__(self, *args, **kwds)
 
-    def do_render( self, fields, action, submit ):
+    def do_render( self, fields, action_url, submit ):
         form = self._form
         try:
             # File object that gets set as a side-effect.
@@ -569,7 +569,7 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
 
         return f.getvalue()
 
-    def do_render_container( self, action ):
+    def do_render_container( self, action_url ):
         return ''
 
     def do_render_table( self, fields, css_class=None ):

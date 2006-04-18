@@ -23,6 +23,8 @@ Bugs and Minor Things to Fix
 - Maybe it would be nice to be able to end() multiple times... maybe we should
   rename the call to check()?
 
+- Process the scriptsdir with the action evaluator, it is a URL after all.
+
 
 Documentation
 =============
@@ -42,6 +44,19 @@ Documentation
 
 - Add a section in document about dealing with multiple submit buttons and an
   example.
+
+- Document why we need to provide non-i18n str over unicode strings.
+
+  - i18n must occur at render time, because only then the context is setup for
+    the appropriate language.
+
+  - Form objects can be initialized and kept over many requests which have
+    potentially different languages.  Not having to create the complex Form
+    objects on every request (just to be able to translate) can be a speed
+    advantage.
+
+- Add a configuration flag that will disable all i18n calls except for the
+  internal messages.
 
 
 Testing
