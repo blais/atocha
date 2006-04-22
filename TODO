@@ -17,6 +17,10 @@
 Bugs and Minor Things to Fix
 ============================
 
+- The 'hidepw' option for rendering the password fields should be automatically
+  determined on whether the protocol is http or https, can we do this somehow?
+  Where do we feed in the information about the protocol?
+
 - Spaces in email addresses are simply removed and they should instead generate
   some kind of error.
 

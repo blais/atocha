@@ -26,7 +26,7 @@ Tests for Htmlout renderer for Atocha library.
 Run these tests using the codespeak py.test tool.
 """
 
-# stdlib imports.
+# stdlib imports
 import sys, os, datetime, StringIO, webbrowser
 from os.path import *
 from pprint import pprint, pformat
@@ -36,10 +36,10 @@ sys.path.append( join(dirname(dirname(__file__)), 'demo') )
 sys.path.append( join('..', 'demo') )
 import common
 
-# atocha imports.
+# atocha imports
 from atocha import *
 
-# htmlout imports.
+# htmlout imports
 from htmlout import tostring
 
 

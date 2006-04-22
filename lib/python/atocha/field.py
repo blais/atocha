@@ -30,7 +30,7 @@ if sys.version_info[:2] < (2, 4):
 import re
 from types import NoneType
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaError, AtochaInternalError
 from messages import msg_registry, msg_type
 

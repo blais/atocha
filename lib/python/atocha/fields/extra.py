@@ -28,7 +28,7 @@ Extra fields, which may carry meaning in certain contexts only.
 # stdlib imports
 import re
 
-# atocha imports.
+# atocha imports
 from atocha.field import Field, FieldError
 from atocha.fields.texts import StringField
 from atocha.messages import msg_registry

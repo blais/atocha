@@ -27,7 +27,7 @@ Numeric Fields
 import locale
 from types import NoneType
 
-# atocha imports.
+# atocha imports
 from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 

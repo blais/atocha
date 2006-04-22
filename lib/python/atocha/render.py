@@ -36,7 +36,7 @@ if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 from types import ClassType, NoneType
 
-# atocha imports.
+# atocha imports
 import atocha
 from atocha import AtochaError, AtochaInternalError
 from atocha.form import Form

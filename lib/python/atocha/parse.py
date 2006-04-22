@@ -25,7 +25,7 @@ Form parsing.
 See class FormParser (below).
 """
 
-# atocha imports.
+# atocha imports
 import atocha
 from fields.uploads import FileUpload
 from messages import msg_registry

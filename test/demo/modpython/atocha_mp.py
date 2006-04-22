@@ -23,11 +23,11 @@
 mod_python handler for Atocha demo.
 """
 
-# stdlib imports.
+# stdlib imports
 import sys
 from os.path import dirname, join
 
-# mod_python imports.
+# mod_python imports
 from mod_python import apache
 from mod_python.util import FieldStorage, Field
 

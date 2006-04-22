@@ -23,11 +23,11 @@
 Normalizer for Apache + mod_python + Draco.
 """
 
-# atocha imports.
+# atocha imports
 from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 
-# draco imports.
+# draco imports
 from draco.request import FileUpload as DracoUpload
 
 

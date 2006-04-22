@@ -23,10 +23,10 @@
 Normalizer for Python's cgi library to handle data coming from CGI scripts.
 """
 
-# stdlib imports.
+# stdlib imports
 import cgi
 
-# atocha imports.
+# atocha imports
 from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 

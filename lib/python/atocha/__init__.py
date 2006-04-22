@@ -120,7 +120,7 @@ class AtochaInternalError(AtochaError):
     """
 
 
-# atocha imports.
+# atocha imports
 from form import *
 from field import *
 from fields import *

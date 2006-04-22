@@ -27,7 +27,7 @@ Time and Date Fields
 import re, datetime, locale
 from types import NoneType
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaInternalError
 from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry

@@ -26,7 +26,7 @@ Fields for usernames
 # stdlib imports
 import re
 
-# atocha imports.
+# atocha imports
 from atocha.field import Field, FieldError
 from atocha.fields.texts import StringField, EmailField
 from atocha.messages import msg_registry

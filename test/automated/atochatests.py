@@ -26,13 +26,13 @@ Tests for forms library.
 Run these tests using the codespeak py.test tool.
 """
 
-# stdlib imports.
+# stdlib imports
 import sys, os, datetime, StringIO, webbrowser
 import unittest 
 from pprint import pprint, pformat
 
 
-# form imports.
+# form imports
 from atocha import *
 
 

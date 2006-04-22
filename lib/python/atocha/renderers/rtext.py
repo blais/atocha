@@ -23,11 +23,11 @@
 Simple text-based form renderers.
 """
 
-# stdlib imports.
+# stdlib imports
 import StringIO, codecs
 from os.path import join
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaError, AtochaInternalError
 import atocha.render
 from atocha.field import *

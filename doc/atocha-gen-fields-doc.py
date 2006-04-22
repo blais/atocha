@@ -24,11 +24,11 @@ Script that automatically generates documentation for all the fields using the
 docstrings of each field in restructuredtext.
 """
 
-# stdlib imports.
+# stdlib imports
 import types, textwrap, datetime, StringIO, tempfile
 from subprocess import call
 
-# atocha imports.
+# atocha imports
 import atocha
 import atocha.fields
 

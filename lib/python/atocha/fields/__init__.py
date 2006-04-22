@@ -32,7 +32,7 @@ if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 _savedglo = set(globals().keys())
 
-# atocha fields imports.
+# atocha fields imports
 from bools import *
 from texts import *
 from numeric import *

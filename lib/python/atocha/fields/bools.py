@@ -26,7 +26,7 @@ Boolean Fields
 # stdlib imports
 from types import NoneType
 
-# atocha imports.
+# atocha imports
 from atocha.field import Field, FieldError
 from atocha.messages import msg_registry
 

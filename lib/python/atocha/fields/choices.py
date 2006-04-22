@@ -27,7 +27,7 @@ Single or Multiple Choice Fields
 import re
 from types import NoneType
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaError, AtochaInternalError
 from atocha.field import Field, FieldError
 from atocha.field import OptRequired, Orientable

@@ -36,7 +36,7 @@ applications).
 """
 
 
-# stdlib imports.
+# stdlib imports
 import __builtin__
 
 

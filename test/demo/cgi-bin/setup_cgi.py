@@ -24,13 +24,13 @@ Setup for CGI scripts, and Atocha configuration.
 This needs be done only once for a web application.
 """
 
-# stdlib imports.
+# stdlib imports
 import sys
 from os.path import *
 projects_root = dirname(dirname(dirname(dirname(dirname(sys.argv[0])))))
 import os
 
-# atocha imports.
+# atocha imports
 sys.path.append(join(projects_root, 'atocha', 'lib', 'python'))
 from atocha import *
 from atocha.norms.ncgi import CGINormalizer
@@ -44,7 +44,7 @@ try:
 except ImportError:
     pass # We won't be able to test the htmlout renderers.
 
-# atocha demo imports.
+# atocha demo imports
 sys.path.append(join(projects_root, 'atocha', 'test', 'demo'))
 import demo
 

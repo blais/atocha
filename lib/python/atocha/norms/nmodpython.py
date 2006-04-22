@@ -23,10 +23,10 @@
 Normalizer for Apache + mod_python.
 """
 
-# mod_python imports.
+# mod_python imports
 from mod_python.util import FieldStorage, Field
 
-# atocha imports.
+# atocha imports
 from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 

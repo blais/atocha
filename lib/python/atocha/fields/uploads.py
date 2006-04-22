@@ -27,7 +27,7 @@ File Upload Fields
 import re, StringIO
 from types import NoneType, InstanceType
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaError, AtochaInternalError
 from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry

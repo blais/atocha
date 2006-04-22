@@ -23,17 +23,17 @@
 Renderer for forms using htmlout.
 """
 
-# stdlib imports.
+# stdlib imports
 from os.path import join
 
-# atocha imports.
+# atocha imports
 from atocha import AtochaError, AtochaInternalError
 import atocha.render
 from atocha.field import *
 from atocha.fields import *
 from atocha.messages import msg_type
 
-# htmlout imports.
+# htmlout imports
 try:
     from htmlout import *
 except ImportError:

@@ -12,17 +12,17 @@ demo script is overly complex because I'm trying to showcase most of the basic
 features of Atocha.  Your code could be much simpler.
 """
 
-# stdlib imports.
+# stdlib imports
 import sys, os, StringIO, base64, shelve
 from os.path import *
 
 # Current renderer type for demo/tests: 'text' or 'htmlout'.
 rtype = 'htmlout'
 
-# atocha imports.
+# atocha imports
 from atocha import *
 
-# htmlout imports.
+# htmlout imports
 if rtype == 'htmlout':
     try:
         from htmlout import *
