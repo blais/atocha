@@ -5,13 +5,13 @@
 
 .. contents::
 ..
-    1  Current Affairs
-    2  Bugs and Minor Things to Fix
-    3  Documentation
-    4  Testing
-    5  Known Bugs and Misfeatures
-    6  Ideas
-    7  Future New Field Types
+    1  Bugs and Minor Things to Fix
+    2  Documentation
+    3  Testing
+    4  Known Bugs and Misfeatures
+    5  Ideas
+    6  Future New Field Types
+    7  New Features
 
 
 Bugs and Minor Things to Fix
@@ -68,7 +68,6 @@ Testing
 
 - In the automated tests, you could configure the parser to raise an exception
   on error (without changing the parser code) and catch it with assertRaises.
-
 
 
 Known Bugs and Misfeatures
@@ -232,3 +231,11 @@ Future New Field Types
   its accompanying images... not sure what to do about this yet. I suppose the
   user has to copy the files anyway, so it might be ok to assume he might edit
   the scripts somewhat.
+
+
+New Features
+============
+
+- Provide some kind of helper function that will generate CRUD resources for a
+  given form.  This should be very easy!
+
