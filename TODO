@@ -17,6 +17,12 @@
 Bugs and Minor Things to Fix
 ============================
 
+- Provide an atocha.initialize() fucntion, and if it has not been called with
+  the required init parameters raise an exception upon trying to use the
+  library.  This should be used as a way to force you to explicitly initialize
+  the library before using it, thereby making it harder for beginners to forget
+  to do that.
+
 - The 'hidepw' option for rendering the password fields should be automatically
   determined on whether the protocol is http or https, can we do this somehow?
   Where do we feed in the information about the protocol?
