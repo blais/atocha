@@ -28,7 +28,6 @@ Form definition and exceptions.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
-import re
 from types import NoneType
 
 # atocha imports
@@ -209,7 +208,7 @@ class Form:
             fields = self._fields
         return [x.label for x in fields]
 
-    def fetchnames( self, obj, exceptions=[], default=None ):
+    def fetchnames( self, obj, exceptions=None, default=None ):
         """
         Fetches attributes corresponding to the form field names from the given
         object 'obj' and returns a mapping with those values.  This can be
@@ -221,6 +220,7 @@ class Form:
         field names (in fact, this is one of the places where having a different
         name for the field and its associated variable may come in handy).
         """
+        exceptions = exceptions or []
         values = {}
         for field in self._fields:
             if field.name in exceptions:

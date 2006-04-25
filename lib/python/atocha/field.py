@@ -31,7 +31,7 @@ import re
 from types import NoneType
 
 # atocha imports
-from atocha import AtochaError, AtochaInternalError
+from atocha import AtochaError
 from messages import msg_registry, msg_type
 
 

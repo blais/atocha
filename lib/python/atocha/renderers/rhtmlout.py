@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable-msg=W0611
 #
 # $Id$
 #
@@ -143,12 +144,12 @@ class HoutFormRenderer(HoutRenderer):
         else:
             return []
 
-    def do_render( self, fields, action, submit ):
+    def do_render( self, ofields, action=None, submit=None ):
         # Create the form container.
         hform = self.render_container(action)
 
         # Create and append the table contained inside.
-        hform.append( self.do_render_table(fields) )
+        hform.append( self.do_render_table(ofields) )
 
         # Create and append the submit buttons.
         hform.append( self.render_submit(submit) )
@@ -325,7 +326,7 @@ class HoutFormRenderer(HoutRenderer):
 
     #---------------------------------------------------------------------------
 
-    def renderHidden( rdr, field, rvalue ):
+    def renderHidden( self, field, rvalue ):
         inputs = []
         # Use the first variable name.
         varname = field.varnames[0]
@@ -485,9 +486,9 @@ class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
         atocha.render.DisplayRendererBase.__init__(self, kwds)
         HoutRenderer.__init__(self, *args, **kwds)
 
-    def do_render( self, fields, action, submit ):
+    def do_render( self, ofields, action=None, submit=None ):
         # We only need return the table.
-        return self.do_render_table(fields)
+        return self.do_render_table(ofields)
 
     def do_render_container( self, action_url ):
         return None
@@ -498,12 +499,12 @@ class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
     def do_render_submit( self, submit, reset ):
         return None
 
-    def do_render_scripts( self ):
+    def do_render_scripts( self, scripts ):
         return None
 
     #---------------------------------------------------------------------------
 
-    def renderHidden( rdr, field, rvalue ):
+    def renderHidden( self, field, rvalue ):
         return None
 
 #-------------------------------------------------------------------------------

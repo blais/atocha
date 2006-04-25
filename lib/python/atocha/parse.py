@@ -531,7 +531,7 @@ class FormParser:
         return error
     _normalize_error = staticmethod(_normalize_error)
 
-    def error( self, _message=None, _status='error', _names=[], **kwds ):
+    def error( self, _message=None, _status='error', _names=None, **kwds ):
         """
         Adds an error to the current state.
 
@@ -562,6 +562,7 @@ class FormParser:
         do not have field-specific messages to indicate.  This will still put
         the parser in an error state.
         """
+        _names = _names or []
 
 	# If there are already errors...
         if self.haserrors():

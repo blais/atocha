@@ -34,7 +34,7 @@ rendering to a tree of elements which gets flattenned out later.
 import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
-from types import ClassType, NoneType
+from types import ClassType
 
 # atocha imports
 import atocha
@@ -43,7 +43,7 @@ from atocha.form import Form
 from field import Field
 import fields
 from atocha.fields.uploads import FileUploadField
-from messages import msg_type, msg_registry # Used for _() setup.
+from messages import msg_registry # Used for _() setup.
 from parse import FormParser
 
 
@@ -94,7 +94,7 @@ def lookup_render_routine( renderer_cls, field_cls ):
         reg = renderer_cls.renderers_registry
     except KeyError:
         raise AtochaInternalError(
-            "Missing renderers registry for '%s'." % renderer.__class__)
+            "Missing renderers registry for '%s'." % renderer_cls.__name__)
 
     # Fetch the function.
     try:
@@ -428,8 +428,8 @@ class FormRenderer:
           of the 'only' and 'ignore' arguments.
 
         """
-        fields = self._form.select_fields(only, ignore)
-        return self.do_render(fields,
+        ofields = self._form.select_fields(only, ignore)
+        return self.do_render(ofields,
                               action or self._form.action,
                               submit or self._form.submit)
 
@@ -472,11 +472,11 @@ class FormRenderer:
         if only in kwds:
             only = only + tuple(kwds.pop('only'))
         ignore = kwds.pop('ignore', None)
-        fields = self._form.select_fields(only, ignore)
+        ofields = self._form.select_fields(only, ignore)
 
         # Render the table given the fields.
         css_class = kwds.pop('css_class', None)
-        return self.do_render_table(fields, css_class=css_class)
+        return self.do_render_table(ofields, css_class=css_class)
 
     def table( self, pairs=(), css_class=None ):
         """
@@ -539,7 +539,7 @@ class FormRenderer:
     # Abstract methods that must get implemented by the derived class.
     # Normally the client should not call any of these directly.
 
-    def do_render( self, fields, action=None, submit=None ):
+    def do_render( self, ofields, action=None, submit=None ):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm on the given list of fields.
@@ -553,7 +553,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_render_table( self, fields, css_class=None ):
+    def do_render_table( self, ofields, css_class=None ):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
         types of the return values depends on the renderer.  Hidden fields are
@@ -716,12 +716,12 @@ class DisplayRendererBase:
         # Return output from the field-specific rendering code.
         return output
 
-    def do_render_display_table( self, fields, css_class=None ):
+    def do_render_display_table( self, ofields, css_class=None ):
         """
         Render a table for diplay, honoring the appropriate options.
         """
         visible = []
-        for field in fields:
+        for field in ofields:
             # Don't display unset fields.
             if not self.show_unset and field.ishidden():
                 continue

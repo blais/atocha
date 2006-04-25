@@ -27,7 +27,7 @@ Fields for usernames
 import re
 
 # atocha imports
-from atocha.field import Field, FieldError
+from atocha.field import FieldError
 from atocha.fields.texts import StringField, EmailField
 from atocha.messages import msg_registry
 

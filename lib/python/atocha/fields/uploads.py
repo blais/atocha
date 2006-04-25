@@ -24,7 +24,7 @@ File Upload Fields
 """
 
 # stdlib imports
-import re, StringIO
+import StringIO
 from types import NoneType, InstanceType
 
 # atocha imports

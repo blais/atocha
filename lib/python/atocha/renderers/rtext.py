@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable-msg=W0611
 #
 # $Id$
 #
@@ -109,7 +110,7 @@ class TextRenderer(atocha.render.FormRenderer):
 
         return sio.getvalue()
 
-    do_ctable = staticmethod(do_ctable)
+    do_ctable = classmethod(do_ctable)
 
     def do_table_imp( rdr, pairs, extra, css_class, f ):
         """
@@ -165,7 +166,7 @@ class TextFormRenderer(TextRenderer):
         else:
             return u''
 
-    def do_render( self, fields, action, submit ):
+    def do_render( self, ofields, action=None, submit=None ):
         try:
             # File object that gets set as a side-effect.
             self.ofile = f = self._create_buffer()
@@ -174,7 +175,7 @@ class TextFormRenderer(TextRenderer):
             self.render_container(action)
 
             # (Side-effect will add to the file declared above.)
-            self.do_render_table(fields)
+            self.do_render_table(ofields)
 
             # Render submit buttons.
             self.render_submit(submit)
@@ -396,7 +397,7 @@ class TextFormRenderer(TextRenderer):
 
     #---------------------------------------------------------------------------
 
-    def renderHidden( rdr, field, rvalue ):
+    def renderHidden( self, field, rvalue ):
         inputs = []
         # Use the first variable name.
         varname = field.varnames[0]
@@ -553,14 +554,14 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
         atocha.render.DisplayRendererBase.__init__(self, kwds)
         TextRenderer.__init__(self, *args, **kwds)
 
-    def do_render( self, fields, action_url, submit ):
+    def do_render( self, ofields, action_url=None, submit=None ):
         form = self._form
         try:
             # File object that gets set as a side-effect.
             self.ofile = f = self._create_buffer()
 
             # (Side-effect will add to the file.)
-            self.do_render_table(fields)
+            self.do_render_table(ofields)
 
             # Close the form (the container rendering only outputs the header.
             f.write('</form>\n')
@@ -583,10 +584,10 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     def do_render_submit( self, submit, reset ):
         return ''
 
-    def do_render_scripts( self ):
+    def do_render_scripts( self, scripts ):
         return ''
 
-    def renderHidden( rdr, field, rvalue ):
+    def renderHidden( self, field, rvalue ):
         return ''
 
 

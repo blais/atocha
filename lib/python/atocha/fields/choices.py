@@ -24,7 +24,6 @@ Single or Multiple Choice Fields
 """
 
 # stdlib imports
-import re
 from types import NoneType
 
 # atocha imports
