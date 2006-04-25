@@ -17,6 +17,13 @@
 Bugs and Minor Things to Fix
 ============================
 
+- Restrict the number of imports when doing::
+
+     from atocha import *
+
+  Currently there is a fair amount of pollution from it, we need to do something
+  about this (run pylint).  See import-cleanup/test.py and complete.
+
 - Provide an atocha.initialize() fucntion, and if it has not been called with
   the required init parameters raise an exception upon trying to use the
   library.  This should be used as a way to force you to explicitly initialize

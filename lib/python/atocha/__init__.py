@@ -87,6 +87,7 @@ Notes
 
 """
 
+
 # Note: we declare those before due to cycles.
 #-------------------------------------------------------------------------------
 #
@@ -141,3 +142,11 @@ from renderers.rtext import *
 # the renderer or parser.
 completeness_errors = False
 
+
+# Restrict the symbols from a star import.
+## FIXME: todo, check the entire controlled list with test.py
+## __all__ = (['AtochaInternalError', 'AtochaDelError', 'AtochaError'] +
+##            form.__all__ +
+##            field.__all__ +
+##            fields.__all__
+##            )
