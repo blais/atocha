@@ -330,6 +330,15 @@ class Field:
             isreq = False
         return isreq
 
+    def set_state( self, new_state ):
+        """
+        Set the new state of the field.  Use this with care.  This is provided
+        for making deep copies of forms and make small modifications to them.
+        """
+        ## FIXME: this may require doing some more checks; where are the
+        ## restrictions applied from the state?
+        self.state = new_state
+
     def parse_value( self, pvalue ):
         """
         :Arguments:
