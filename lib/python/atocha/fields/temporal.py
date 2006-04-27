@@ -53,7 +53,7 @@ class DateField(StringField):
     attributes_delete = ('strip', 'minlen', 'maxlen')
 
 
-    __def_display_fmt = '%a, %d %B %Y' # or '%x'
+    _def_display_fmt = '%a, %d %B %Y' # or '%x'
 
     # Support ISO-8601 format.
     __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
@@ -133,7 +133,7 @@ class DateField(StringField):
     def display_value( self, dvalue ):
         if dvalue is None:
             return u''
-        return time_to_string(dvalue, self.__def_display_fmt)
+        return time_to_string(dvalue, self._def_display_fmt)
 
 
 #-------------------------------------------------------------------------------
@@ -221,7 +221,7 @@ class JSDateField(Field, OptRequired):
 
     def display_value( self, dvalue ):
         assert dvalue is not None
-        return time_to_string(dvalue, DateField.__def_display_fmt)
+        return time_to_string(dvalue, DateField._def_display_fmt)
 
 
 #-------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ class DateMenuField(MenuField):
     __def_nbdays = 30
 
     __value_fmt = '%Y-%m-%d'
-    __def_display_fmt = '%a, %d %B %Y' # or '%x'
+    _def_display_fmt = '%a, %d %B %Y' # or '%x'
 
     # Support ISO-8601 format.
     __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
@@ -315,7 +315,7 @@ class DateMenuField(MenuField):
         elif dvalue in self.extra_choiceset:
             return self.extra_choiceset.get(dvalue, dvalue)
         else:
-            return time_to_string(dvalue, self.__def_display_fmt)
+            return time_to_string(dvalue, self._def_display_fmt)
 
     def _reset_dates( self ):
         """
@@ -326,7 +326,7 @@ class DateMenuField(MenuField):
         # Set the list of dates to this choice field.
         for d in date_range(self.nbdays):
             choices.append( (d.strftime(self.__value_fmt),
-                             time_to_string(d, self.__def_display_fmt)) )
+                             time_to_string(d, self._def_display_fmt)) )
 
         self.setchoices(choices)
 
