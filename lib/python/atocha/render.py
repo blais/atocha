@@ -691,8 +691,13 @@ class DisplayRendererBase:
 
         This always returns a unicode string, ready to be printed.
         """
-        assert isinstance(field, Field)
-        assert isinstance(dvalue, field.types_data)
+        if not isinstance(field, Field):
+            raise AtochaInternalError(
+                "Trying to display something that is not a Field.")
+        if not isinstance(dvalue, field.types_data):
+            raise AtochaError(
+                "dvalue '%s' is of illegal type, expecting one of %s" %
+                (repr(dvalue), str(field.types_data)))
 
         # Have the value converted by the field for display.
         #
