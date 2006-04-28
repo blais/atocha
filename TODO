@@ -17,6 +17,9 @@
 Bugs and Minor Things to Fix
 ============================
 
+- Add an ``action=`` constructor keyword for the renderer, just another
+  convenient way to pass in the desired action (useful when using a URL mapper).
+
 - Restrict the number of imports when doing::
 
      from atocha import *
