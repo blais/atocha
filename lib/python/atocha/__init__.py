@@ -120,6 +120,14 @@ class AtochaInternalError(AtochaError):
     renderers.
     """
 
+#-------------------------------------------------------------------------------
+#
+class Unset:
+    """
+    Dummy symbol used to indicate that the default value is not set.
+    If this were LISP, this would be more elegant.
+    """
+
 
 # atocha imports
 from form import *

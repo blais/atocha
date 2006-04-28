@@ -6,7 +6,7 @@
 
 PYTEST ?= $(HOME)/src/dist-py/py/bin/py.test
 
-PY = python2.3
+PY = python
 CMD =  $(PYTEST) -s -x
 
 all: dbg opt

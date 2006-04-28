@@ -696,7 +696,7 @@ class DisplayRendererBase:
                 "Trying to display something that is not a Field.")
         if not isinstance(dvalue, field.types_data):
             raise AtochaError(
-                "Dvalue %s for field %s of illegal type, expecting one of %s" %
+                "dvalue %s for field %s of illegal type, expecting one of %s" %
                 (repr(dvalue), field.name, str(field.types_data)))
 
         # Have the value converted by the field for display.

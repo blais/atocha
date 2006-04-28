@@ -31,7 +31,7 @@ if sys.version_info[:2] < (2, 4):
 from types import NoneType
 
 # atocha imports
-from atocha import AtochaError, AtochaInternalError
+from atocha import AtochaError, AtochaInternalError, Unset
 from field import Field, FieldError
 from fields.uploads import FileUploadField, FileUpload
 from messages import msg_registry, msg_type
@@ -208,7 +208,7 @@ class Form:
             fields = self._fields
         return [x.label for x in fields]
 
-    def fetchnames( self, obj, exceptions=None, default=None ):
+    def fetchnames( self, obj, exceptions=None, default=Unset ):
         """
         Fetches attributes corresponding to the form field names from the given
         object 'obj' and returns a mapping with those values.  This can be
@@ -226,9 +226,12 @@ class Form:
             if field.name in exceptions:
                 continue
             try:
-                v = values[field.name] = getattr(obj, field.name)
-                if v is None and default is not None:
+                v = getattr(obj, field.name)
+                if v is not None:
+                    values[field.name] = v
+                elif default is not Unset:
                     values[field.name] = default
+
             except AttributeError:
                 pass
         return values
