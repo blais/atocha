@@ -31,7 +31,7 @@ if sys.version_info[:2] < (2, 4):
 from types import NoneType
 
 # atocha imports
-from atocha import AtochaError, AtochaInternalError, Unset
+from atocha import AtochaError, AtochaInternalError
 from field import Field, FieldError
 from fields.uploads import FileUploadField, FileUpload
 from messages import msg_registry, msg_type
@@ -45,6 +45,15 @@ _python_keywords = set(
     'return', 'break', 'else', 'global', 'not', 'try', 'class', 'except', 'if',
     'or', 'while', 'continue', 'exec', 'import', 'pass', 'yield', 'def',
     'finally', 'in', 'print',))
+
+
+#-------------------------------------------------------------------------------
+#
+class Unset:
+    """
+    Dummy symbol used to indicate that the default value is not set.
+    If this were LISP, this would be more elegant.
+    """
 
 
 #-------------------------------------------------------------------------------

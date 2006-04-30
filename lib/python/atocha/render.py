@@ -168,7 +168,7 @@ class FormRenderer:
         Destructor override that just makes sure that we rendered all the fields
         of the given form before we got destroyed.
         """
-        if atocha.completeness_errors:
+        if atocha._completeness_errors:
             if (not self._incomplete and
                 set(self._form.names()) != self._rendered):
 

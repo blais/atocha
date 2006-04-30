@@ -276,7 +276,7 @@ class FormParser:
         """
         Destructor override that just makes sure that we ended the parser.
         """
-        if atocha.completeness_errors:
+        if atocha._completeness_errors:
             if not self._ended:
                 raise atocha.AtochaDelError("Form parser not ended properly.",
                                             self._form.name)

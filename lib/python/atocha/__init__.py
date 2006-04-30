@@ -120,14 +120,9 @@ class AtochaInternalError(AtochaError):
     renderers.
     """
 
+
 #-------------------------------------------------------------------------------
 #
-class Unset:
-    """
-    Dummy symbol used to indicate that the default value is not set.
-    If this were LISP, this would be more elegant.
-    """
-
 
 # atocha imports
 from form import *
@@ -148,13 +143,17 @@ from renderers.rtext import *
 # Set this global to True if you want to indicate errors when forms are not
 # completely rendered or parsed.  This raises an exception in the destructor of
 # the renderer or parser.
-completeness_errors = False
+_completeness_errors = False
 
 
-# Restrict the symbols from a star import.
-## FIXME: todo, check the entire controlled list with test.py
-## __all__ = (['AtochaInternalError', 'AtochaDelError', 'AtochaError'] +
-##            form.__all__ +
-##            field.__all__ +
-##            fields.__all__
-##            )
+# Export the messages registry, but with a nice descriptive name that runs no
+# chance of conflicting with the client's application.
+atocha_messages = msg_registry
+del msg_registry
+
+
+# Remove stuff that we don't want to export in a star-export.
+from types import ModuleType as _modtype
+__all__ = tuple(k for k, v in globals().iteritems()
+                if not k.startswith('_') and not isinstance(v, _modtype))
+
