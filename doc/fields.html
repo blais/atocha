@@ -16,6 +16,7 @@
 
 <div class="document" id="atocha-field-classes">
 <h1 class="title">Atocha Field Classes</h1>
+
 <div class="abstract topic">
 <p class="topic-title first">Abstract</p>
 <p>Description of all the field classes provided with Atocha.
@@ -167,6 +168,9 @@ formats.</p>
 <div class="section">
 <h2><a class="toc-backref" href="#id6" id="datemenufield" name="datemenufield">2.2&nbsp;&nbsp;&nbsp;DateMenuField</a></h2>
 <p>A field that offers dates in close proximity, via a select menu.</p>
+<p>Extra choices can be added to the menu, and in this case a string type is
+returned (therefore, when you accept the data, you will need to check the
+returned datatype for a str or a date object.)</p>
 <div class="field-options topic">
 <p class="topic-title first">Valid Attributes</p>
 <blockquote>
@@ -185,8 +189,6 @@ formats.</p>
 <dd>If this is set, allow missing values, i.e. if the value is not sent          by the browser, do not raise an error.  This is useful if the widget          may be hidden conditionally.</dd>
 <dt>onchange  --&gt; str (JavaScript) (Optional)</dt>
 <dd>JavaScript to run when the selector changes.</dd>
-<dt>any  --&gt; str (Optional)</dt>
-<dd>Set this to some string if the field should support entering a value          for any/unspecified date.  The string will be displayed in the dates          menu and a value of None will be returned by the widget if it is          selected.</dd>
 <dt>nbdays  --&gt; int (Optional)</dt>
 <dd>The number of days to display from today.</dd>
 </dl>
@@ -579,6 +581,8 @@ checkboxes.</p>
 <dd>Mark field label as being a required input field.  Fields which are          optionally required, i.e. those fields which accept the 'required'          option, are automatically starred if they are required.           This can be used in the case where many fields are used for entering          one value, and for example, some are selectively hidden by JavaScript          code, and even though the fields are not required by the automated          parsing, you need to add a star marker to some of those fields, to let          the user know he has to enter a value there.</dd>
 <dt>nocheck  --&gt; bool (Optional)</dt>
 <dd>Set this to True if you want to prevent the parser from          cross-checking the values against the choices set in the instance of          this field.  When parsing, do not perform checks specific to the          choices set on against the received values. This is useful if the set          of choices for this field is generated dynamically and you will do your          validation by hand.  Another thing that can be done is to not use this          but to call setchoices() before running the parser on the arguments, if          in the handler you know which choices are possibly valid and would like          to use the parsing code provided in this field.</dd>
+<dt>atleast  --&gt; int (Optional)</dt>
+<dd>Minimum number of entries selected (defaults to none).</dd>
 <dt>orient  --&gt; One of ORI_VERTICAL, ORI_HORIZONTAL (Optional)</dt>
 <dd>Orientation of the mini-table for layout of multiple inputs.</dd>
 </dl>
@@ -617,6 +621,8 @@ provide at least one value, use the 'required' option.</p>
 <dd>Mark field label as being a required input field.  Fields which are          optionally required, i.e. those fields which accept the 'required'          option, are automatically starred if they are required.           This can be used in the case where many fields are used for entering          one value, and for example, some are selectively hidden by JavaScript          code, and even though the fields are not required by the automated          parsing, you need to add a star marker to some of those fields, to let          the user know he has to enter a value there.</dd>
 <dt>nocheck  --&gt; bool (Optional)</dt>
 <dd>Set this to True if you want to prevent the parser from          cross-checking the values against the choices set in the instance of          this field.  When parsing, do not perform checks specific to the          choices set on against the received values. This is useful if the set          of choices for this field is generated dynamically and you will do your          validation by hand.  Another thing that can be done is to not use this          but to call setchoices() before running the parser on the arguments, if          in the handler you know which choices are possibly valid and would like          to use the parsing code provided in this field.</dd>
+<dt>atleast  --&gt; int (Optional)</dt>
+<dd>Minimum number of entries selected (defaults to none).</dd>
 <dt>label  --&gt; str (Optional)</dt>
 <dd>The visible label used by the form rendering.</dd>
 <dt>state  --&gt; one of Field._states (Optional)</dt>

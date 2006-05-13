@@ -123,6 +123,8 @@ msg_registry = TranslatorDict({
 
     'one-choice-required': N_("Please select at least one of the choices."),
 
+    'at-least-required': N_("Please select at least %s of the choices."),
+
     'date-invalid-format':
     N_("Invalid format for date: '%s'. Use YYYY-MM-DD format."),
     'date-invalid-month': N_("Invalid month name for date: '%s'."),

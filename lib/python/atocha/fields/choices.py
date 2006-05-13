@@ -328,6 +328,11 @@ class _ManyChoicesField(_MultipleField):
     types_parse = (NoneType, unicode, list)
     types_render = (list,)
 
+    attributes_declare = (
+        ('atleast', 'int',
+         """Minimum number of entries selected (defaults to none)."""),
+        )
+
     def __init__( self, name, choices, label, attribs ):
 
         # Check the type of initial, which must be one of the types accepted for
@@ -348,15 +353,25 @@ class _ManyChoicesField(_MultipleField):
             assert isinstance(initial,
                               (NoneType,) + _ManyChoicesField.types_data)
             attribs['initial'] = initial
-
+            
+        self.atleast = attribs.pop('atleast', 0)
+        
         # Initialize base classes, always set as required.
         _MultipleField.__init__(self, name, choices, label, attribs)
 
-
+    def check_at_least( self, numvalues ):
+        """
+        Check that we have the number of required values.
+        """
+        if self.atleast and numvalues < self.atleast:
+            raise FieldError(msg_registry['at-least-required'] % self.atleast)
+        
     def parse_value( self, pvalue ):
         if pvalue is None or pvalue == u'':
+            self.check_at_least(0)
             # Nothing was selected, so we simply return an empty list.
             return []
+
         elif isinstance(pvalue, unicode):
             # Make it a list of one element, and then we process the list below.
             pvalue = [pvalue]
@@ -376,7 +391,10 @@ class _ManyChoicesField(_MultipleField):
 
         # Check the given argument against the value.
         self.checkvalues(dvalue)
-
+        
+        # Check the number of values.
+        self.check_at_least(len(dvalue))
+        
         return dvalue
 
     def render_value( self, dvalue ):

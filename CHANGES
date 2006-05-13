@@ -5,8 +5,13 @@
 Current Version
 ---------------
 
+- Added 'atleast' option to the multiple fields, to enforce a minimum number of
+  entries.
+
 - Fixed important bug with Form.fetchname default values.
+
 - Loosened the requirements for FormParser.redirect()
+
 - Created a new DateMenuField control, that allows us to select a date from a
   menu
 
