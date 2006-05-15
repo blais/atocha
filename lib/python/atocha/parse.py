@@ -701,7 +701,7 @@ class FormParser:
         return fun(rurl, self._form, self._status, self._message,
                    self.getvalues(True), self._errors)
 
-    def do_redirect( url, form, status, message, values, errors ):
+    def do_redirect( self, url, form, status, message, values, errors ):
         """
         Perform a requested error redirection.  Override this method (static) to
         implement this functionality, whose details depend on the framework that
@@ -710,8 +710,6 @@ class FormParser:
         """
         # Default mechanism, return this value from end() method.
         return None
-
-    do_redirect = staticmethod(do_redirect)
 
 
 #-------------------------------------------------------------------------------
