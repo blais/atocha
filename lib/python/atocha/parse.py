@@ -136,8 +136,9 @@ class FormParser:
 
     4. You do nothing and call end() manually everytime, examining its return
        value and take appropriate action if you need to redirect.  Note that if
-       you choose this, you cannot use the end option in the constructor (there
-       is no way to return the result value of ending the parser);
+       you choose this, you cannot use the 'end' option in the constructor
+       (there is then no nice way to return the result value for you to take
+       action from the constructor);
 
     For methods 1, 2 and 3, we expect redirection to be implemented using an
     exception.
@@ -156,7 +157,7 @@ class FormParser:
     normalizer = None
 
 
-    def parse( form, args, redir=None, redirfun=None ):
+    def parse( form, args, **kwds ):
         """
         Creates a FormParser, applies the arguments to be parsed, and completes
         the parser automatically, return the parsed results if there is no
@@ -169,7 +170,7 @@ class FormParser:
         perform the parsing.
         """
         # Create a parser.
-        parser = FormParser(form, redir=redir, redirfun=redirfun)
+        parser = FormParser(form, **kwds)
 
         # Parse the given arguments.
         parser.parse_args(args)
@@ -199,7 +200,7 @@ class FormParser:
           special object for file uploads.
 
         - 'redirfun' -> instance: an object that will get called to process the
-          redirection. See docstring above for alternatives on this.
+          redirection. See this class' docstring above for alternatives on this.
           (Specifying the 'redirfun' here is not the most convenient way to do
           this.)
 

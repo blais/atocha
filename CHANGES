@@ -5,6 +5,9 @@
 Current Version
 ---------------
 
+- Added an 'extra' parameter to the do_redirect() glue method, so that we can
+  pass request context data to perform the response.
+
 - Added 'atleast' option to the multiple fields, to enforce a minimum number of
   entries.
 
