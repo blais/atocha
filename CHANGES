@@ -5,6 +5,9 @@
 Current Version
 ---------------
 
+- Fixed a few msg_registry lookups that were happening in the constructors, 
+  which is usually before the language environment is setup.
+
 - Added an 'extra' parameter to the do_redirect() glue method, so that we can
   pass request context data to perform the response.
 

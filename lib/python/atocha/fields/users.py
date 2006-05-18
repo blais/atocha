@@ -72,7 +72,7 @@ class UsernameField(StringField):
             attribs['maxlen'] = self._default_maxlen
 
         if label is None:
-            label = msg_registry['username-label']
+            label = msg_registry.get_notrans('username-label')
 
         attribs['encoding'] = 'ascii'
         attribs['strip'] = True
@@ -126,7 +126,7 @@ class UsernameOrEmailField(EmailField):
         attribs['accept_local'] = True
 
         if label is None:
-            label = msg_registry['username-or-email-label']
+            label = msg_registry.get_notrans('username-or-email-label')
 
         EmailField.__init__(self, name, label, **attribs)
         
