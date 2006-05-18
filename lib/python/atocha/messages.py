@@ -71,11 +71,14 @@ class TranslatorDict(dict):
     """
     def __getitem__( self, key ):
         """
-        Automatically translate the key.
+        Automatically translate the key on lookup.
         """
         return _(dict.__getitem__(self, key))
 
     def get_notrans( self, key ):
+        """
+        Lookup the message without translating.
+        """
         return dict.__getitem__(self, key)
     
 # Message registry: the single place where we store all forms of human-readable
