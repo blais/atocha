@@ -17,6 +17,9 @@
 Bugs and Minor Things to Fix
 ============================
 
+- Make the normalizers just functions, they do not have to be full objects
+  (currently we're working like we would in C++… this is stupid)
+
 - Add an ``action=`` constructor keyword for the renderer, just another
   convenient way to pass in the desired action (useful when using a URL mapper).
 
