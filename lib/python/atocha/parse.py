@@ -31,7 +31,7 @@ from fields.uploads import FileUpload
 from messages import msg_registry
 
 
-__all__ = ['FormParser']
+__all__ = ('FormParser',)
 
 
 #-------------------------------------------------------------------------------

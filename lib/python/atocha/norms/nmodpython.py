@@ -31,7 +31,7 @@ from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 
 
-__all__ = ['ModPythonNormalizer']
+__all__ = ('ModPythonNormalizer',)
 
 
 #-------------------------------------------------------------------------------

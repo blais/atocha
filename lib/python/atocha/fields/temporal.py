@@ -35,7 +35,7 @@ from texts import StringField
 from choices import MenuField
 
 
-__all__ = ['DateField', 'JSDateField', 'DateMenuField']
+__all__ = ('DateField', 'JSDateField', 'DateMenuField',)
 
 
 #-------------------------------------------------------------------------------

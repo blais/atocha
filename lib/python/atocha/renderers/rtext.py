@@ -36,7 +36,7 @@ from atocha.fields import *
 from atocha.messages import msg_type
 
 
-__all__ = ['TextFormRenderer', 'TextDisplayRenderer']
+__all__ = ('TextFormRenderer', 'TextDisplayRenderer',)
 
 
 #-------------------------------------------------------------------------------

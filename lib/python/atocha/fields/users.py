@@ -32,7 +32,7 @@ from atocha.fields.texts import StringField, EmailField
 from atocha.messages import msg_registry
 
 
-__all__ = ['UsernameField', 'UsernameOrEmailField']
+__all__ = ('UsernameField', 'UsernameOrEmailField',)
 
 
 #-------------------------------------------------------------------------------

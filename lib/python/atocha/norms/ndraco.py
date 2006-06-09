@@ -31,7 +31,7 @@ from atocha.fields.uploads import FileUpload
 from draco.request import FileUpload as DracoUpload
 
 
-__all__ = ['DracoNormalizer']
+__all__ = ('DracoNormalizer',)
 
 
 #-------------------------------------------------------------------------------

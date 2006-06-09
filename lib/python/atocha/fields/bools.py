@@ -31,7 +31,7 @@ from atocha.field import Field, FieldError
 from atocha.messages import msg_registry
 
 
-__all__ = ['BoolField', 'AgreeField',]
+__all__ = ('BoolField', 'AgreeField',)
 
 
 #-------------------------------------------------------------------------------

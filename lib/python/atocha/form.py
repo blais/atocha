@@ -37,7 +37,7 @@ from fields.uploads import FileUploadField, FileUpload
 from messages import msg_registry, msg_type
 
 
-__all__ = ['Form']
+__all__ = ('Form',)
 
 
 _python_keywords = set(

@@ -47,7 +47,7 @@ from messages import msg_registry # Used for _() setup.
 from parse import FormParser
 
 
-__all__ = ['FormRenderer']
+__all__ = ('FormRenderer',)
 
 
 #-------------------------------------------------------------------------------

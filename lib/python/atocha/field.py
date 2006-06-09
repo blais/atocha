@@ -35,9 +35,9 @@ from atocha import AtochaError
 from messages import msg_registry, msg_type
 
 
-__all__ = ['Field', 'FieldError',
+__all__ = ('Field', 'FieldError',
            'ORI_HORIZONTAL', 'ORI_VERTICAL', 'ORI_RAW',
-           'OptRequired', 'Orientable',]
+           'OptRequired', 'Orientable',)
 
 
 #-------------------------------------------------------------------------------

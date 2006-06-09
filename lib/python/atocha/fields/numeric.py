@@ -32,7 +32,7 @@ from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 
 
-__all__ = ['IntField', 'FloatField',]
+__all__ = ('IntField', 'FloatField',)
 
 
 #-------------------------------------------------------------------------------

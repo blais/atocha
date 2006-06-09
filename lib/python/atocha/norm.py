@@ -33,7 +33,7 @@ an appropriate normalizer instance.
 """
 
 
-__all__ = ['ArgsNormalizer']
+__all__ = ('ArgsNormalizer',)
 
 
 #-------------------------------------------------------------------------------

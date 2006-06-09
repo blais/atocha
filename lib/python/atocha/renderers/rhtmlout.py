@@ -42,7 +42,7 @@ except ImportError:
         'Error: You need to install the htmlout library to use this module.')
 
 
-__all__ = ['HoutFormRenderer', 'HoutDisplayRenderer']
+__all__ = ('HoutFormRenderer', 'HoutDisplayRenderer',)
 
 
 #-------------------------------------------------------------------------------

@@ -33,7 +33,7 @@ from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 from bools import BoolField
 
-__all__ = ['FileUploadField', 'SetFileField', 'FileUpload',]
+__all__ = ('FileUploadField', 'SetFileField', 'FileUpload',)
 
 
 #-------------------------------------------------------------------------------

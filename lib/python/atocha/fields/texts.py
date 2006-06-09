@@ -32,8 +32,8 @@ from atocha.field import Field, FieldError, OptRequired
 from atocha.messages import msg_registry
 
 
-__all__ = ['StringField', 'TextAreaField', 'PasswordField',
-           'EmailField', 'URLField']
+__all__ = ('StringField', 'TextAreaField', 'PasswordField',
+           'EmailField', 'URLField',)
 
 
 #-------------------------------------------------------------------------------

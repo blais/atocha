@@ -34,7 +34,7 @@ from atocha.fields.texts import StringField
 from atocha.messages import msg_registry
 
 
-__all__ = ['URLPathField', 'PhoneField']
+__all__ = ('URLPathField', 'PhoneField',)
 
 
 #-------------------------------------------------------------------------------

@@ -33,7 +33,7 @@ from atocha.field import OptRequired, Orientable
 from atocha.messages import msg_registry, msg_type
 
 
-__all__ = ['RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',]
+__all__ = ('RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',)
 
 
 #-------------------------------------------------------------------------------
