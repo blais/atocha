@@ -311,5 +311,5 @@ Online Demo
 Try the `online demo`__ which features an instance of most of the fields, to
 quickly see what the library can do.
 
-__ ../test/demo/cgi-bin/display.cgi
+__ ../demo/cgi-bin/display.cgi
 

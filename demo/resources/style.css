@@ -5,7 +5,7 @@
  *  CSS style file for the test CGI scripts for Atocha form library.
  */
 
-@import url("../../../../style.css");
+@import url("../../../style.css");
 
 .atoerr { color: red; font-size: smaller; }
 

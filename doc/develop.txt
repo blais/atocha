@@ -63,10 +63,10 @@ where conversion occur and to take appropriate explicit action.
 Demo Testing
 ============
 
-Under ``/test/demo/`` are a set of scripts that are used to interactively test
+Under ``/demo/`` are a set of scripts that are used to interactively test
 the library without the overhead of a framework and isolates the library from
 the effect of other codes.  It uses CGI scripts, and all you have to do to use
 it is to setup an Apache web server (on your development machine) to point to
-the ``/test/demo/cgi-bin`` subdirectory, with ``ExecCGI`` option enabled.  This
+the ``/demo/cgi-bin`` subdirectory, with ``ExecCGI`` option enabled.  This
 is how I interactively test and isolated version of the fields/widgets.
 

@@ -27,7 +27,7 @@ This needs be done only once for a web application.
 # stdlib imports
 import sys
 from os.path import *
-projects_root = dirname(dirname(dirname(dirname(dirname(sys.argv[0])))))
+projects_root = dirname(dirname(dirname(dirname(sys.argv[0]))))
 import os
 
 # atocha imports
@@ -45,7 +45,7 @@ except ImportError:
     pass # We won't be able to test the htmlout renderers.
 
 # atocha demo imports
-sys.path.append(join(projects_root, 'atocha', 'test', 'demo'))
+sys.path.append(join(projects_root, 'atocha', 'demo'))
 import demo
 
 
