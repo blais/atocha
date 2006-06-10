@@ -220,9 +220,6 @@ class TextFormRenderer(TextRenderer):
         return u'</form>'
 
     def do_render_table( self, fields, css_class=None ):
-        # Use side-effect for efficiency if requested.
-        f = self.ofile or self._create_buffer()
-
         hidden, visible = [], []
         for field in fields:
             rendered = self._render_field(field, field.state)
@@ -234,9 +231,9 @@ class TextFormRenderer(TextRenderer):
                     label += u'<span class="%s">*</span>' % self.css_required
                 visible.append( (label, rendered) )
 
-        self.do_table(visible, u'\n'.join(hidden), css_class=css_class)
+        value = self.do_table(visible, u'\n'.join(hidden), css_class=css_class)
 
-        if self.ofile is None: return f.getvalue()
+        return value
 
     def do_render_submit( self, submit, reset ):
         # Use side-effect for efficiency if requested.
