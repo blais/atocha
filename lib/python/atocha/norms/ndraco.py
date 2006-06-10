@@ -24,31 +24,29 @@ Normalizer for Apache + mod_python + Draco.
 """
 
 # atocha imports
-from atocha.norm import ArgsNormalizer
 from atocha.fields.uploads import FileUpload
 
 # draco imports
 from draco.request import FileUpload as DracoUpload
 
 
-__all__ = ('DracoNormalizer',)
+__all__ = ('normalize',)
 
 
 #-------------------------------------------------------------------------------
 #
-class DracoNormalizer(ArgsNormalizer):
+def normalize_args( parser, args ):
     """
     Noop normalizer for Draco, which already normalizes from mod_python.
     """
-    def normalize( self, args ):
-        # Convert from DracoNamespace to a Python dict.
+    # Convert from DracoNamespace to a Python dict.
 
-        newargs = {}
-        for k, v in args.iteritems():
-            if isinstance(v, DracoUpload):
-                newargs[k] = FileUpload(v.field)
-            else:
-                newargs[k] = v
+    newargs = {}
+    for k, v in args.iteritems():
+        if isinstance(v, DracoUpload):
+            newargs[k] = FileUpload(v.field)
+        else:
+            newargs[k] = v
 
-        return newargs
+    return newargs
 

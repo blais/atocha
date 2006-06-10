@@ -33,7 +33,7 @@ import os
 # atocha imports
 sys.path.append(join(projects_root, 'atocha', 'lib', 'python'))
 from atocha import *
-from atocha.norms.ncgi import CGINormalizer
+from atocha.norms.ncgi import normalize_args
 
 # htmlout imports (if available).
 sys.path.append(join(projects_root, 'htmlout', 'lib', 'python'))
@@ -68,7 +68,7 @@ def do_redirect( url, form, status, message, values, errors ):
 FormParser.redirect_func = staticmethod(do_redirect)
 
 # Setup normalizer for CGI scripts using Python's cgi module.
-FormParser.normalizer = CGINormalizer()
+FormParser.normalizer = normalize_args
 
 # Setup form renderer for rendering scripts.
 TextFormRenderer.scriptsdir = 'resources/scripts'

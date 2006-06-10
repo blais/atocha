@@ -60,13 +60,13 @@ def setup_mp( demo_root ):
         raise Redirect('Errors in user input', url)
     
     from atocha import FormParser, TextFormRenderer
-    from atocha.norms.nmodpython import ModPythonNormalizer
+    from atocha.norms.nmodpython import normalize_args
 
     # Setup automatic redirection mechanism.
     FormParser.redirect_func = staticmethod(do_redirect)
 
     # Setup normalizer for CGI scripts using Python's cgi module.
-    FormParser.normalizer = ModPythonNormalizer()
+    FormParser.normalizer = normalize_args
 
     # Setup form renderer for rendering scripts.
     TextFormRenderer.scriptsdir = 'resources/scripts'

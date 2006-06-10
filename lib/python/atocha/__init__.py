@@ -131,7 +131,10 @@ from fields import *
 from messages import *
 from parse import *
 from render import *
-from norm import *
+
+# Note: we do not import the normalizers automatically.  You need to do that in
+# your glue code.
+
 
 # Renderers.
 #

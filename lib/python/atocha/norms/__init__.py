@@ -20,11 +20,11 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 """
-Normalizer classes.
+Normalizer functions.
 
-These classes are used to convert between the various formats for the arguments
-that the different web frameworks or libraries provide.  The arguments are
-normalized first, without any knowledge of the form in which they will get
+These callables are used to convert between the various formats for the
+arguments that the different web frameworks or libraries provide.  The arguments
+are normalized first, without any knowledge of the form in which they will get
 parsed, and then returned for parsing.
 """
 

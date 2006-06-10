@@ -150,10 +150,10 @@ class FormParser:
     # Function called to perform redirection if present.
     redirect_func = None
 
-    # Object that will get called to normalize the types before parsing.  This
-    # is used to adapt the incoming arguments from a variety of web application
-    # frameworks to the kinds of generic arguments that this library is
-    # expecting.
+    # Callable that will get invoked to normalize the types before parsing.
+    # This is used to adapt the incoming arguments from a variety of web
+    # application frameworks to the kinds of generic arguments that this library
+    # is expecting.
     normalizer = None
 
 
@@ -321,7 +321,7 @@ class FormParser:
 
         # Normalize the submitted arguments if required.
         if self.normalizer:
-            args = self.normalizer.normalize(args)
+            args = self.normalizer(args)
         assert isinstance(args, dict)
 
         # Select the fields.
