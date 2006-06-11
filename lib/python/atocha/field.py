@@ -195,7 +195,7 @@ class Field:
     attributes_delete = ()
 
     
-    def get_attributes( cls ):
+    def get_attributes(cls):
         """
         Lazily compute the field attributes and returns a set of valid
         attributes and a list of (name, typedesc, desc) tuples.
@@ -246,7 +246,7 @@ class Field:
 
     get_attributes = classmethod(get_attributes)
     
-    def validate_attributes( cls, attribs ):
+    def validate_attributes(cls, attribs):
         """
         Validates that all the attributes names given are supported.
         """
@@ -267,7 +267,7 @@ class Field:
 
     #---------------------------------------------------------------------------
     #
-    def __init__( self, name, label, attribs ):
+    def __init__(self, name, label, attribs):
         assert isinstance(name, str)
         assert isinstance(label, (NoneType, msg_type))
 
@@ -296,7 +296,7 @@ class Field:
                 "Error: unsupported attributes '%s' in field '%s'." %
                 (', '.join(attribs.keys()), self.name))
 
-    def __str__( self ):
+    def __str__(self):
         """
         Returns a human-readable version of the field.
         """
@@ -305,13 +305,13 @@ class Field:
     # This is also useful for reading debugging output.
     __repr__ = __str__
     
-    def ishidden( self ):
+    def ishidden(self):
         """
         Returns true if this field is hidden.
         """
         return self.state == Field.HIDDEN
 
-    def isrequired( self ):
+    def isrequired(self):
         """
         Returns whether this field is required (optionally or not) or not
         required.  This is meant to be used exclusively for rendering purpose
@@ -330,7 +330,7 @@ class Field:
             isreq = False
         return isreq
 
-    def set_state( self, new_state ):
+    def set_state(self, new_state):
         """
         Set the new state of the field.  Use this with care.  This is provided
         for making deep copies of forms and make small modifications to them.
@@ -339,7 +339,7 @@ class Field:
         ## restrictions applied from the state?
         self.state = new_state
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         """
         :Arguments:
 
@@ -377,7 +377,7 @@ class Field:
         """
         raise NotImplementedError # return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         """
         :Arguments:
 
@@ -399,7 +399,7 @@ class Field:
         """
         raise NotImplementedError # return rvalue
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         """
         :Arguments:
 
@@ -461,11 +461,11 @@ class OptRequired:
         for the corresponding field."""),
         )
 
-    def __init__( self, attribs, def_required=False ):
+    def __init__(self, attribs, def_required=False):
         self.required = bool(attribs.pop('required', def_required))
         assert isinstance(self.required, bool)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         """
         Check that the field is present.  Fields which derive from this one do
         not accept None if the value is required.
@@ -496,7 +496,7 @@ class Orientable:
         """Orientation of the mini-table for layout of multiple inputs."""),
         )
 
-    def __init__( self, attribs ):
+    def __init__(self, attribs):
 
         self.orient = attribs.pop('orient', ORI_VERTICAL)
         assert self.orient in [ORI_HORIZONTAL, ORI_VERTICAL, ORI_RAW]

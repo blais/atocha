@@ -56,7 +56,7 @@ class URLPathField(StringField):
     
     __urlpath_re = re.compile('[/a-zA-Z0-9]+$')
 
-    def __init__( self, name, **attribs ):
+    def __init__(self, name, **attribs):
         URLPathField.validate_attributes(attribs)
 
         attribs['encoding'] = 'ascii'
@@ -64,7 +64,7 @@ class URLPathField(StringField):
         attribs['state'] = Field.HIDDEN
         StringField.__init__(self, name, None, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
         assert isinstance(dvalue, str)
 
@@ -95,14 +95,14 @@ class PhoneField(StringField):
     
     __valid_re = re.compile('^[0-9\-\.\+\(\)\ ext]+$')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         PhoneField.validate_attributes(attribs)
 
         attribs['encoding'] = 'ascii'
         attribs['strip'] = True
         StringField.__init__(self, name, label, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
         assert isinstance(dvalue, str)
 

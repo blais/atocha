@@ -91,7 +91,7 @@ class _MultipleField(Field):
          to use the parsing code provided in this field."""),
         )
 
-    def __init__( self, name, choices, label, attribs ):
+    def __init__(self, name, choices, label, attribs):
 
         self.nocheck = attribs.pop('nocheck', None)
 
@@ -109,7 +109,7 @@ class _MultipleField(Field):
         self.setchoices(choices)
 
     @staticmethod
-    def parse_choices( in_choices ):
+    def parse_choices(in_choices):
         choiceset = {}
         choices = []
 
@@ -162,14 +162,14 @@ class _MultipleField(Field):
 
         return choices, choiceset
 
-    def setchoices( self, choices ):
+    def setchoices(self, choices):
         """
         Set the choices that this field renders and parses.  'choices' is of the
         same types as described in the attributes.
         """
         self.choices, self.choiceset = self.parse_choices(choices)
 
-    def checkvalues( self, values ):
+    def checkvalues(self, values):
         """
         Cross-check values agains the set of possible choices for this field.
         The 'nocheck' option is processed here internally, so you can just call
@@ -209,7 +209,7 @@ class _OneChoiceField(_MultipleField):
          may be hidden conditionally."""),
         )
 
-    def __init__( self, name, choices, label, attribs ):
+    def __init__(self, name, choices, label, attribs):
 
         # Check the type of initial, which must be one of the types accepted
         # for choices.
@@ -226,7 +226,7 @@ class _OneChoiceField(_MultipleField):
         _MultipleField.__init__(self, name, choices, label, attribs)
 
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # See note about a value expected to have been submitted for the field,
         # in parse_value() docstring.
 
@@ -262,7 +262,7 @@ class _OneChoiceField(_MultipleField):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             if self.choices:
                 return self.choices[0][0]
@@ -276,7 +276,7 @@ class _OneChoiceField(_MultipleField):
         # for the renderer to do its thing.
         return dvalue
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         # Translate the label of the value before returning it.
         return _(self.choiceset[dvalue])
 
@@ -290,7 +290,7 @@ class RadioField(_OneChoiceField, Orientable):
     """
     css_class = 'radio'
 
-    def __init__( self, name, choices, label=None, **attribs ):
+    def __init__(self, name, choices, label=None, **attribs):
         RadioField.validate_attributes(attribs)
 
         Orientable.__init__(self, attribs)
@@ -310,7 +310,7 @@ class MenuField(_OneChoiceField):
          """JavaScript to run when the selector changes."""),
         )
     
-    def __init__( self, name, choices, label=None, **attribs ):
+    def __init__(self, name, choices, label=None, **attribs):
         MenuField.validate_attributes(attribs)
 
         self.onchange = attribs.pop('onchange', None)
@@ -333,7 +333,7 @@ class _ManyChoicesField(_MultipleField):
          """Minimum number of entries selected (defaults to none)."""),
         )
 
-    def __init__( self, name, choices, label, attribs ):
+    def __init__(self, name, choices, label, attribs):
 
         # Check the type of initial, which must be one of the types accepted for
         # choices.
@@ -359,14 +359,14 @@ class _ManyChoicesField(_MultipleField):
         # Initialize base classes, always set as required.
         _MultipleField.__init__(self, name, choices, label, attribs)
 
-    def check_at_least( self, numvalues ):
+    def check_at_least(self, numvalues):
         """
         Check that we have the number of required values.
         """
         if self.atleast and numvalues < self.atleast:
             raise FieldError(msg_registry['at-least-required'] % self.atleast)
         
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         if pvalue is None or pvalue == u'':
             self.check_at_least(0)
             # Nothing was selected, so we simply return an empty list.
@@ -397,7 +397,7 @@ class _ManyChoicesField(_MultipleField):
         
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return []
 
@@ -405,7 +405,7 @@ class _ManyChoicesField(_MultipleField):
         # for the renderer to do its thing.
         return dvalue
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         # Get labels and join them.
         # Note: Translate the labels of the value before returning it.
         labels = [_(self.choiceset[x]) for x in dvalue]
@@ -421,7 +421,7 @@ class CheckboxesField(_ManyChoicesField, Orientable):
     """
     css_class = 'checkboxes'
 
-    def __init__( self, name, choices, label=None, **attribs ):
+    def __init__(self, name, choices, label=None, **attribs):
         CheckboxesField.validate_attributes(attribs)
 
         Orientable.__init__(self, attribs)
@@ -462,7 +462,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
 
     __default_size = 5
 
-    def __init__( self, name, choices, label=None, **attribs ):
+    def __init__(self, name, choices, label=None, **attribs):
         ListboxField.validate_attributes(attribs)
 
         self.multiple = attribs.pop('multiple', False)
@@ -483,7 +483,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
             _OneChoiceField.__init__(self, name, choices, label, attribs)
 
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # Check the required value, this forces at least one choice to be
         # present.
         pvalue = OptRequired.parse_value(self, pvalue)
@@ -499,7 +499,7 @@ class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
                 return None
             return _OneChoiceField.parse_value(self, pvalue)
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         if self.multiple:
             return _ManyChoicesField.display_value(self, dvalue)
         else:

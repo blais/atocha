@@ -36,7 +36,7 @@ from mod_python.util import FieldStorage, Field
 #
 setup_done = 0
 
-def setup_mp( demo_root ):
+def setup_mp(demo_root):
     """
     Global setup for Atocha in mod_python.
     """
@@ -53,7 +53,7 @@ def setup_mp( demo_root ):
     demo.ext = ''
 
     # Define and configure redirection mechanism.
-    def do_redirect( url, form, status, message, values, errors ):
+    def do_redirect(url, form, status, message, values, errors):
         # Store form data for later retrieval in session data.
         db = demo.getdb()
         db['session-%s' % demo.form1.name] = values, errors, message
@@ -87,7 +87,7 @@ class Redirect(Exception):
 
 #-------------------------------------------------------------------------------
 #
-def handler( mpreq ):
+def handler(mpreq):
     """
     mod_python handler. We dispatch to the methods in demo.py.
     """

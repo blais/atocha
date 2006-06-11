@@ -54,7 +54,7 @@ demo.ext = '.cgi'
 
 #-------------------------------------------------------------------------------
 #
-def do_redirect( url, form, status, message, values, errors ):
+def do_redirect(url, form, status, message, values, errors):
     # Store form data for later retrieval in session data.
     db = demo.getdb()
     db['session-%s' % demo.form1.name] = values, errors, message

@@ -93,7 +93,7 @@ class Form:
     __def_enctype_file = 'multipart/form-data'
     __def_accept_charset = 'UTF-8'
 
-    def __init__( self, name, *fields, **kwds ):
+    def __init__(self, name, *fields, **kwds):
         """
         Form creation.  You can specify 'action', 'submit' (button name) and
         'method' (GET or POST) here.
@@ -156,7 +156,7 @@ class Form:
         "A map of all the fields."
 
         # Unroll nested lists of fields.
-        def unroll_fields( forl ):
+        def unroll_fields(forl):
             if isinstance(forl, Field):
                 ufields.append(forl)
             elif isinstance(forl, (list, tuple)):
@@ -178,26 +178,26 @@ class Form:
         for val in self.__get_submit_values():
             assert val not in self._fieldsmap
 
-    def __getitem__( self, name ):
+    def __getitem__(self, name):
         """
         Get a field by name.  This allows you to lookup a field from the form
         directly.
         """
         return self._fieldsmap[name]
 
-    def fields( self ):
+    def fields(self):
         """
         Return a list containing the form fields.
         """
         return self._fields
 
-    def names( self ):
+    def names(self):
         """
         Returns a list of the field names.
         """
         return [x.name for x in self._fields]
 
-    def varnames( self ):
+    def varnames(self):
         """
         Returns a list of the variable names that the fields encompass.
         This will normally be the same as the field names.
@@ -207,7 +207,7 @@ class Form:
             varnames.extend(fi.varnames)
         return varnames
 
-    def labels( self, *fieldnames ):
+    def labels(self, *fieldnames):
         """
         Returns a list of the labels of the fields.
         """
@@ -217,7 +217,7 @@ class Form:
             fields = self._fields
         return [x.label for x in fields]
 
-    def fetchnames( self, obj, exceptions=None, default=Unset ):
+    def fetchnames(self, obj, exceptions=None, default=Unset):
         """
         Fetches attributes corresponding to the form field names from the given
         object 'obj' and returns a mapping with those values.  This can be
@@ -245,7 +245,7 @@ class Form:
                 pass
         return values
 
-    def addfield( self, field ):
+    def addfield(self, field):
         """
         Add a field to the form. The field argument must be a Field instance.
         """
@@ -287,7 +287,7 @@ class Form:
         self._fields.append(field)
         self._fieldsmap[field.name] = field
 
-    def select_fields( self, only=None, ignore=None ):
+    def select_fields(self, only=None, ignore=None):
         """
         Select the fields specified via 'only' and 'ignore'.
         This method implements just the only and ignore selection.
@@ -335,7 +335,7 @@ class Form:
         return fields
 
 
-    def parse_field( self, fi, args ):
+    def parse_field(self, fi, args):
         """
         Parse and validate the incoming arguments for a single field.  The value
         of the parsed argument is returned, along with accompanying errors, if
@@ -511,7 +511,7 @@ class Form:
         return (0, parsed_dvalue)
 
 
-    def __get_submit_values( self ):
+    def __get_submit_values(self):
         """
         Returns a list of values for the submit buttons.
         If there is a single submit button only, returns an empty list.
@@ -529,7 +529,7 @@ class Form:
                     raise AtochaInternalError("Internal error with submit types.")
         return submit_values
 
-    def parse_submit( self, args ):
+    def parse_submit(self, args):
         """
         Many submit buttons may be present in a form. If this is the case, this
         method is used to find out which of the submit buttons was pressed, and
@@ -561,7 +561,7 @@ class Form:
 
             return found
 
-    def getscripts( self ):
+    def getscripts(self):
         """
         Returns a dict of Javascript script filenames that need to be included
         to support the widgets present in the form.

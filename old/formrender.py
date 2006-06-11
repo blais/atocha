@@ -63,7 +63,7 @@ class HtmloutRenderer(BaseRenderer):
 
     validstyles = [None, 'vertical', 'horizontal']
 
-    def renderform( self, form, tr=None, action=None ):
+    def renderform(self, form, tr=None, action=None):
         if tr is None: tr = _
 
         # the form itself
@@ -80,7 +80,7 @@ class HtmloutRenderer(BaseRenderer):
                 break
         return formhtml
 
-    def rendersubmit( self, form, tr=None, submit=None ):
+    def rendersubmit(self, form, tr=None, submit=None):
         if tr is None: tr = _
 
         if isinstance(form.submit, str):
@@ -95,7 +95,7 @@ class HtmloutRenderer(BaseRenderer):
 
         return CENTER(inputs)
 
-    def renderfield( self, field, values=None, tr=None ):
+    def renderfield(self, field, values=None, tr=None):
         """See base class."""
         if tr is None: tr = _
 
@@ -110,8 +110,8 @@ class HtmloutRenderer(BaseRenderer):
 
         return inputs
 
-    def rendertable( self, form, values=None, tr=None,
-                     style=None, fields=None ):
+    def rendertable(self, form, values=None, tr=None,
+                    style=None, fields=None):
         """
         Render the form, filling in the values that are present with the
         contents of the 'values' mapping (for example, as can be extracted with
@@ -169,7 +169,7 @@ class HtmloutRenderer(BaseRenderer):
 
         return table, hidden_fields
 
-    def rendertable_empty( self, label=None, inputs=None, style=None ):
+    def rendertable_empty(self, label=None, inputs=None, style=None):
         """
         Render an empty table, returning a tuple of (table, label container and
         inputs container), with the same HTML structure as for rendertable().
@@ -177,7 +177,7 @@ class HtmloutRenderer(BaseRenderer):
         return self._rendertable_empty('form', label, inputs, style)
         
     @staticmethod
-    def _rendertable_empty( pfx, label=None, inputs=None, style=None ):
+    def _rendertable_empty(pfx, label=None, inputs=None, style=None):
         """
         Internal implementation of the empty table rendering method.
         """
@@ -206,7 +206,7 @@ class HtmloutRenderer(BaseRenderer):
 
         return table, tdlabel, tdinput
 
-    def rendererrors( self, htmlform, errors, tr=None ):
+    def rendererrors(self, htmlform, errors, tr=None):
         """
         Add appropriate errors in the form.
         """
@@ -216,7 +216,7 @@ class HtmloutRenderer(BaseRenderer):
         assert type(errors) is types.DictType
         if tr is None: tr = _
 
-        def errorvisitor( node, parent ):
+        def errorvisitor(node, parent):
             # Add a little span that contains an appropriate error message.
             if isinstance(node, INPUT) or \
                    isinstance(node, SELECT) or \
@@ -270,14 +270,14 @@ class HtmloutRenderer(BaseRenderer):
 
         htmlform.visit(errorvisitor)
 
-    def render( self, form, values=None, errors=None, tr=None,
-                style=None, fields=None, action=None, submit=None ):
+    def render(self, form, values=None, errors=None, tr=None,
+               style=None, fields=None, action=None, submit=None):
 
         htmlform = self.renderform(form, tr, action)
         table, hidden = \
                self.rendertable(form, values, tr, style, fields)
         htmlform.append(table, hidden)
-        htmlform.append( self.rendersubmit(form, tr, submit) )
+        htmlform.append(self.rendersubmit(form, tr, submit))
 
         if errors:
             self.rendererrors(htmlform, errors)
@@ -289,7 +289,7 @@ class HtmloutRenderer(BaseRenderer):
 
     #---------------------------------------------------------------------------
 
-    def renderhidden( self, field, value, tr ):
+    def renderhidden(self, field, value, tr):
         if value is None: value = ''
 
         inputs = []
@@ -305,7 +305,7 @@ class HtmloutRenderer(BaseRenderer):
             raise RuntimeError
         return inputs
 
-    def render_Field( self, field, value, tr, type_='text', checked=NoDef ):
+    def render_Field(self, field, value, tr, type_='text', checked=NoDef):
         inpu = INPUT(name=field.name, type=type_, CLASS='form-input')
         if checked is not NoDef and checked:
             inpu.attrib['checked'] = 'checked'
@@ -313,7 +313,7 @@ class HtmloutRenderer(BaseRenderer):
             inpu.attrib['value'] = value
         return [inpu]
 
-    def render_TextField( self, field, value, tr, type_ ):
+    def render_TextField(self, field, value, tr, type_):
         inputs = self.render_Field(field, value, tr, type_)
         if field.maxlen:
             slen = str(field.maxlen)
@@ -321,13 +321,13 @@ class HtmloutRenderer(BaseRenderer):
                 inp.attrib['maxlength'] = slen
         return inputs
 
-    def render_StringField( self, field, value, tr ):
+    def render_StringField(self, field, value, tr):
         return self.render_TextField(field, value, tr, 'text')
 
-    def render_PasswordField( self, field, value, tr ):
+    def render_PasswordField(self, field, value, tr):
         return self.render_TextField(field, value, tr, 'password')
 
-    def render_TextAreaField( self, field, value, tr ):
+    def render_TextAreaField(self, field, value, tr):
         # Note: we cannot specify a maximum length for TEXTAREA.
         inpu = TEXTAREA(value or '', name=field.name)
 
@@ -338,16 +338,16 @@ class HtmloutRenderer(BaseRenderer):
 
         return [inpu]
 
-    def render_IntField( self, field, value, tr ):
+    def render_IntField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_FloatField( self, field, value, tr ):
+    def render_FloatField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_BoolField( self, field, value, tr ):
+    def render_BoolField(self, field, value, tr):
         return self.render_Field(field, '1', tr, 'checkbox', checked=value)
 
-    def render_MultipleField( self, field, value, tr, type_ ):
+    def render_MultipleField(self, field, value, tr, type_):
         inputs = []
         for fvalue, flabel in field.values:
             inpu = INPUT(flabel, name=field.name, type=type_)
@@ -364,12 +364,12 @@ class HtmloutRenderer(BaseRenderer):
                 inpu.attrib['checked'] = 'checked'
         return inputs
 
-    def render_RadioField( self, field, value, tr ):
+    def render_RadioField(self, field, value, tr):
 ## FIXME TODO add support for minitables like listfield below
         return self.render_MultipleField(field, value, tr, 'radio')
 
-    def render_ListField( self, field, value, tr ):
-        def getinpu( fvalue, flabel ):
+    def render_ListField(self, field, value, tr):
+        def getinpu(fvalue, flabel):
             inpu = INPUT(name=field.name, type='checkbox', value=fvalue)
             if type(value) is types.ListType:
                 if fvalue in value:
@@ -396,7 +396,7 @@ class HtmloutRenderer(BaseRenderer):
         else:
             return self.render_MultipleField(field, value, tr, 'checkbox')
 
-    def render_MenuField( self, field, value, tr ):
+    def render_MenuField(self, field, value, tr):
         options = []
         for fvalue, flabel in field.values:
             option = OPTION(flabel, value=fvalue)
@@ -416,10 +416,10 @@ class HtmloutRenderer(BaseRenderer):
 
         return [select]
 
-    def render_DateField( self, field, value, tr ):
+    def render_DateField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_ActiveDateField( self, field, value, tr ):
+    def render_ActiveDateField(self, field, value, tr):
         # Warning: the renderer of the form has the responsibility for adding
         # the script URL.
         vstr = ''
@@ -450,10 +450,10 @@ class HtmloutRenderer(BaseRenderer):
         # Note: setting 'name' on a SCRIPT tag is not standard, but it allows us
         # to render the errors later on.
 
-    def render_FileUploadField( self, field, value, tr ):
+    def render_FileUploadField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'file')
 
-    def renderscripts( self, form, scriptsdir='' ):
+    def renderscripts(self, form, scriptsdir=''):
         """
         Render the appropriate tags needed for the fields that the given form
         contains.
@@ -484,8 +484,8 @@ class HtmloutDisplayRenderer(BaseRenderer):
 
     validstyles = [None]
 
-    def render( self, form, values=None, tr=None, errors=None,
-                style=None, noempty=False, fields=None ):
+    def render(self, form, values=None, tr=None, errors=None,
+               style=None, noempty=False, fields=None):
         """
         Render the form, filling in the values that are present with the
         contents of the 'values' mapping (for example, as can be extracted with
@@ -521,30 +521,30 @@ class HtmloutDisplayRenderer(BaseRenderer):
 
         return table
 
-    def rendertable_empty( self, label=None, inputs=None, style=None ):
+    def rendertable_empty(self, label=None, inputs=None, style=None):
         """
         Render an empty display table.
         """
         return HtmloutRenderer._rendertable_empty(
             'disp', label, inputs, style)
 
-    def renderhidden( self, field, value, tr ):
+    def renderhidden(self, field, value, tr):
         # Note: we do not render the hidden fields at this point.
         # This could become an option in the future.
         return []
 
-    def render_Field( self, field, value, tr, type_='text' ):
+    def render_Field(self, field, value, tr, type_='text'):
         return value
 
-    def render_PasswordField( self, field, value, tr ):
+    def render_PasswordField(self, field, value, tr):
         if value != None:
             return '*' * len(value)
         return None
 
-    def render_EmailField( self, field, value, tr, type_='text' ):
+    def render_EmailField(self, field, value, tr, type_='text'):
         return A(value, href='mailto:%s' % value)
 
-    def render_MultipleField( self, field, value, tr ):
+    def render_MultipleField(self, field, value, tr):
         selected = []
         for fvalue, flabel in field.values:
             if type(value) is types.ListType:
@@ -554,11 +554,11 @@ class HtmloutDisplayRenderer(BaseRenderer):
                 selected.append(flabel)
         return ', '.join(selected)
 
-    def render_FileUploadField( self, field, value, tr ):
+    def render_FileUploadField(self, field, value, tr):
         ## FIXME what do we do here now?
         return self.render_Field(field, value, tr, 'file')
 
-    def render_ActiveDateField( self, field, value, tr ):
+    def render_ActiveDateField(self, field, value, tr):
         vstr = ''
         if value:
             # We must be able to accept both the string version and the datetime

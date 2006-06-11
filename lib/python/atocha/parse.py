@@ -157,7 +157,7 @@ class FormParser:
     normalizer = None
 
 
-    def parse( form, args, **kwds ):
+    def parse(form, args, **kwds):
         """
         Creates a FormParser, applies the arguments to be parsed, and completes
         the parser automatically, return the parsed results if there is no
@@ -181,7 +181,7 @@ class FormParser:
     parse = staticmethod(parse)
 
 
-    def __init__( self, form, args=None, redir=None, redirfun=None ):
+    def __init__(self, form, args=None, redir=None, redirfun=None):
         """
         Create a parser with the given form, and error redirection URL.
 
@@ -273,7 +273,7 @@ class FormParser:
         if args is not None:
             self.parse_args(args)
 
-    def __del__( self ):
+    def __del__(self):
         """
         Destructor override that just makes sure that we ended the parser.
         """
@@ -283,7 +283,7 @@ class FormParser:
                                             self._form.name)
 
 
-    def parse_args( self, args, only=None, ignore=None ):
+    def parse_args(self, args, only=None, ignore=None):
         """
         Parse and validate the incoming arguments for the form, including the
         submit value if necessary. This parses all the arguments for which a
@@ -352,7 +352,7 @@ class FormParser:
         # Parse the submit buttons.
         self.parse_submit(args)
 
-    def parse_submit( self, args ):
+    def parse_submit(self, args):
         """
         Parse only for the submit value and nothing else.
         """
@@ -363,7 +363,7 @@ class FormParser:
 
         return submit_value
 
-    def getsubmit( self ):
+    def getsubmit(self):
         """
         Returns the value of the submitted button.  This is None if there is
         only a single submit button in the form, or a str with the appropriate
@@ -373,7 +373,7 @@ class FormParser:
         assert self._submit_parsed
         return self._submit
 
-    def __getitem__( self, fname ):
+    def __getitem__(self, fname):
         """
         Access the parser's parsed values, insuring that values which have not
         been parsed simply return None rather than raising an exception.  This
@@ -390,19 +390,19 @@ class FormParser:
             except KeyError:
                 raise KeyError("Invalid field name '%s'." % fname)
 
-    def __setitem__( self, fname, value ):
+    def __setitem__(self, fname, value):
         """
         See store() method.
         """
         return self.store(fname, value)
 
-    def __contains__( self, fname ):
+    def __contains__(self, fname):
         """
         Membership test.
         """
         return fname in self._values
 
-    def store( self, name, value ):
+    def store(self, name, value):
         """
         Store some extra data that is not associated with any field, but that
         will get routed through the form data system if an error occurs.
@@ -421,7 +421,7 @@ class FormParser:
         # Store along with the values dict.
         self._values[name] = value
 
-    def clear( self, name ):
+    def clear(self, name):
         """
         Clear the given value.
         """
@@ -430,7 +430,7 @@ class FormParser:
         except KeyError:
             pass
 
-    def getvalues( self, cullfiles=False ):
+    def getvalues(self, cullfiles=False):
         """
         Returns the parsed arguments (dict).  This is intended as a convenience
         if you need to store or pass around the arguments, rather than having to
@@ -469,27 +469,27 @@ class FormParser:
                         pass
             return vcopy
 
-    def ok( self, fieldname ):
+    def ok(self, fieldname):
         """
         Returns false if the given field has an error associated to it.
         See haserror() below.
         """
         return fieldname not in self._errors
 
-    def haserror( self, fieldname ):
+    def haserror(self, fieldname):
         """
         Returns true if the given field has an error associated to it.
         See ok() above.
         """
         return fieldname in self._errors
 
-    def haserrors( self ):
+    def haserrors(self):
         """
         Returns true if some errors have already been signaled.
         """
         return bool(self._errors or self._message or self._status)
 
-    def geterrors( self ):
+    def geterrors(self):
         """
         Returns the accumulated field errors, a dict of (message, repl_rvalue)
         tuples for each field name.  This can be used by the form renderer to
@@ -497,13 +497,13 @@ class FormParser:
         """
         return self._errors
 
-    def geterrorfields( self ):
+    def geterrorfields(self):
         """
         Returns a list of the fields which have had errors (a list of str):
         """
         return self._errors.keys()
 
-    def geterrorlabels( self ):
+    def geterrorlabels(self):
         """
         Returns a list of the labels of the fields which have had errors.
         """
@@ -512,7 +512,7 @@ class FormParser:
         return [self._form[x].label for x in self._errors.iterkeys()]
 
 
-    def _normalize_error( error ):
+    def _normalize_error(error):
         """
         Normalize the type of an error to a (message, repl_rvalue)
         triple.
@@ -532,7 +532,7 @@ class FormParser:
         return error
     _normalize_error = staticmethod(_normalize_error)
 
-    def error( self, _message=None, _status='error', _names=None, **kwds ):
+    def error(self, _message=None, _status='error', _names=None, **kwds):
         """
         Adds an error to the current state.
 
@@ -601,7 +601,7 @@ class FormParser:
             # necessarily a (message, repl_rvalue) tuple.
             self._errors[fname] = error
 
-    def clear_errors( self, *names ):
+    def clear_errors(self, *names):
         """
         Clear the errors associated with the given fields.
         """
@@ -614,20 +614,20 @@ class FormParser:
         if not self._errors:
             self._status, self._message = None, u''
 
-    def clear_message( self ):
+    def clear_message(self):
         """
         Clear the UI message that is to be displayed for errors.
         """
         self._message = u''
 
-    def set_redirect( self, redir ):
+    def set_redirect(self, redir):
         """
         (Re-)Set the redirection URL.
         """
         self._redirurl = redir
 
 
-    def end( self, redir=None ):
+    def end(self, redir=None):
         """
         Completes the validation phase, redirecting if necessary.
         Redirection is performed is an error was signaled.
@@ -667,7 +667,7 @@ class FormParser:
         # the appropriate values.  This works similarly to optparse.
         return self._accessor
 
-    def cancel( self ):
+    def cancel(self):
         """
         Cancel this parser.  It is important to use this method if you have not
         called end() on a parser when you do not intend to later end() it,
@@ -676,7 +676,7 @@ class FormParser:
         """
         self._ended = 1  # Mark as ended.
 
-    def redirect( self, redir=None ):
+    def redirect(self, redir=None):
         """
         Force redirection.  To be able to redirect, the parser must be
         complete/ended.
@@ -701,7 +701,7 @@ class FormParser:
         return fun(rurl, self._form, self._status, self._message,
                    self.getvalues(True), self._errors)
 
-    def do_redirect( self, url, form, status, message, values, errors ):
+    def do_redirect(self, url, form, status, message, values, errors):
         """
         Perform a requested error redirection.  Override this method (static) to
         implement this functionality, whose details depend on the framework that
@@ -719,16 +719,16 @@ class ParserAccessor(object):
     Accessor helper class that allows you to access the contents of the
     values via its attributes.
     """
-    def __init__( self, parser ):
+    def __init__(self, parser):
         self._parser = parser
         """Parser (cyclic dependency, unfortunately)."""
 
-    def __getattr__( self, fname ):
+    def __getattr__(self, fname):
         return self._parser.__getitem__(fname)
 
-    def getsubmit( self ):
+    def getsubmit(self):
         return self._parser.getsubmit()
 
-    def getvalues( self ):
+    def getvalues(self):
         return self._parser.getvalues()
 

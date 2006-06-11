@@ -46,7 +46,7 @@ class FileUpload:
     class so it can be used as a file.
     """
 
-    def __init__( self, obj, filename=None ):
+    def __init__(self, obj, filename=None):
         self.obj = obj
         """The object that contains a 'file' member, from which the contents of
         the upload can be read."""
@@ -54,10 +54,10 @@ class FileUpload:
         self.filename = filename
         """The name of the file that is uploaded, if available."""
 
-    def __nonzero__( self ):
+    def __nonzero__(self):
         return True # To be able to test with parser['filefield'].
 
-    def __getattr__( self, name ):
+    def __getattr__(self, name):
         """
         Aggregate file methods into the current object.
         """
@@ -113,7 +113,7 @@ class FileUploadField(Field, OptRequired):
          HTML input field."""),
         )
          
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         FileUploadField.validate_attributes(attribs)
 
         self.filtpat = attribs.pop('filtpat', None)
@@ -121,7 +121,7 @@ class FileUploadField(Field, OptRequired):
         OptRequired.__init__(self, attribs)
         Field.__init__(self, name, label, attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         """
         Check the type of the object that is given to us.  Depending on the
         framework which is using this library, the nature of the object can
@@ -201,12 +201,12 @@ class FileUploadField(Field, OptRequired):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         # Never render anything in there, it's not really used by browsers
         # anyway (at least not without a warning, when it is, e.g. Opera).
         return u''
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         # Nothing to display from this, it's a file, you'll have to do something
         # special.
         if dvalue is not None:
@@ -254,7 +254,7 @@ class SetFileField(FileUploadField):
          rendering."""),
         )
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         SetFileField.validate_attributes(attribs)
 
         self.remlabel = attribs.pop('remlabel', None)
@@ -268,7 +268,7 @@ class SetFileField(FileUploadField):
         # upload, and another name for the checkbox.
         self.varnames.append(self.name + self.__resetext)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         pvfile, pvreset = [pvalue[self.varnames[x]] for x in 0, 1]
         assert isinstance(pvfile, FileUploadField.types_parse)
         assert isinstance(pvreset, BoolField.types_parse)

@@ -66,14 +66,14 @@ class DateField(StringField):
     _mon_list = [getattr(locale, 'MON_%d' % x) for x in xrange(1, 13)]
     _abmon_list = [getattr(locale, 'ABMON_%d' % x) for x in xrange(1, 13)]
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         DateField.validate_attributes(attribs)
 
         attribs.setdefault('size', 20)
         attribs['strip'] = True
         StringField.__init__(self, name, label, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         value = StringField.parse_value(self, pvalue)
         assert isinstance(value, unicode)
 
@@ -122,7 +122,7 @@ class DateField(StringField):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return u''
 
@@ -130,7 +130,7 @@ class DateField(StringField):
         rvalue = dvalue.isoformat().decode('ascii')
         return rvalue
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         if dvalue is None:
             return u''
         return time_to_string(dvalue, self._def_display_fmt)
@@ -163,7 +163,7 @@ class JSDateField(Field, OptRequired):
 
     __script_re = '^[a-zA-Z_]+$'
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         JSDateField.validate_attributes(attribs)
 
         # Note: there is a special constraint on the varname of the field due to
@@ -178,7 +178,7 @@ class JSDateField(Field, OptRequired):
         assert isinstance(self.required, bool)
 
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # Check if no value submitted... this would be strange, since this field
         # should always send us a value (except when not required explicitly),
         # even without user edits.
@@ -210,7 +210,7 @@ class JSDateField(Field, OptRequired):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return u''
 
@@ -219,7 +219,7 @@ class JSDateField(Field, OptRequired):
         rvalue = dvalue.strftime('%Y%m%d')
         return rvalue.decode('ascii')
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         assert dvalue is not None
         return time_to_string(dvalue, DateField._def_display_fmt)
 
@@ -252,7 +252,7 @@ class DateMenuField(MenuField):
     # Support ISO-8601 format.
     __date_re1 = re.compile('(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)')
 
-    def __init__( self, name, label=None, extra_choices=None, **attribs ):
+    def __init__(self, name, label=None, extra_choices=None, **attribs):
         DateMenuField.validate_attributes(attribs)
 
         self.nbdays = int(attribs.pop('nbdays', self.__def_nbdays))
@@ -271,7 +271,7 @@ class DateMenuField(MenuField):
         # children eventually having invalid dates, so we do not initialize the
         # menu's choices in the constructor.
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         value = MenuField.parse_value(self, pvalue)
 
         # Indicate that this field has not been sent.
@@ -294,7 +294,7 @@ class DateMenuField(MenuField):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         self._reset_dates()
 
         # Convert date to its corresponding value string.
@@ -309,7 +309,7 @@ class DateMenuField(MenuField):
 
         return rvalue
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         if dvalue is None:
             return u''
         elif dvalue in self.extra_choiceset:
@@ -317,7 +317,7 @@ class DateMenuField(MenuField):
         else:
             return time_to_string(dvalue, self._def_display_fmt)
 
-    def _reset_dates( self ):
+    def _reset_dates(self):
         """
         Reset the list of dates (choices) for this menu.
         """
@@ -333,7 +333,7 @@ class DateMenuField(MenuField):
 
 #-------------------------------------------------------------------------------
 #
-def time_to_string( date, fmt ):
+def time_to_string(date, fmt):
     """
     Convert a date object to a unicode string.  We need this because
     strftime has calendar limitations on years before 1900.
@@ -349,7 +349,7 @@ def time_to_string( date, fmt ):
 
 #-------------------------------------------------------------------------------
 #
-def date_range( nbsteps, basedate=None, step=None ):
+def date_range(nbsteps, basedate=None, step=None):
     """
     Yield a range of dates, for 'nbsteps' steps, starting from 'basedate' or
     today's date, if not set, and stepping by 'step', or one-day increments, if

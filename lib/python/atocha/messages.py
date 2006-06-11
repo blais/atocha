@@ -69,13 +69,13 @@ class TranslatorDict(dict):
     """
     A dictionary class that automatically translates on access.
     """
-    def __getitem__( self, key ):
+    def __getitem__(self, key):
         """
         Automatically translate the key on lookup.
         """
         return _(dict.__getitem__(self, key))
 
-    def get_notrans( self, key ):
+    def get_notrans(self, key):
         """
         Lookup the message without translating.
         """

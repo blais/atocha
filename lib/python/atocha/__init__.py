@@ -104,7 +104,7 @@ class AtochaDelError(AtochaError):
     """
     Exception used within constructors and destructors.
     """
-    def __repr__( self ):
+    def __repr__(self):
         return ("<AtochaDelError for %s fields %s>" %
                 (self.args[1], self.args[2]))
 

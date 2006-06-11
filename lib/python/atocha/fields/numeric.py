@@ -61,7 +61,7 @@ class _NumericalField(Field, OptRequired):
         not affect the input parsing at all."""),
         )
 
-    def __init__( self, name, label, attribs ):
+    def __init__(self, name, label, attribs):
 
         self.minval = attribs.pop('minval', None)
         assert isinstance(self.minval, (NoneType, self._numtype))
@@ -78,7 +78,7 @@ class _NumericalField(Field, OptRequired):
         Field.__init__(self, name, label, attribs)
 
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # Check the required value.
         pvalue = OptRequired.parse_value(self, pvalue)
 
@@ -105,12 +105,12 @@ class _NumericalField(Field, OptRequired):
 
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return u''
         return self._format_value(dvalue)
     
-    def _format_value( self, dvalue ):
+    def _format_value(self, dvalue):
         """
         Simply convert from the numerical type into a string.
         """
@@ -131,7 +131,7 @@ class IntField(_NumericalField):
     css_class = 'int'
     _numtype = int
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         IntField.validate_attributes(attribs)
 
         _NumericalField.__init__(self, name, label, attribs)
@@ -145,7 +145,7 @@ class FloatField(_NumericalField):
     css_class = 'float'
     _numtype = float
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         FloatField.validate_attributes(attribs)
 
         _NumericalField.__init__(self, name, label, attribs)

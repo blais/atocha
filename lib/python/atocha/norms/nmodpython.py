@@ -35,7 +35,7 @@ __all__ = ('normalize',)
 
 #-------------------------------------------------------------------------------
 #
-def normalize_args( parser, mpreq ):
+def normalize_args(parser, mpreq):
     """
     Normalizer for Python's cgi library.
     """

@@ -147,8 +147,8 @@ class Field:
 
     """
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None):
         self.name = name
         assert isinstance(name, str)
         self.label = label
@@ -157,20 +157,20 @@ class Field:
         self.notnull = notnull
         self.validators = []
 
-    def __str__( self ):
+    def __str__(self):
         return "<Field name=%s>" % self.name
 
-    def ishidden( self ):
+    def ishidden(self):
         """
         Returns true if this field is hidden.
         """
         return self.label is None
 
-    def prepare_value( self, value ):
+    def prepare_value(self, value):
         "Prepare the value for rendering."
         return value
 
-    def parse( self, value ):
+    def parse(self, value):
         return value
 
 #===============================================================================
@@ -187,15 +187,15 @@ class TextField(Field):
 
     class_ = 'text'
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None, 
-                  minlen=None, maxlen=None, ascii=False ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None, 
+                 minlen=None, maxlen=None, ascii=False):
         Field.__init__(self, name, label, default, notnull)
         self.minlen = minlen
         self.maxlen = maxlen
         self.ascii = ascii
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         if self.minlen is not None and len(value) < self.minlen:
@@ -215,7 +215,7 @@ class StringField(TextField):
 
     class_ = 'string'
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         value = value.strip()
@@ -250,7 +250,7 @@ class EmailField(StringField):
 
     ascii = True
 
-    def parse( self, value ):
+    def parse(self, value):
         value = StringField.parse(self, value)
         if not self.mre.match(value):
             raise ValueError
@@ -271,9 +271,9 @@ class TextAreaField(TextField):
 
     class_ = 'textarea'
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None, 
-                  minlen=None, maxlen=None, rows=None, cols=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None, 
+                 minlen=None, maxlen=None, rows=None, cols=None):
         TextField.__init__(self, name, label, default, notnull)
         self.rows = rows
         self.cols = cols
@@ -285,7 +285,7 @@ class PasswordField(TextField):
     Password field.
     """
 
-    def prepare_value( self, value ):
+    def prepare_value(self, value):
         return None # automatically hide password values before rendering.
         ## Note: this should only be done when we're not using https.
 
@@ -299,14 +299,14 @@ class IntField(Field):
 
     class_ = 'int'
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None, 
-                  minval=None, maxval=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None, 
+                 minval=None, maxval=None):
         Field.__init__(self, name, label, default, notnull)
         self.minval = minval
         self.maxval = maxval
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         value = int(value)
@@ -326,14 +326,14 @@ class FloatField(Field):
 
     class_ = 'float'
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None, 
-                  minval=None, maxval=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None, 
+                 minval=None, maxval=None):
         Field.__init__(self, name, label, default, notnull)
         self.minval = minval
         self.maxval = maxval
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         value = float(value)
@@ -352,7 +352,7 @@ class BoolField(Field):
 
     class_ = 'bool'
 
-    def parse( self, value ):
+    def parse(self, value):
         if type(value) in types.StringTypes:
             if value in ['0', 'False']:
                 return False
@@ -361,7 +361,7 @@ class BoolField(Field):
         # booleans and any other string
         return bool(value)
 
-    def prepare_value( self, value ):
+    def prepare_value(self, value):
         return bool(value)
 
 #-------------------------------------------------------------------------------
@@ -409,8 +409,8 @@ class MultipleField(Field):
 
     class_ = 'multiple'
 
-    def __init__( self, name, values,
-                  label=None, default=[], notnull=None, nocheck=None ):
+    def __init__(self, name, values,
+                 label=None, default=[], notnull=None, nocheck=None):
         Field.__init__(self, name, label, default, notnull)
 
         self.nocheck = nocheck
@@ -420,7 +420,7 @@ class MultipleField(Field):
 
         self.setvalues(values)
 
-    def setvalues( self, values ):
+    def setvalues(self, values):
         normvalues = []
         self.valuesset = set()
         if type(values) is types.ListType:
@@ -459,7 +459,7 @@ class MultipleField(Field):
                 v = v.decode(_dec_encoding)
             self.values.append( (k, v) )
 
-    def convert_value_for_multiple( self, value ):
+    def convert_value_for_multiple(self, value):
         """
         Convert the value to the appropriate type for multiple fields.
 
@@ -470,7 +470,7 @@ class MultipleField(Field):
         """
         return value.encode('utf-8')
 
-    def prepare_value( self, value ):
+    def prepare_value(self, value):
         if isinstance(value, _strtype):
             if value not in self.valuesset:
                 raise ValueError(
@@ -495,8 +495,8 @@ class RadioField(MultipleField):
 
     class_ = 'radio'
 
-    def __init__( self, name, values,
-                  label=None, default=[], notnull=None, nocheck=None, **kw ):
+    def __init__(self, name, values,
+                 label=None, default=[], notnull=None, nocheck=None, **kw):
 
         MultipleField.__init__(self, name, values,
                                label, default, notnull, nocheck)
@@ -507,7 +507,7 @@ class RadioField(MultipleField):
         self.minitable = kw.get('minitable', None)
         assert self.minitable in [None, 'vertical', 'horizontal']
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         newvalue = self.convert_value_for_multiple(value)
@@ -515,7 +515,7 @@ class RadioField(MultipleField):
             raise ValueError
         return newvalue
 
-    def prepare_value( self, value ):
+    def prepare_value(self, value):
         # always be prepared to accept an unspecified value for a radio button
         # field
         if value is None:
@@ -533,8 +533,8 @@ class ListField(MultipleField):
 
     class_ = 'list'
 
-    def __init__( self, name, values,
-                  label=None, default=[], notnull=None, nocheck=None, **kw ):
+    def __init__(self, name, values,
+                 label=None, default=[], notnull=None, nocheck=None, **kw):
 
         MultipleField.__init__(self, name, values,
                                label, default, notnull, nocheck)
@@ -545,7 +545,7 @@ class ListField(MultipleField):
         self.minitable = kw.get('minitable', None)
         assert self.minitable in [None, 'vertical', 'horizontal']
 
-    def parse( self, value ):
+    def parse(self, value):
         if isinstance(value, _strtype):
             if not self.nocheck and value not in self.valuesset:
                 raise ValueError
@@ -572,9 +572,9 @@ class MenuField(RadioField, ListField):
 
     class_ = 'menu'
 
-    def __init__( self, name, values,
-                  label=None, default=[], notnull=None, nocheck=None,
-                  multiple=False, size=NoDef ):
+    def __init__(self, name, values,
+                 label=None, default=[], notnull=None, nocheck=None,
+                 multiple=False, size=NoDef):
 
         MultipleField.__init__(self, name, values,
                                label, default, notnull, nocheck)
@@ -589,7 +589,7 @@ class MenuField(RadioField, ListField):
             else:
                 self.size = 1
 
-    def parse( self, value ):
+    def parse(self, value):
         if self.multiple:
             return ListField.parse(self, value)
         else:
@@ -607,7 +607,7 @@ class DateField(Field):
 
     dre = re.compile('(\d\d\d\d)-(\d\d)-(\d\d)')
 
-    def parse( self, value ):
+    def parse(self, value):
         if not isinstance(value, _strtype):
             raise ValueError
         mo = self.dre.match(value)
@@ -634,8 +634,8 @@ class ActiveDateField(DateField):
 
     dre = re.compile('(\d\d\d\d)(\d\d)(\d\d)')
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None):
         Field.__init__(self, name, label, default, notnull)
 
         # This verification is required for the JS calendar.
@@ -654,13 +654,13 @@ class FileUploadField(Field):
 
     class_ = 'file'
 
-    def __init__( self, name,
-                  label=None, default=None, notnull=None, 
-                  accept=None ):
+    def __init__(self, name,
+                 label=None, default=None, notnull=None, 
+                 accept=None):
         Field.__init__(self, name, label, default, notnull)
         self.accept = accept
 
-    def parse( self, value ):
+    def parse(self, value):
         # Note: to avoid the dependency on the caller, we only make sure that he
         # creates a class named 'FileUpload' to store the file-like object that
         # will allow reading the uploaded file.
@@ -679,7 +679,7 @@ class FileUploadField(Field):
 
 #-------------------------------------------------------------------------------
 #
-def handle_upload( arg ):
+def handle_upload(arg):
     """
     Handles a file uploadb by wrapping either the string or the file object in a
     file object readied for reading.
@@ -722,14 +722,14 @@ class FormError(Exception):
 
     """
 
-    def __init__( self, illegal_fields=[], required_fields=[], args=[] ):
+    def __init__(self, illegal_fields=[], required_fields=[], args=[]):
         Exception.__init__(self, 'Form Error')
         self.illegal = illegal_fields
         self.required = required_fields
         self.args = args
         assert self.illegal or self.required
 
-    def __str__( self ):
+    def __str__(self):
         o = []
         if self.illegal:
             o.append('Illegal values for fields: %s.' % \
@@ -739,29 +739,29 @@ class FormError(Exception):
                      ', '.join(map(lambda x: x.name, self.required)))
         return ' '.join(o)
 
-    def parsed_args( self ):
+    def parsed_args(self):
         return self.args
 
-    def errfields( self ):
+    def errfields(self):
         """
         Returns a list of erroneous fields.
         """
         return self.illegal + self.required
 
-    def errnames( self ):
+    def errnames(self):
         """
         Returns a list of erroneous field names.
         """
         return [x.name for x in self.illegal + self.required]
 
-    def errlabels( self ):
+    def errlabels(self):
         """
         Returns a printable list of erroneous field labels, comma-separated.
         """
         return filter(None,
                       map(lambda x: x.label, self.illegal + self.required))
 
-    def formerrors( self ):
+    def formerrors(self):
         """
         Retuns a dict suitable for setting as form errors.
         """
@@ -809,7 +809,7 @@ class Form:
     __def_method = 'POST'
     __def_encoding = 'UTF-8'
 
-    def __init__( self, name, *fields, **kwds ):
+    def __init__(self, name, *fields, **kwds):
         """
         Form creation.  You can specify 'action', 'submit' (button name) and
         'method' (GET or POST) here.
@@ -828,7 +828,7 @@ class Form:
         self.m_fieldmap = {}
 
         # Unroll nested lists of fields.
-        def unroll_fields( forl ):
+        def unroll_fields(forl):
             if isinstance(forl, Field):
                 ufields.append(forl)
             elif isinstance(forl, (list, tuple)):
@@ -844,25 +844,25 @@ class Form:
             assert isinstance(field, Field)
             self.addField(field)
 
-    def __getitem__( self, name ):
+    def __getitem__(self, name):
         """
         Get a field by name.
         """
         return self.m_fieldmap[name]
 
-    def fields( self ):
+    def fields(self):
         """
         Return a list containing the form fields.
         """
         return self.m_fields
 
-    def names( self ):
+    def names(self):
         """
         Returns a list of the field names.
         """
         return [x.name for x in self.m_fields]
 
-    def labels( self, fieldnames=None ):
+    def labels(self, fieldnames=None):
         """
         Returns a list of the labels of the fields.
         """
@@ -872,7 +872,7 @@ class Form:
             fields = self.m_fields
         return [x.label for x in fields]
 
-    def fetchnames( self, obj, exceptions=[] ):
+    def fetchnames(self, obj, exceptions=[]):
         """
         Fetches the fieldname attributes from the given object and returns a
         mapping with those values.  This can be useful if 'obj' is an ORM object
@@ -888,7 +888,7 @@ class Form:
                 pass
         return values
 
-    def addField( self, field ):
+    def addField(self, field):
         """
         Add a field to the form. The field argument must be a Field instance.
         """
@@ -899,7 +899,7 @@ class Form:
         self.m_fields.append(field)
         self.m_fieldmap[field.name] = field
 
-    def parse( self, args ):
+    def parse(self, args):
         """
         Parse the form, raising a FormError on error.  This is also the
         validation function.  Note that this extracts ONLY the fields of args
@@ -970,7 +970,7 @@ class Form:
         else:
             return parsed_args
 
-    def parse_submit( self, args ):
+    def parse_submit(self, args):
         """
         Parse the multiple submit buttons if necessary.
         Returns the string of the chosen button, or None, if not relevant.
@@ -1000,7 +1000,7 @@ class Form:
 
 #-------------------------------------------------------------------------------
 #
-def clsiter( obj ):
+def clsiter(obj):
     """Iterator that works its way up the class hierarchy of the given object."""
 
     clsstk = [obj.__class__]
@@ -1017,7 +1017,7 @@ class BaseRenderer:
     Base class for renderer visitors.
     """
 
-    def dispatch( self, func, field, *args ):
+    def dispatch(self, func, field, *args):
         """
         Dispatch to function with base 'func' on type 'field.  Your derived
         class must have methods func_<type>.  A search is made up the
@@ -1033,13 +1033,13 @@ class BaseRenderer:
         else:
             raise RuntimeError("No method to handle field '%s'." % field)
 
-    def renderhidden( self, field, value, tr ):
+    def renderhidden(self, field, value, tr):
         """
         Override this method to render the hidden fields.
         """
         raise NotImplementedError
 
-    def renderfield( self, field, values, tr, noempty=False ):
+    def renderfield(self, field, values, tr, noempty=False):
         """
         Render a single field of the form.
         """
@@ -1091,7 +1091,7 @@ class BaseRenderer:
             output = self.dispatch('render', field, pvalue, tr)
         return output
 
-    def renderfields( self, form, values, tr, noempty=False, fields=None ):
+    def renderfields(self, form, values, tr, noempty=False, fields=None):
         """
         Generator for rendering fields.
         Derived classes should use this.
@@ -1112,7 +1112,7 @@ class BaseRenderer:
 
 #-------------------------------------------------------------------------------
 #
-def tr_noop( s ):
+def tr_noop(s):
     "Noop translation service."
     return s
 
@@ -1130,7 +1130,7 @@ class SimpleRenderer(BaseRenderer):
     data without editing capabilities (with an [Edit] button/link perhaps?).
     """
 
-    def render( self, form, values=None, errors=None, tr=None ):
+    def render(self, form, values=None, errors=None, tr=None):
         """Render the form, filling in the values that are present with the
         contents of the 'values' mapping (for example, as can be extracted with
         the cgi module)."""
@@ -1168,7 +1168,7 @@ class SimpleRenderer(BaseRenderer):
                  "    <td>%(inputs)s</td>\n  </tr>\n"
     __fieldfmt_hidden = "%(inputs)s\n"
 
-    def renderhidden( self, field, value, tr ):
+    def renderhidden(self, field, value, tr):
         if value is None: value = ''
         elif value is True: value = '1'
         elif value is False: value = '0'
@@ -1186,7 +1186,7 @@ class SimpleRenderer(BaseRenderer):
 
         return inpu
 
-    def render_Field( self, field, value, tr, type_='text', checked=NoDef ):
+    def render_Field(self, field, value, tr, type_='text', checked=NoDef):
         label = tr(field.label)
 
         vstr = ''
@@ -1199,13 +1199,13 @@ class SimpleRenderer(BaseRenderer):
 
         return self.__fieldfmt % {'label': label, 'inputs': inpu}
 
-    def render_StringField( self, field, value, tr ):
+    def render_StringField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_PasswordField( self, field, value, tr ):
+    def render_PasswordField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'password')
 
-    def render_TextAreaField( self, field, value, tr ):
+    def render_TextAreaField(self, field, value, tr):
         label = tr(field.label)
 
         astr = []
@@ -1219,16 +1219,16 @@ class SimpleRenderer(BaseRenderer):
 
         return self.__fieldfmt % {'label': label, 'inputs': inpu}
 
-    def render_IntField( self, field, value, tr ):
+    def render_IntField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_FloatField( self, field, value, tr ):
+    def render_FloatField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_BoolField( self, field, value, tr ):
+    def render_BoolField(self, field, value, tr):
         return self.render_Field(field, '1', tr, 'checkbox', checked=value)
 
-    def render_MultipleField( self, field, value, tr, type_ ):
+    def render_MultipleField(self, field, value, tr, type_):
         label = tr(field.label)
 
         inpu = '\n'
@@ -1245,13 +1245,13 @@ class SimpleRenderer(BaseRenderer):
 
         return self.__fieldfmt % {'label': label, 'inputs': inpu}
 
-    def render_RadioField( self, field, value, tr ):
+    def render_RadioField(self, field, value, tr):
         return self.render_MultipleField(field, value, tr, 'radio')
 
-    def render_ListField( self, field, value, tr ):
+    def render_ListField(self, field, value, tr):
         return self.render_MultipleField(field, value, tr, 'checkbox')
 
-    def render_MenuField( self, field, value, tr ):
+    def render_MenuField(self, field, value, tr):
         label = tr(field.label)
 
         mulstr = field.multiple and 'multiple="1"' or ''
@@ -1272,10 +1272,10 @@ class SimpleRenderer(BaseRenderer):
 
         return self.__fieldfmt % {'label': label, 'inputs': inpu}
 
-    def render_DateField( self, field, value, tr ):
+    def render_DateField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'text')
 
-    def render_FileUploadField( self, field, value, tr ):
+    def render_FileUploadField(self, field, value, tr):
         return self.render_Field(field, value, tr, 'file')
 
 
@@ -1294,7 +1294,7 @@ import unittest, sys, os
 #
 lastwrite = None
 
-def getcodediff( nframes ):
+def getcodediff(nframes):
     """
     Returns the difference in code between the given filename and lineno and the
     last one encountered.
@@ -1328,7 +1328,7 @@ def getcodediff( nframes ):
 
 #-------------------------------------------------------------------------------
 #
-def _write( output ):
+def _write(output):
     "Write output to test file."
 
     print '/------------------------------'
@@ -1349,11 +1349,11 @@ def _write( output ):
 #
 class TestsCreate(unittest.TestCase):
 
-    def test_uniqueness( self ):
+    def test_uniqueness(self):
         try:
-            Form( 'form-1',
-                  StringField('rachel'),
-                  StringField('rachel') )
+            Form('form-1',
+                 StringField('rachel'),
+                 StringField('rachel'))
             raise RuntimeError
         except FormUniquenessError:
             pass
@@ -1364,11 +1364,11 @@ class TestsRender(unittest.TestCase):
 
     renderer = SimpleRenderer()
 
-    def test_render( self ):
+    def test_render(self):
 
-        form = Form( 'form-1',
-                     StringField('bli2')
-                     )
+        form = Form('form-1',
+                    StringField('bli2')
+                    )
         self.assertRaises(RuntimeError, self.renderer.render, form)
 
         form = Form(
@@ -1392,7 +1392,7 @@ class TestsRender(unittest.TestCase):
         o = self.renderer.render(form, values, errors)
         _write(o)
 
-    def test_enums( self ):
+    def test_enums(self):
 
         choices = [ ('fr', "Francais"),
                     ('en', "English"),
@@ -1428,7 +1428,7 @@ class TestsRender(unittest.TestCase):
         self.renderer.render(form)
 
 
-    def test_file( self ):
+    def test_file(self):
 
         form = Form(
             'form-1',
@@ -1437,7 +1437,7 @@ class TestsRender(unittest.TestCase):
             )
         self.renderer.render(form)
 
-    def test_hide_password( self ):
+    def test_hide_password(self):
 
         form = Form(
             'form-1',
@@ -1452,7 +1452,7 @@ class TestsRender(unittest.TestCase):
 #
 class TestsParse(unittest.TestCase):
 
-    def test_simple( self ):
+    def test_simple(self):
 
         form = Form(
             'form-1',
@@ -1479,7 +1479,7 @@ class TestFields(unittest.TestCase):
 
     renderer = SimpleRenderer()
 
-    def test_string( self ):
+    def test_string(self):
         class_ = StringField
 
         # visible form, valid
@@ -1505,7 +1505,7 @@ class TestFields(unittest.TestCase):
 
         _write(self.renderer.render(form, vals))
 
-    def test_password( self ):
+    def test_password(self):
         class_ = PasswordField
 
         # visible form, valid
@@ -1530,7 +1530,7 @@ class TestFields(unittest.TestCase):
                      class_('passwd') )
         _write(self.renderer.render(form, vals))
 
-    def test_textarea( self ):
+    def test_textarea(self):
         class_ = TextAreaField
         roman = "Ven ven ven!  Pa'que tu vea como es el tren..."
 
@@ -1554,7 +1554,7 @@ class TestFields(unittest.TestCase):
                      class_('roman') )
         _write(self.renderer.render(form, vals))
 
-    def test_int( self ):
+    def test_int(self):
         class_ = IntField
         # visible form, valid
         form = Form( 'form-1',
@@ -1576,7 +1576,7 @@ class TestFields(unittest.TestCase):
                      class_('winning') )
         _write(self.renderer.render(form, vals))
 
-    def test_float( self ):
+    def test_float(self):
         class_ = FloatField
         # visible form, valid
         form = Form( 'form-1',
@@ -1599,7 +1599,7 @@ class TestFields(unittest.TestCase):
                      class_('winning') )
         _write(self.renderer.render(form, vals))
 
-    def test_bool( self ):
+    def test_bool(self):
         class_ = BoolField
         # visible form, valid
         form = Form( 'form-1',
@@ -1630,7 +1630,7 @@ class TestFields(unittest.TestCase):
         _write(self.renderer.render(form, vals))
 
 
-    def test_radio( self ):
+    def test_radio(self):
         class_ = RadioField
         choices = [ ('ha', 'La Habana'),
                     ('ci', 'Cienfuegos'),
@@ -1657,7 +1657,7 @@ class TestFields(unittest.TestCase):
                      class_('ciudad', choices) )
         _write(self.renderer.render(form, vals))
 
-    def test_list( self ):
+    def test_list(self):
         class_ = ListField
         choices = [ ('ha', 'La Habana'),
                     ('ci', 'Cienfuegos'),
@@ -1696,7 +1696,7 @@ class TestFields(unittest.TestCase):
                      class_('ciudad', choices) )
         _write(self.renderer.render(form, vals))
 
-    def test_menu( self ):
+    def test_menu(self):
         class_ = MenuField
 
         choices = [ ('ha', 'La Habana'),
@@ -1745,7 +1745,7 @@ class TestFields(unittest.TestCase):
         _write(self.renderer.render(form, vals))
 
 
-    def test_date( self ):
+    def test_date(self):
         class_ = DateField
 
         # visible form, valid
@@ -1765,7 +1765,7 @@ class TestFields(unittest.TestCase):
                      class_('fired') )
         _write(self.renderer.render(form, vals))
 
-    def test_file( self ):
+    def test_file(self):
         class_ = FileUploadField
 
 ## FIXME todo, write more tests.

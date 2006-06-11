@@ -254,7 +254,7 @@ def handler_query():
 
 #-------------------------------------------------------------------------------
 #
-def handler_handle( args, url ):
+def handler_handle(args, url):
     """
     Handler for form submission.
     """

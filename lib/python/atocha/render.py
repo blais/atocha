@@ -52,7 +52,7 @@ __all__ = ('FormRenderer',)
 
 #-------------------------------------------------------------------------------
 #
-def register_render_routine( renderer_cls, field_cls, fun, override=False ):
+def register_render_routine(renderer_cls, field_cls, fun, override=False):
     """
     Register a rendering routine for a specific renderer class and specific
     field class.  'fun' is the function that is to be registered, and must
@@ -80,7 +80,7 @@ def register_render_routine( renderer_cls, field_cls, fun, override=False ):
 
 #-------------------------------------------------------------------------------
 #
-def lookup_render_routine( renderer_cls, field_cls ):
+def lookup_render_routine(renderer_cls, field_cls):
     """
     Lookup the rendering routine associated with render 'renderer_cls' and field
     'field_cls', or with 'field_cls.render_as', if present.
@@ -140,7 +140,7 @@ class FormRenderer:
     than actual URLs.  See project Ranvier for an example of this."""
 
 
-    def __init__( self, form, values=None, errors=None, incomplete=False ):
+    def __init__(self, form, values=None, errors=None, incomplete=False):
         assert isinstance(form, Form)
         self._form = form
         "The form instance that we're rendering."
@@ -163,7 +163,7 @@ class FormRenderer:
         """Set of field names that have already been rendered. This is used to
         make sure that all of a form's fields are rendered."""
 
-    def __del__( self ):
+    def __del__(self):
         """
         Destructor override that just makes sure that we rendered all the fields
         of the given form before we got destroyed.
@@ -181,19 +181,19 @@ class FormRenderer:
                 missing = ', '.join(set(self._form.names()) - self._rendered)
                 raise atocha.AtochaDelError(msg, self._form.name, missing)
 
-    def getform( self ):
+    def getform(self):
         """
         Return the form that this renderer is processing.
         """
         return self._form
 
-    def getvalues( self ):
+    def getvalues(self):
         """
         Return the values that this renderer is processing.
         """
         return self._values
 
-    def _render_field( self, field, state ):
+    def _render_field(self, field, state):
         """
         Render a single field (implementation).
 
@@ -306,7 +306,7 @@ class FormRenderer:
         # Return output from the field-specific rendering code.
         return output
 
-    def _dispatch_render( self, field, rvalue, errmsg, state ):
+    def _dispatch_render(self, field, rvalue, errmsg, state):
         """
         Dispatch to the appropriate method for rendering the fields.
         """
@@ -358,14 +358,14 @@ class FormRenderer:
 
         return output
 
-    def _get_label( self, field ):
+    def _get_label(self, field):
         """
         Returns a printable label for the given field.
         """
         return (field.label and _(field.label)
                 or field.name.capitalize().decode('ascii'))
 
-    def validate_renderer( cls ):
+    def validate_renderer(cls):
         """
         Checks that all the required rendering methods are present in the
         renderer's implementation.  A rendering method should be provided for
@@ -396,7 +396,7 @@ class FormRenderer:
 
     validate_renderer = classmethod(validate_renderer)
 
-    def eval_action( self, action ):
+    def eval_action(self, action):
         """
         Evaluation the action with the action processor, if there is one.
         """
@@ -408,13 +408,13 @@ class FormRenderer:
     #---------------------------------------------------------------------------
     # Public methods that you can use.
 
-    def update_values( self, newvalues ):
+    def update_values(self, newvalues):
         """
         Update the renderer's values with the new values.
         """
         self._values.update(newvalues)
 
-    def render( self, only=None, ignore=None, action=None, submit=None ):
+    def render(self, only=None, ignore=None, action=None, submit=None):
         """
         Render the entire form including the labels and inputs and hidden fields
         and all.  This is intended to be the simple straightforward way to
@@ -433,7 +433,7 @@ class FormRenderer:
                               action or self._form.action,
                               submit or self._form.submit)
 
-    def render_container( self, action=None ):
+    def render_container(self, action=None):
         """
         Renders the form prefix only.  There returned value should be the
         container tags for the form, which include the form's name, action,
@@ -446,7 +446,7 @@ class FormRenderer:
 
         return self.do_render_container(action_url)
 
-    def render_table( self, *fieldnames, **kwds ):
+    def render_table(self, *fieldnames, **kwds):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
         types of the return values depends on the renderer.  Hidden fields are
@@ -478,7 +478,7 @@ class FormRenderer:
         css_class = kwds.pop('css_class', None)
         return self.do_render_table(ofields, css_class=css_class)
 
-    def table( self, pairs=(), css_class=None ):
+    def table(self, pairs=(), css_class=None):
         """
         User-callable method for rendering a simple table. 'pairs' is an
         iterable of (label, value) pairs.  'css_class' can be used to add a
@@ -486,7 +486,7 @@ class FormRenderer:
         """
         return self.do_table(pairs, css_class=css_class)
 
-    def ctable( cls, pairs=(), css_class=None ):
+    def ctable(cls, pairs=(), css_class=None):
         """
         User-callable method for rendering a simple table. 'pairs' is an
         iterable of (label, value) pairs.  'css_class' can be used to add a
@@ -496,7 +496,7 @@ class FormRenderer:
 
     ctable = classmethod(ctable)
 
-    def render_field( self, fieldname, state=None ):
+    def render_field(self, fieldname, state=None):
         """
         Render given field (by name).
         If you want to render multiple fields, use render_table().
@@ -511,14 +511,14 @@ class FormRenderer:
             state = field.state
         return self._render_field(field, state)
 
-    def ignore( self, *fieldnames ):
+    def ignore(self, *fieldnames):
         """
         Mark field as rendered, for insuring completion of the form.
         """
         for fname in fieldnames:
             self._rendered.add(fname)
 
-    def render_submit( self, submit=None ):
+    def render_submit(self, submit=None):
         """
         Renders the submit buttons.
 
@@ -528,7 +528,7 @@ class FormRenderer:
         return self.do_render_submit(submit or self._form.submit,
                                      self._form.reset)
 
-    def render_scripts( self ):
+    def render_scripts(self):
         """
         Renders the scripts to be added to the meta headers.
         """
@@ -539,21 +539,21 @@ class FormRenderer:
     # Abstract methods that must get implemented by the derived class.
     # Normally the client should not call any of these directly.
 
-    def do_render( self, ofields, action=None, submit=None ):
+    def do_render(self, ofields, action=None, submit=None):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm on the given list of fields.
         """
         raise NotImplementedError
 
-    def do_render_container( self, action_url ):
+    def do_render_container(self, action_url):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm for the form container.
         """
         raise NotImplementedError
 
-    def do_render_table( self, ofields, css_class=None ):
+    def do_render_table(self, ofields, css_class=None):
         """
         Render a table of (label, inputs) pairs, for convenient display.  The
         types of the return values depends on the renderer.  Hidden fields are
@@ -564,7 +564,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_table( self, pairs=(), extra=None, css_class=None ):
+    def do_table(self, pairs=(), extra=None, css_class=None):
         """
         Renders a simplistic table, inserting the given list of (label, inputs)
         pairs.  The return value type depend on the renderer.  The
@@ -580,20 +580,20 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def do_render_submit( self, submit, reset ):
+    def do_render_submit(self, submit, reset):
         """
         This abstract method must be provided by all the derived classes, to
         implement the actual rendering algorithm for the form container.
         """
         raise NotImplementedError
 
-    def do_render_scripts( self, scripts ):
+    def do_render_scripts(self, scripts):
         """
         Renders the scripts to be added to the meta headers (implementation).
         """
         raise NotImplementedError
 
-    def renderHidden( self, field, rvalue ):
+    def renderHidden(self, field, rvalue):
         """
         You must override this method to render a hidden field.  Since all the
         hidden fields get rendered using very similar code, we don't impose a
@@ -604,7 +604,7 @@ class FormRenderer:
         """
         raise NotImplementedError
 
-    def renderField( self, field, renctx ):
+    def renderField(self, field, renctx):
         """
         Example of the signature for the methods that must be overriden.
         See the class RenderContext for more details.
@@ -617,7 +617,7 @@ class FormRenderer:
 
     #---------------------------------------------------------------------------
     #
-    def render_buttons( cls, buttons, action, formname=None, method=None ):
+    def render_buttons(cls, buttons, action, formname=None, method=None):
         """
         Shorthand convenience function for rendering buttons.  This is a class
         method that should be invoked from an appropriate derived class.
@@ -666,7 +666,7 @@ class DisplayRendererBase:
     other renderer types, this is why we provide this special class).
     """
 
-    def __init__( self, kwds ):
+    def __init__(self, kwds):
         if 'errors' in kwds:
             raise AtochaError("Errors not allowed in display renderer.")
 
@@ -683,7 +683,7 @@ class DisplayRendererBase:
         value but which evaluates to False.  This will not display fields with
         empty strings."""
 
-    def _display_field( self, field, dvalue ):
+    def _display_field(self, field, dvalue):
         """
         Convert the value for the given field from valid type data to a
         user-displayable string.  This is used by the display renderers to
@@ -721,7 +721,7 @@ class DisplayRendererBase:
         # Return output from the field-specific rendering code.
         return output
 
-    def do_render_display_table( self, ofields, css_class=None ):
+    def do_render_display_table(self, ofields, css_class=None):
         """
         Render a table for diplay, honoring the appropriate options.
         """
@@ -781,7 +781,7 @@ class RenderContext:
     Simply holds the context data that is used to render a field.
     Note that this is used for non-hidden fields only.
     """
-    def __init__( self, state, rvalue, errmsg, required ):
+    def __init__(self, state, rvalue, errmsg, required):
 
         self.state = state
         "The final state to render the widgets in."

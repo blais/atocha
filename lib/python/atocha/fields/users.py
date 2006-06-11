@@ -61,7 +61,7 @@ class UsernameField(StringField):
     # Simple usernames.
     __username_re = re.compile('[a-z0-9]*')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         UsernameField.validate_attributes(attribs)
 
         self.autolower = attribs.pop('autolower', False)
@@ -79,14 +79,14 @@ class UsernameField(StringField):
 
         StringField.__init__(self, name, label, **attribs)
         
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
 
         dvalue = UsernameField.validate_username(dvalue, self.autolower)
 
         return dvalue
 
-    def validate_username( dvalue, autolower ):
+    def validate_username(dvalue, autolower):
         """
         Validate the the value is an acceptable username.
         """
@@ -120,7 +120,7 @@ class UsernameOrEmailField(EmailField):
 
     render_as = StringField # Always render just as a string.
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         UsernameOrEmailField.validate_attributes(attribs)
 
         attribs['accept_local'] = True
@@ -130,7 +130,7 @@ class UsernameOrEmailField(EmailField):
 
         EmailField.__init__(self, name, label, **attribs)
         
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # Note: this always works, even for usernames, because we accept local
         # emails.
         dvalue = EmailField.parse_value(self, pvalue)

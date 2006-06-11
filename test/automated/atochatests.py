@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
     """
     Base class for tests. We just use this for its assert functions.
     """
-    def __init__( self ):
+    def __init__(self):
         pass
 
 #-------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ class TestSimple(Test):
     """
     Simple varied tests.
     """
-    def test_simple1( self ):
+    def test_simple1(self):
         'Simple form test.'
 
         f = Form('test-form')
@@ -93,13 +93,13 @@ class TestRender(Test):
     Tests for rendering.
     """
 
-    def test_validity( self ):
+    def test_validity(self):
         "Test the completeness of a renderer's implementation."
         f = Form('test-form')
         TextFormRenderer.validate_renderer()
         # Note: test the htmlout renderer here too.
 
-    def test_hidden( self ):
+    def test_hidden(self):
         'Test rendering hidden fields.'
 
         # Expect an error on trying to render a hidden field without a value.
@@ -114,7 +114,7 @@ class TestRender(Test):
         p = TextFormRenderer(f, incomplete=1)
         self.assertRaises(AtochaError, p.render)
 
-    def test_incomplete( self ):
+    def test_incomplete(self):
         'Test rendering incompletely.'
 
         # Expect an error on trying to render a hidden field without a value.
@@ -127,7 +127,7 @@ class TestRender(Test):
         # exception is ignored from there, due to its presence in the __del__()
         # call, and all it does is output a message to stderr.
 
-    def test_nonexistent( self ):
+    def test_nonexistent(self):
         'Test rendering fields that do not exist.'
 
         # Expect an error on trying to render a hidden field without a value.
@@ -136,7 +136,7 @@ class TestRender(Test):
         p = FormRenderer(f, incomplete=1)
         self.assertRaises(AtochaError, p.render, only=['notexist'])
 
-    def test_encoding( self ):
+    def test_encoding(self):
         'Test output encoding for text renderer.'
 
         f = Form('test-form',
@@ -164,7 +164,7 @@ class TestRender(Test):
     
     tmpfilename = '/tmp/test.html'
     
-    def print_render( self, text ):
+    def print_render(self, text):
         """
         Renderer supporting the inspection of test HTML output.
         """
@@ -185,7 +185,7 @@ class TestRender(Test):
             # Open it automatically in the web browser.
             webbrowser.open(self.tmpfilename)
 
-    def test_visual( self ):
+    def test_visual(self):
         'Visual tests examining the output of the renderer.'
         
         f = Form('test-form',
@@ -208,7 +208,7 @@ class TestRender(Test):
         self.print_render(p.render())
 
 
-    def test_none( self ):
+    def test_none(self):
         'Test providing a value of None for rendering a string.'
 
         f = Form('test-form',
@@ -234,7 +234,7 @@ class TestFields(Test):
     Tests for specific fields.
     """
 
-    def test_string( self ):
+    def test_string(self):
         'StringField tests.'
 
         # Test without a label.
@@ -310,7 +310,7 @@ class TestFields(Test):
         self.assert_(o is not None)
         self.assert_(o.name == u'Martin')
 
-    def test_textarea( self ):
+    def test_textarea(self):
         'Textarea tests.'
         
         # Test strip option.
@@ -330,7 +330,7 @@ class TestFields(Test):
             self.assert_(o.quote)
 
         
-    def test_date( self ):
+    def test_date(self):
         'DateField tests.'
 
         # Test simple.
@@ -355,7 +355,7 @@ class TestFields(Test):
         self.assert_(o is None and p.haserrors() and 'birthday' in p.geterrors())
 
 
-    def test_email( self ):
+    def test_email(self):
         'EmailField tests.'
 
         f = Form('test-form', EmailField('email'))
@@ -393,12 +393,12 @@ class TestFields(Test):
         # p = FormParser(f, {'email': 'blais@furius.glu'}, end=1)
         # self.assert_(p.haserrors() and p.geterrorfields() == ['email'])
 
-    def test_url( self ):
+    def test_url(self):
         'URLField tests.'
 
         ## FIXME: todo
 
-    def test_int( self ):
+    def test_int(self):
         'IntField tests.'
 
         # Test simple.
@@ -427,7 +427,7 @@ class TestFields(Test):
         o = p.end()
         self.assert_(p.haserrors() and 'number' in p.geterrors())
 
-    def test_float( self ):
+    def test_float(self):
         'FloatField tests.'
 
         # Test simple.
@@ -457,7 +457,7 @@ class TestFields(Test):
         o = p.end()
         self.assert_(p.haserrors() and 'number' in p.geterrors())
 
-    def test_bool( self ):
+    def test_bool(self):
         'BoolField tests.'
 
         # Test simple.
@@ -483,7 +483,7 @@ class TestFields(Test):
         o = p.end()
         self.assert_(not p.haserrors() and p['agree'] is False)
 
-    def _test_one( self, cls, **extra ):
+    def _test_one(self, cls, **extra):
         'One choices test.'
 
         # Simple tests.
@@ -536,7 +536,7 @@ class TestFields(Test):
         self.assert_(not p.haserrors() and p['coffee'] == 'american')
 
 
-    def _test_many( self, cls, **extra ):
+    def _test_many(self, cls, **extra):
         'Many choices tests.'
 
         # Simple tests.
@@ -591,12 +591,12 @@ class TestFields(Test):
         self.assert_(not p.haserrors() and p['coffee'] == ['american'])
 
 
-    def test_radio( self ):
+    def test_radio(self):
         'RadioField tests.'
 
         self._test_one(RadioField)
 
-    def test_menu( self ):
+    def test_menu(self):
         'MenuField tests.'
 
         self._test_one(MenuField)
@@ -608,12 +608,12 @@ class TestFields(Test):
         o = p.end()
         self.assert_(p.haserrors() and 'coffee' in p.geterrors())
 
-    def test_checkboxes( self ):
+    def test_checkboxes(self):
         'CheckboxesField tests.'
 
         self._test_many(CheckboxesField)
 
-    def test_listbox( self ):
+    def test_listbox(self):
         'ListboxField tests.'
 
         self._test_one(ListboxField)
@@ -627,7 +627,7 @@ class TestFields(Test):
 
         self._test_many(ListboxField, multiple=1)
 
-    def test_jsdate( self ):
+    def test_jsdate(self):
         'JSDateField tests.'
 
         # Test simple.
@@ -653,7 +653,7 @@ class TestFields(Test):
                           {'birthday': 'Thu, Jan 01, 2005'})
         p.end()
 
-    def test_fileupload( self ):
+    def test_fileupload(self):
         'FileUpload tests.'
         
         contents = 'FILE CONTENTS'
@@ -706,7 +706,7 @@ class TestParser(Test):
     Tests for parser.
     """
 
-    def test_errstatus( self ):
+    def test_errstatus(self):
         "Test error status."
         f = Form('test-form', IntField('numbah'))
 

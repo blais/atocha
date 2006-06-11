@@ -50,7 +50,7 @@ class TestHoutRender:
     Tests for rendering.
     """
 
-    def test_simple( self ):
+    def test_simple(self):
         "Test rendering the demo form in htmlout mode"
 
         r = HoutFormRenderer(common.form1)

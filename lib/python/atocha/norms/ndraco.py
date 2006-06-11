@@ -35,7 +35,7 @@ __all__ = ('normalize',)
 
 #-------------------------------------------------------------------------------
 #
-def normalize_args( parser, args ):
+def normalize_args(parser, args):
     """
     Noop normalizer for Draco, which already normalizes from mod_python.
     """

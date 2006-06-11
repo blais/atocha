@@ -62,7 +62,7 @@ class _TextField(Field, OptRequired):
          values."""),
         )
 
-    def __init__( self, name, label, attribs ):
+    def __init__(self, name, label, attribs):
 
         self.minlen = attribs.pop('minlen', None)
         self.maxlen = attribs.pop('maxlen', None)
@@ -72,7 +72,7 @@ class _TextField(Field, OptRequired):
         Field.__init__(self, name, label, attribs)
 
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         """
         See base class.
 
@@ -145,12 +145,12 @@ class _TextField(Field, OptRequired):
         # Return the parsed valid value.
         return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return u''
         return _TextField.display_value(self, dvalue)
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         if self.encoding is not None:
             assert isinstance(dvalue, str)
             # Convert the data value to a unicode object for rendering.
@@ -177,7 +177,7 @@ class StringField(_TextField):
          rendering and during parsing."""),
         )
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         StringField.validate_attributes(attribs)
 
         self.size = attribs.pop('size', attribs.get('maxlen', None))
@@ -185,7 +185,7 @@ class StringField(_TextField):
 
         _TextField.__init__(self, name, label, attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = _TextField.parse_value(self, pvalue)
 
         # Check that the value contains no newlines.
@@ -203,7 +203,7 @@ class StringField(_TextField):
         else:
             return dvalue
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         rvalue = _TextField.render_value(self, dvalue)
 
         # Strip the value on rendering as well, if necessary.
@@ -226,7 +226,7 @@ class TextAreaField(_TextField):
         ('cols', 'int', "The number of column to render the field with."),
         )
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         TextAreaField.validate_attributes(attribs)
 
         self.rows = attribs.pop('rows', None)
@@ -234,7 +234,7 @@ class TextAreaField(_TextField):
 
         _TextField.__init__(self, name, label, attribs)
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         rvalue = _TextField.render_value(self, dvalue)
 
         if self.encoding:
@@ -265,7 +265,7 @@ class PasswordField(StringField):
          "Specifies whether the password should be state on rendering."),
         )
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         PasswordField.validate_attributes(attribs)
 
         self.hidepw = attribs.pop('hidepw', True)
@@ -273,13 +273,13 @@ class PasswordField(StringField):
         attribs['strip'] = False
         StringField.__init__(self, name, label, **attribs)
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if self.hidepw:
             return u''
         else:
             return _TextField.render_value(self, dvalue)
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         # Never display passwords in any case ever!
         return u'*' * len(dvalue)
 
@@ -305,7 +305,7 @@ class EmailField(StringField):
 
     __email_re = re.compile('^.*@.*\.[a-zA-Z][a-zA-Z]+$')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         EmailField.validate_attributes(attribs)
 
         self.accept_local = attribs.pop('accept_local', False)
@@ -314,7 +314,7 @@ class EmailField(StringField):
         attribs['strip'] = True
         StringField.__init__(self, name, label, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
         assert isinstance(dvalue, str)
 
@@ -339,14 +339,14 @@ class EmailField(StringField):
             # email address part.
             return addr
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         # Mangle the @ character into an HTML equivalent.
         # dvalue.replace('@', '&#64;')
         # Note: disabled, until we can find a nice way to output this without
         # escaping in htmlout.
         return StringField.render_value(self, dvalue)
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         # Mangle the @ character into an HTML equivalent.
         # dvalue.replace('@', '&#64;')
         # Note: disabled, until we can find a nice way to output this without
@@ -367,14 +367,14 @@ class URLField(StringField):
 
     attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         URLField.validate_attributes(attribs)
 
         attribs['encoding'] = 'ascii'
         attribs['strip'] = True
         StringField.__init__(self, name, label, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
         assert isinstance(dvalue, str)
 
@@ -403,14 +403,14 @@ class URLPathField(StringField):
 
     attributes_delete = ('encoding', 'strip', 'minlen', 'maxlen')
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         URLField.validate_attributes(attribs)
 
         attribs['encoding'] = 'ascii'
         attribs['strip'] = True
         StringField.__init__(self, name, label, **attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = StringField.parse_value(self, pvalue)
         assert isinstance(dvalue, str)
 

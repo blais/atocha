@@ -57,7 +57,7 @@ class BoolField(Field):
          transparently render the more widely supported onclick callback."""),
         )
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         BoolField.validate_attributes(attribs)
         
         self.disptrue = attribs.pop('disptrue', None)
@@ -66,7 +66,7 @@ class BoolField(Field):
 
         Field.__init__(self, name, label, attribs)
 
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         # Accept a missing argument or an empty string as False value (browsers
         # don't submit the argument for a checkbox input when it is not
         # checked).
@@ -81,7 +81,7 @@ class BoolField(Field):
         else:
             return bool(pvalue)
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         if dvalue is None:
             return False
         if dvalue:
@@ -89,7 +89,7 @@ class BoolField(Field):
         else:
             return False # Render false.
 
-    def display_value( self, dvalue ):
+    def display_value(self, dvalue):
         if dvalue:
             return self.disptrue or msg_registry['display-true']
         else:
@@ -106,7 +106,7 @@ class AgreeField(BoolField):
 
     attributes_delete = ('initial',)
 
-    def __init__( self, name, label=None, **attribs ):
+    def __init__(self, name, label=None, **attribs):
         AgreeField.validate_attributes(attribs)
 
         # Make sure that we're never initialized already checked (this is the
@@ -116,7 +116,7 @@ class AgreeField(BoolField):
 
         BoolField.__init__(self, name, label, **attribs)
         
-    def isrequired( self ):
+    def isrequired(self):
         """
         Override to place a marker that this field is required.
         Note: this field is not 'optionally required', it is ALWAYS required.
@@ -124,11 +124,11 @@ class AgreeField(BoolField):
         """
         return True
 
-    def render_value( self, dvalue ):
+    def render_value(self, dvalue):
         # Always render False, to be accepted.
         return False
     
-    def parse_value( self, pvalue ):
+    def parse_value(self, pvalue):
         dvalue = BoolField.parse_value(self, pvalue)
 
         if dvalue is False:
