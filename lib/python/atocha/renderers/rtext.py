@@ -241,16 +241,16 @@ class TextFormRenderer(TextRenderer):
         f.write(u'<div class="%s">\n' % self.css_submit)
 
         if isinstance(submit, msg_type):
-            f.write(u'<input type="submit" value="%s" />\n' % (_(submit)))
+            f.write(u'<input type="submit" value="%s" />\n' % (C_(submit)))
         else:
             assert isinstance(submit, (list, tuple))
             for subvalue, label in submit:
                 assert isinstance(label, msg_type)
                 f.write((u'<input type="submit" name="%s" value="%s" />\n') %
-                        (subvalue, _(label)))
+                        (subvalue, C_(label)))
 
         if reset:
-            f.write(u'<input type="reset" value="%s" />\n' % _(reset))
+            f.write(u'<input type="reset" value="%s" />\n' % C_(reset))
 
         f.write(u'</div>\n')
         if self.ofile is None: return f.getvalue()
@@ -369,7 +369,7 @@ class TextFormRenderer(TextRenderer):
             if vname in renctx.rvalue:
                 selstr = u'selected="selected"'
             lines.append(u'<option value="%s" %s>%s</option>' %
-                         (vname, selstr, _(label)))
+                         (vname, selstr, C_(label)))
         lines.append(u'</select>')
         return self._geterror(renctx) + u'\n'.join(lines)
 
@@ -453,7 +453,7 @@ def renderRadioField(rdr, field, renctx):
         checked = bool(vname == renctx.rvalue)
         inputs.append(
             rdr._input('radio', field, renctx.state,
-                        vname, checked, _(label)))
+                        vname, checked, C_(label)))
     output = rdr._orient(field, inputs)
     return rdr._geterror(renctx) + output
 
@@ -467,7 +467,7 @@ def renderCheckboxesField(rdr, field, renctx):
         checked = vname in renctx.rvalue
         inputs.append(
             rdr._input('checkbox', field, renctx.state,
-                        vname, checked, _(label)))
+                        vname, checked, C_(label)))
     output = rdr._orient(field, inputs)
     return rdr._geterror(renctx) + output
 
@@ -485,7 +485,7 @@ def renderSetFileField(rdr, field, renctx):
     checked, renctx.rvalue = renctx.rvalue, u'1'
     resetw = rdr._single('checkbox', field, renctx,
                           checked, varname=field.varnames[1])
-    return u'\n'.join([filew, '&nbsp;' + _(field.remlabel) + resetw])
+    return u'\n'.join([filew, '&nbsp;' + C_(field.remlabel) + resetw])
 
 def renderJSDateField(rdr, field, renctx):
     varname = field.varnames[0]
@@ -636,3 +636,14 @@ TextDisplayRenderer_routines = ((StringField, displayValue),
 for fcls, fun in TextDisplayRenderer_routines:
     atocha.render.register_render_routine(TextDisplayRenderer, fcls, fun)
 
+
+#-------------------------------------------------------------------------------
+#
+def C_(s):
+    """
+    Conditional gettext, only if the argument is a str.
+    If the argument is a unicode object, do not translate.
+    """
+    if isinstance(s, str):
+        return _(s)
+    return s

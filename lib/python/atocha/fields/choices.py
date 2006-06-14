@@ -109,7 +109,7 @@ class _MultipleField(Field):
         self.setchoices(choices)
 
     @staticmethod
-    def parse_choices(in_choices):
+    def parse_choices(in_choices, accept_unicode=False):
         choiceset = {}
         choices = []
 
@@ -150,7 +150,10 @@ class _MultipleField(Field):
                     # Other we check to make sure that the label is of type
                     # msg_type, which is the required type for all the
                     # user-visible choices.
-                    assert isinstance(label, msg_type)
+                    if accept_unicode:
+                        assert isinstance(label, (msg_type, unicode))
+                    else:
+                        assert isinstance(label, msg_type)
 
                 # Just more zealous sanity checking.
                 assert isinstance(choice, str)
@@ -162,12 +165,15 @@ class _MultipleField(Field):
 
         return choices, choiceset
 
-    def setchoices(self, choices):
+    def setchoices(self, choices, accept_unicode=False):
         """
         Set the choices that this field renders and parses.  'choices' is of the
-        same types as described in the attributes.
+        same types as described in the attributes.  If 'accept_unicode' is true,
+        we accept the choices as unicode objects and the renderer will not
+        translate.
         """
-        self.choices, self.choiceset = self.parse_choices(choices)
+        self.choices, self.choiceset = self.parse_choices(choices,
+                                                          accept_unicode)
 
     def checkvalues(self, values):
         """

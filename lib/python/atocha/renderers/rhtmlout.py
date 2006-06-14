@@ -199,15 +199,15 @@ class HoutFormRenderer(HoutRenderer):
     def do_render_submit(self, submit, reset):
         nodes = []
         if isinstance(submit, msg_type):
-            nodes.append(INPUT(type='submit', value=_(submit)))
+            nodes.append(INPUT(type='submit', value=C_(submit)))
         else:
             assert isinstance(submit, (list, tuple))
             for subvalue, label in submit:
                 assert isinstance(label, msg_type)
                 nodes.append(INPUT(type='submit',
-                                   name=subvalue, value=_(label)))
+                                   name=subvalue, value=C_(label)))
         if reset:
-            nodes.append(INPUT(type='reset', value=_(reset)))
+            nodes.append(INPUT(type='reset', value=C_(reset)))
         return DIV(nodes, CLASS=self.css_submit)
 
     def do_render_scripts(self, scripts):
@@ -307,7 +307,7 @@ class HoutFormRenderer(HoutRenderer):
             select.attrib['onchange'] = field.onchange
 
         for vname, label in field.choices:
-            option = OPTION(_(label), value=vname)
+            option = OPTION(C_(label), value=vname)
             if vname in renctx.rvalue:
                 option.attrib['selected'] = "selected"
             select.append(option)
@@ -390,7 +390,7 @@ def renderRadioField(rdr, field, renctx):
         checked = bool(vname == renctx.rvalue)
         inputs.append(
             rdr._input('radio', field, renctx.state,
-                        vname, checked, _(label)))
+                        vname, checked, C_(label)))
     output = rdr._orient(field, inputs)
     return [rdr._geterror(renctx)] + output
 
@@ -404,7 +404,7 @@ def renderCheckboxesField(rdr, field, renctx):
         checked = vname in renctx.rvalue
         inputs.append(
             rdr._input('checkbox', field, renctx.state,
-                        vname, checked, _(label)))
+                        vname, checked, C_(label)))
     output = rdr._orient(field, inputs)
     return [rdr._geterror(renctx)] + output
 
@@ -422,7 +422,7 @@ def renderSetFileField(rdr, field, renctx):
     checked, renctx.rvalue = False, u'1'
     resetw = rdr._single('checkbox', field, renctx,
                           checked, varname=field.varnames[1])
-    return [filew, _(field.remlabel), resetw]
+    return [filew, C_(field.remlabel), resetw]
 
 def renderJSDateField(rdr, field, renctx):
     varname = field.varnames[0]
@@ -554,4 +554,16 @@ HoutDisplayRenderer_routines = ((StringField, displayValue),
 
 for fcls, fun in HoutDisplayRenderer_routines:
     atocha.render.register_render_routine(HoutDisplayRenderer, fcls, fun)
+
+
+#-------------------------------------------------------------------------------
+#
+def C_(s):
+    """
+    Conditional gettext, only if the argument is a str.
+    If the argument is a unicode object, do not translate.
+    """
+    if isinstance(s, str):
+        return _(s)
+    return s
 
