@@ -29,6 +29,8 @@ import sys
 if sys.version_info[:2] < (2, 4):
     from sets import Set as set
 from types import NoneType
+import keyword
+import copy
 
 # atocha imports
 from atocha import AtochaError, AtochaInternalError
@@ -38,13 +40,6 @@ from messages import msg_registry, msg_type
 
 
 __all__ = ('Form',)
-
-
-_python_keywords = set(
-    ('and', 'del', 'for', 'is', 'raise', 'assert', 'elif', 'from', 'lambda',
-    'return', 'break', 'else', 'global', 'not', 'try', 'class', 'except', 'if',
-    'or', 'while', 'continue', 'exec', 'import', 'pass', 'yield', 'def',
-    'finally', 'in', 'print',))
 
 
 #-------------------------------------------------------------------------------
@@ -98,19 +93,59 @@ class Form:
         Form creation.  You can specify 'action', 'submit' (button name) and
         'method' (GET or POST) here.
         """
+        self.name = None
+        "The name of the form, which appears in the HTML rendering as well."
+
+        self.action = self.__def_action
+        """The action of the form. This is the URL which will handle the form
+        submit."""
+
+        self.submit = None
+        """The string on the submit button, or a tuple of strings if there are
+        many."""
+
+        self.method = None
+        "The submit method, GET or POST."
+
+        self.enctype = self.__def_enctype
+        """Encapsulation type for the form data.  This should be set
+        appropriately, depending on the presence of a file upload input."""
+
+        self.accept_charset = self.__def_accept_charset
+        "The charset encoding that the form handler will accept."
+
+        self.reset = None
+        """Whether a reset button should be provided. The value can be either a
+        string to be translated later or a bool/int, where we will use the
+        default value."""
+
+        self._fields = []
+        "The list of fields, essentially to keep the ordering."
+
+        self._fieldsmap = {}
+        "A map of all the fields."
+
+        self._initialize(name, *fields, **kwds)
+
+
+    def _initialize(self, name, *fields, **kwds):
+        """
+        Augment the initialized form with the given name, fields and keyword
+        options.
+        """
         assert name and isinstance(name, str)
         self.name = name
         "The name of the form, which appears in the HTML rendering as well."
 
-        # assert isinstance(action, str) # Accept any data type to support
-                                         # delayed evaluation.
-        self.action = kwds.get('action', self.__def_action)
-        """The action of the form. This is the URL which will handle the form
-        submit."""
 
-        self.submit = kwds.get('submit', None)
-        """The string on the submit button, or a tuple of strings if there are
-        many."""
+        if 'action' in kwds:
+            # assert isinstance(action, str) # Accept any data type to support
+                                             # delayed evaluation.
+            self.action = kwds['action']
+
+        if 'submit' in kwds:
+             self.submit = kwds['submit']
+
         if self.submit is None:
             self.submit = msg_registry.get_notrans('submit-button')
 
@@ -126,34 +161,23 @@ class Form:
             assert isinstance(self.submit, msg_type)
         assert self.submit
 
-        self.method = kwds.get('method', None)
+        if 'method' in kwds:
+            self.method = kwds['method']
         if self.method is None:
             self.method = self.__def_method
         assert self.method in ('GET', 'POST')
-        "The submit method, GET or POST."
 
-        self.enctype = kwds.get('enctype', self.__def_enctype)
-        """Encapsulation type for the form data.  This should be set
-        appropriately, depending on the presence of a file upload input."""
+        if 'enctype' in kwds:
+            self.enctype = kwds['enctype']
 
-        self.accept_charset = kwds.get('accept_charset',
-                                       self.__def_accept_charset)
-        "The charset encoding that the form handler will accept."
+        if 'accept_charset' in kwds:
+            self.accept_charset = kwds['accept_charset']
 
-        reset = kwds.get('reset', None)
-        if reset and isinstance(reset, (bool, int)):
-            reset = msg_registry.get_notrans('reset-button')
-        assert isinstance(reset, (NoneType, msg_type))
-        self.reset = reset
-        """Whether a reset button should be provided. The value can be either a
-        string to be translated later or a bool/int, where we will use the
-        default value."""
-            
-        self._fields = []
-        "The list of fields, essentially to keep the ordering."
-
-        self._fieldsmap = {}
-        "A map of all the fields."
+        if 'reset' in kwds:
+            self.reset = kwds['reset']
+        if self.reset and isinstance(self.reset, (bool, int)):
+            self.reset = msg_registry.get_notrans('reset-button')
+        assert isinstance(self.reset, (NoneType, msg_type))
 
         # Unroll nested lists of fields.
         def unroll_fields(forl):
@@ -245,6 +269,22 @@ class Form:
                 pass
         return values
 
+    def copy_extend(self, name, *fields, **kwds):
+        """
+        Make a copy of this form and add the given fields to it.  Return the new
+        form, extended with the additional fields.  The existing fields are
+        actually copied as well (deep-copied).  See the constructor for the
+        possible valid arguments.
+        """
+        # Clone ourselves.
+        formcopy = copy.deepcopy(self)
+
+        # Initialize over the existing form.
+        formcopy._initialize(name, *fields, **kwds)
+
+        # Return the new copy.
+        return formcopy
+
     def addfield(self, field):
         """
         Add a field to the form. The field argument must be a Field instance.
@@ -257,7 +297,7 @@ class Form:
             self.enctype = self.__def_enctype_file
 
         # Check against keywords.
-        if field.name in _python_keywords:
+        if field.name in keyword.kwlist:
             # Note: we *could* issue a warning here, but we assume that most
             # people will use the attribute syntax to access the parsed
             # arguments and it would only write something to the log file.  It's

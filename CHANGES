@@ -5,6 +5,9 @@
 Current Version
 ---------------
 
+- Added copy_extend() method to the form, so that we clone and extend forms
+  easily.
+
 - Fixed a few msg_registry lookups that were happening in the constructors, 
   which is usually before the language environment is setup.
 
