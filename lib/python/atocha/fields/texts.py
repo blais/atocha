@@ -186,6 +186,13 @@ class StringField(_TextField):
         _TextField.__init__(self, name, label, attribs)
 
     def parse_value(self, pvalue):
+        if pvalue and self.strip:
+            # Strip the text value before parsing.
+            #
+            # We do this before the string parsing, because it may be required,
+            # and we want to reject a required string consisting only of spaces.
+            pvalue = pvalue.strip()
+
         dvalue = _TextField.parse_value(self, pvalue)
 
         # Check that the value contains no newlines.
@@ -197,12 +204,8 @@ class StringField(_TextField):
             raise FieldError(msg_registry['text-invalid-chars'],
                              self.render_value(dvalue))
 
-        if self.strip:
-            # Strip the parsed valid text value.
-            return dvalue.strip()
-        else:
-            return dvalue
-
+        return dvalue
+    
     def render_value(self, dvalue):
         rvalue = _TextField.render_value(self, dvalue)
 
