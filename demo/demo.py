@@ -35,8 +35,7 @@ if rtype == 'htmlout':
         rtype = 'text'
 
 
-#-------------------------------------------------------------------------------
-#
+
 # Definition of test form.
 #
 form1 = Form(
@@ -139,7 +138,7 @@ form1 = Form(
     action='handle', reset=1)
 
 
-#-------------------------------------------------------------------------------
+
 # HTML page templates for our test scripts
 
 template_pre = """
@@ -179,8 +178,7 @@ template_post = """
 """
 
 
-#-------------------------------------------------------------------------------
-#
+
 def getdb():
     """
     Returns an open object with a dict interface to store data in a DB.
@@ -193,14 +191,10 @@ def getdb():
     shelf = shelve.open(fn, 'c')
     return shelf
 
-#===============================================================================
-# HANDLERS
-#===============================================================================
 
 ext = None
 
-#-------------------------------------------------------------------------------
-#
+
 def handler_query():
     """
     Handler for rendering a query form to allow the user to enter input.
@@ -252,8 +246,7 @@ def handler_query():
 
     return s.getvalue()
 
-#-------------------------------------------------------------------------------
-#
+
 def handler_handle(args, url):
     """
     Handler for form submission.
@@ -288,8 +281,7 @@ def handler_handle(args, url):
 
     return handler_display()
 
-#-------------------------------------------------------------------------------
-#
+
 def handler_display():
     """
     Render page for final accepted displayed data.
@@ -352,8 +344,7 @@ def handler_display():
     return s.getvalue()
 
 
-#-------------------------------------------------------------------------------
-#
+
 def handler_reset():
     """
     Handler that resets the form data stored in the local DB.

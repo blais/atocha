@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # pylint: disable-msg=W0611
 #
 # $Id$
@@ -45,8 +44,7 @@ except ImportError:
 __all__ = ('HoutFormRenderer', 'HoutDisplayRenderer',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class HoutRenderer(atocha.render.FormRenderer):
     """
     Base class for all renderers that will output to htmlout.
@@ -117,8 +115,7 @@ class HoutRenderer(atocha.render.FormRenderer):
     do_table_imp = staticmethod(do_table_imp)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class HoutFormRenderer(HoutRenderer):
     """
     Form renderer that outputs htmlout nodes.
@@ -351,8 +348,7 @@ class HoutFormRenderer(HoutRenderer):
         return inputs
 
 
-#-------------------------------------------------------------------------------
-#
+
 def renderStringField(rdr, field, renctx):
     return rdr._single('text', field, renctx)
 
@@ -439,7 +435,7 @@ def renderJSDateField(rdr, field, renctx):
     return rdr._script(field, renctx, script, noscript)
 
 
-#-------------------------------------------------------------------------------
+
 # Register rendering routines.
 HoutFormRenderer_routines = ((StringField, renderStringField),
                              (TextAreaField, renderTextAreaField),
@@ -465,8 +461,7 @@ for fcls, fun in HoutFormRenderer_routines:
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
     """
     Display renderer in normal text. This renderer is meant to display parsed
@@ -507,8 +502,7 @@ class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
     def renderHidden(self, field, rvalue):
         return None
 
-#-------------------------------------------------------------------------------
-#
+
 def displayValue(rdr, field, renctx):
     return [renctx.rvalue]
 
@@ -530,7 +524,7 @@ def displayFileUploadField(rdr, field, renctx):
     return []
 
 
-#-------------------------------------------------------------------------------
+
 # Register rendering routines.
 HoutDisplayRenderer_routines = ((StringField, displayValue),
                                 (TextAreaField, displayTextAreaField),
@@ -556,8 +550,7 @@ for fcls, fun in HoutDisplayRenderer_routines:
     atocha.render.register_render_routine(HoutDisplayRenderer, fcls, fun)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def C_(s):
     """
     Conditional gettext, only if the argument is a str.

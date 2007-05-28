@@ -41,8 +41,7 @@ from atocha import *
 reload(sys); sys.setdefaultencoding('undefined')
 
 
-#-------------------------------------------------------------------------------
-#
+
 class Test(unittest.TestCase):
     """
     Base class for tests. We just use this for its assert functions.
@@ -50,8 +49,7 @@ class Test(unittest.TestCase):
     def __init__(self):
         pass
 
-#-------------------------------------------------------------------------------
-#
+
 class TestSimple(Test):
     """
     Simple varied tests.
@@ -76,8 +74,7 @@ class TestSimple(Test):
         self.assertEqual(o.name, u'école')
  
 
-#-------------------------------------------------------------------------------
-#
+
 class TestForm(Test):
     """
     Test form functionalities.
@@ -86,8 +83,7 @@ class TestForm(Test):
     # FIXME: we need to check the basic form functionalities here.
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TestRender(Test):
     """
     Tests for rendering.
@@ -225,8 +221,7 @@ class TestRender(Test):
         # self.print_render(p.render())
 
 
-#-------------------------------------------------------------------------------
-#
+
 _u8str = u'école'.encode('utf-8')
 
 class TestFields(Test):
@@ -699,8 +694,7 @@ class TestFields(Test):
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TestParser(Test):
     """
     Tests for parser.

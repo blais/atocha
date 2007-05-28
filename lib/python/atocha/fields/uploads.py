@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -36,8 +35,7 @@ from bools import BoolField
 __all__ = ('FileUploadField', 'SetFileField', 'FileUpload',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class FileUpload:
     """
     Adapter class for the mod_python Field class that implements the file
@@ -68,8 +66,7 @@ class FileUpload:
         return getattr(self.obj, name)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class FileUploadField(Field, OptRequired):
     """
     A file being sent by the client.  The returned value is an instance of the
@@ -214,8 +211,7 @@ class FileUploadField(Field, OptRequired):
         return u''
 
 
-#-------------------------------------------------------------------------------
-#
+
 class SetFileField(FileUploadField):
     """
     A file being set or reset by the client.  The returned value is an instance

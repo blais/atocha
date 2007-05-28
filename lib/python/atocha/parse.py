@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -34,8 +33,7 @@ from messages import msg_registry
 __all__ = ('FormParser',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class FormParser:
     """
     Helper class that allow us to parse a form's arguments and process and
@@ -712,8 +710,7 @@ class FormParser:
         return None
 
 
-#-------------------------------------------------------------------------------
-#
+
 class ParserAccessor(object):
     """
     Accessor helper class that allows you to access the contents of the

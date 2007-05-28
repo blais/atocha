@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -42,8 +41,7 @@ from messages import msg_registry, msg_type
 __all__ = ('Form',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class Unset:
     """
     Dummy symbol used to indicate that the default value is not set.
@@ -51,8 +49,7 @@ class Unset:
     """
 
 
-#-------------------------------------------------------------------------------
-#
+
 class Form:
     """
     A form is essentially a container for a number of input fields with some

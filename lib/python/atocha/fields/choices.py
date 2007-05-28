@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -36,8 +35,7 @@ from atocha.messages import msg_registry, msg_type
 __all__ = ('RadioField', 'MenuField', 'CheckboxesField', 'ListboxField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class _MultipleField(Field):
     """
     Base class for fields that allow zero, one or multiple choices among many.
@@ -196,8 +194,7 @@ class _MultipleField(Field):
                 raise AtochaError("Error: internal error checking values "
                                    "against choices in a multiple field.")
 
-#-------------------------------------------------------------------------------
-#
+
 class _OneChoiceField(_MultipleField):
     """
     Base class for multiple selectors for classes that allow exactly one choice.
@@ -287,8 +284,7 @@ class _OneChoiceField(_MultipleField):
         return _(self.choiceset[dvalue])
 
 
-#-------------------------------------------------------------------------------
-#
+
 class RadioField(_OneChoiceField, Orientable):
     """
     Field that renders radio buttons, which allow the user to select a single
@@ -302,8 +298,7 @@ class RadioField(_OneChoiceField, Orientable):
         Orientable.__init__(self, attribs)
         _OneChoiceField.__init__(self, name, choices, label, attribs)
 
-#-------------------------------------------------------------------------------
-#
+
 class MenuField(_OneChoiceField):
     """
     Field that renders an option menu, which allow the user to select a single
@@ -324,8 +319,7 @@ class MenuField(_OneChoiceField):
         _OneChoiceField.__init__(self, name, choices, label, attribs)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class _ManyChoicesField(_MultipleField):
     """
     Zero or many checkbox choices among many.
@@ -418,8 +412,7 @@ class _ManyChoicesField(_MultipleField):
         return u', '.join(labels)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class CheckboxesField(_ManyChoicesField, Orientable):
     """
     Zero, one or many checkbox choices.  This field defines a row or column of
@@ -433,8 +426,7 @@ class CheckboxesField(_ManyChoicesField, Orientable):
         Orientable.__init__(self, attribs)
         _ManyChoicesField.__init__(self, name, choices, label, attribs)
 
-#-------------------------------------------------------------------------------
-#
+
 class ListboxField(_ManyChoicesField, _OneChoiceField, OptRequired):
     """
     A listbox higher than one entry.  Either ''zero or one'' choices, OR ''zero

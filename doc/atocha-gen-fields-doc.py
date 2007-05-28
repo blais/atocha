@@ -32,8 +32,7 @@ from subprocess import call
 import atocha
 import atocha.fields
 
-#-------------------------------------------------------------------------------
-#
+
 template = """
 ========================
   Atocha Field Classes
@@ -52,8 +51,7 @@ template = """
 
 _opts_as_table = 0
 
-#-------------------------------------------------------------------------------
-#
+
 def main():
     import optparse
     parser = optparse.OptionParser(__doc__.strip())

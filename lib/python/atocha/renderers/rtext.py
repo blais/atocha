@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # pylint: disable-msg=W0611
 #
 # $Id$
@@ -39,8 +38,7 @@ from atocha.messages import msg_type
 __all__ = ('TextFormRenderer', 'TextDisplayRenderer',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TextRenderer(atocha.render.FormRenderer):
     """
     Base class for all renderers that will output to text.
@@ -138,8 +136,7 @@ class TextRenderer(atocha.render.FormRenderer):
     do_table_imp = staticmethod(do_table_imp)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TextFormRenderer(TextRenderer):
     """
     Form renderer that outputs HTML text directly.
@@ -412,8 +409,7 @@ class TextFormRenderer(TextRenderer):
 
         return u'\n'.join(inputs)
 
-#-------------------------------------------------------------------------------
-#
+
 def renderStringField(rdr, field, renctx):
     return rdr._single('text', field, renctx)
 
@@ -504,7 +500,7 @@ def renderJSDateField(rdr, field, renctx):
     return rdr._script(field, renctx, script, noscript)
 
 
-#-------------------------------------------------------------------------------
+
 # Register rendering routines.
 TextFormRenderer_routines = ((StringField, renderStringField),
                              (TextAreaField, renderTextAreaField),
@@ -530,8 +526,7 @@ for fcls, fun in TextFormRenderer_routines:
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
     """
     Display renderer in normal text. This renderer is meant to display parsed
@@ -588,8 +583,7 @@ class TextDisplayRenderer(TextRenderer, atocha.render.DisplayRendererBase):
         return ''
 
 
-#-------------------------------------------------------------------------------
-#
+
 def displayValue(rdr, field, renctx):
     return renctx.rvalue
 
@@ -612,7 +606,7 @@ def displayFileUploadField(rdr, field, renctx):
     # Never display a file upload. Don't even try.
     return u''
 
-#-------------------------------------------------------------------------------
+
 # Register rendering routines.
 TextDisplayRenderer_routines = ((StringField, displayValue),
                                 (TextAreaField, displayTextAreaField),
@@ -637,8 +631,7 @@ for fcls, fun in TextDisplayRenderer_routines:
     atocha.render.register_render_routine(TextDisplayRenderer, fcls, fun)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def C_(s):
     """
     Conditional gettext, only if the argument is a str.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -36,8 +35,7 @@ __all__ = ('StringField', 'TextAreaField', 'PasswordField',
            'EmailField', 'URLField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class _TextField(Field, OptRequired):
     """
     Base class for fields receiving text.
@@ -161,8 +159,7 @@ class _TextField(Field, OptRequired):
         return rvalue
 
 
-#-------------------------------------------------------------------------------
-#
+
 class StringField(_TextField):
     """
     String input that must be on a single line.
@@ -216,8 +213,7 @@ class StringField(_TextField):
             return rvalue
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TextAreaField(_TextField):
     """
     A multi-line string.
@@ -250,8 +246,7 @@ class TextAreaField(_TextField):
     display_value = render_value
 
 
-#-------------------------------------------------------------------------------
-#
+
 class PasswordField(StringField):
     """
     A single-line field for entering a password.
@@ -288,8 +283,7 @@ class PasswordField(StringField):
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class EmailField(StringField):
     """
     Field for an email address.  The user can also enter a full name with <> but
@@ -356,8 +350,7 @@ class EmailField(StringField):
         # escaping in htmlout.
         return StringField.render_value(self, dvalue)
 
-#-------------------------------------------------------------------------------
-#
+
 class URLField(StringField):
     """
     Field for an URL. We can parse some of the syntax for a valid URL.  This
@@ -392,8 +385,7 @@ class URLField(StringField):
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class URLPathField(StringField):
     """
     Field for an URL. We can parse some of the syntax for a valid URL.  This

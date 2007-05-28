@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -40,8 +39,7 @@ __all__ = ('Field', 'FieldError',
            'OptRequired', 'Orientable',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class Field:
     """
     Common class for all form fields.
@@ -425,8 +423,7 @@ class Field:
         raise NotImplementedError # return uvalue
 
 
-#-------------------------------------------------------------------------------
-#
+
 class FieldError(Exception):
     """
     Error that is raised when user-input results in an invalid field.
@@ -434,8 +431,7 @@ class FieldError(Exception):
     (see class Field for details).
     """
     
-#------------------------------------------------------------------------------
-#
+
 class OptRequired:
     """
     Base class for all fields which can be OPTIONALLY REQUIRED, that is, which
@@ -477,8 +473,7 @@ class OptRequired:
         return pvalue
 
 
-#-------------------------------------------------------------------------------
-#
+
 ORI_HORIZONTAL = 1   # Horizontal widgets/table.
 ORI_VERTICAL = 2     # Vertical table.
 ORI_RAW = 3          # Just the inputs.

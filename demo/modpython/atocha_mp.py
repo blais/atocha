@@ -32,8 +32,7 @@ from mod_python import apache
 from mod_python.util import FieldStorage, Field
 
     
-#-------------------------------------------------------------------------------
-#
+
 setup_done = 0
 
 def setup_mp(demo_root):
@@ -78,15 +77,13 @@ def setup_mp(demo_root):
         pass
 
 
-#-------------------------------------------------------------------------------
-#
+
 class Redirect(Exception):
     """
     Exception used to trigger redirection.
     """
 
-#-------------------------------------------------------------------------------
-#
+
 def handler(mpreq):
     """
     mod_python handler. We dispatch to the methods in demo.py.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -33,8 +32,7 @@ from atocha.fields.uploads import FileUpload
 __all__ = ('normalize',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def normalize_args(parser, form):
     """
     Normalizer for Python's cgi library.

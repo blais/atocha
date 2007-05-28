@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -38,8 +37,7 @@ from choices import MenuField
 __all__ = ('DateField', 'JSDateField', 'DateMenuField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class DateField(StringField):
     """
     A string field that accepts strings that represent dates, in some specific
@@ -136,8 +134,7 @@ class DateField(StringField):
         return time_to_string(dvalue, self._def_display_fmt)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class JSDateField(Field, OptRequired):
     """
     A fancy Javascript-based date field.
@@ -224,8 +221,7 @@ class JSDateField(Field, OptRequired):
         return time_to_string(dvalue, DateField._def_display_fmt)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class DateMenuField(MenuField):
     """
     A field that offers dates in close proximity, via a select menu.
@@ -331,8 +327,7 @@ class DateMenuField(MenuField):
         self.setchoices(choices)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def time_to_string(date, fmt):
     """
     Convert a date object to a unicode string.  We need this because
@@ -347,8 +342,7 @@ def time_to_string(date, fmt):
         return date.strftime(fmt)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def date_range(nbsteps, basedate=None, step=None):
     """
     Yield a range of dates, for 'nbsteps' steps, starting from 'basedate' or

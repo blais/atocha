@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -34,8 +33,7 @@ from atocha.messages import msg_registry
 __all__ = ('BoolField', 'AgreeField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class BoolField(Field):
     """
     A single boolean (checkbox) field.
@@ -96,8 +94,7 @@ class BoolField(Field):
             return self.dispfalse or msg_registry['display-false']
 
 
-#-------------------------------------------------------------------------------
-#
+
 class AgreeField(BoolField):
     """
     Checkbox that is required to be received, otherwise an error is given.

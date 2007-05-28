@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -50,8 +49,7 @@ from parse import FormParser
 __all__ = ('FormRenderer',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 def register_render_routine(renderer_cls, field_cls, fun, override=False):
     """
     Register a rendering routine for a specific renderer class and specific
@@ -78,8 +76,7 @@ def register_render_routine(renderer_cls, field_cls, fun, override=False):
     # Add the function to the registry.
     reg[field_cls] = fun
 
-#-------------------------------------------------------------------------------
-#
+
 def lookup_render_routine(renderer_cls, field_cls):
     """
     Lookup the rendering routine associated with render 'renderer_cls' and field
@@ -118,8 +115,7 @@ def lookup_render_routine(renderer_cls, field_cls):
 
 
 
-#-------------------------------------------------------------------------------
-#
+
 class FormRenderer:
     """
     Form renderer base class.
@@ -658,8 +654,7 @@ class FormRenderer:
     render_buttons = classmethod(render_buttons)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class DisplayRendererBase:
     """
     Common options for display renderers (but they might not make sense for
@@ -774,8 +769,7 @@ class DisplayRendererBase:
         return self.do_table(visible, css_class=css_class)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class RenderContext:
     """
     Simply holds the context data that is used to render a field.

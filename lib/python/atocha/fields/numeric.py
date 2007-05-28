@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -35,8 +34,7 @@ from atocha.messages import msg_registry
 __all__ = ('IntField', 'FloatField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class _NumericalField(Field, OptRequired):
     """
     Base class for a single-line text field that accepts and parses a numerical

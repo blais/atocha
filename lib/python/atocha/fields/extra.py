@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -37,8 +36,7 @@ from atocha.messages import msg_registry
 __all__ = ('URLPathField', 'PhoneField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class URLPathField(StringField):
     """
     A valid URL path.
@@ -76,8 +74,7 @@ class URLPathField(StringField):
         return dvalue
 
 
-#-------------------------------------------------------------------------------
-#
+
 class PhoneField(StringField):
     """
     A valid URL path.

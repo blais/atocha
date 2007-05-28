@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -89,8 +88,7 @@ Notes
 
 
 # Note: we declare those before due to cycles.
-#-------------------------------------------------------------------------------
-#
+
 class AtochaError(Exception):
     """
     Class used for errors due to the misuse of the Atocha API.  An occurrence of
@@ -98,8 +96,7 @@ class AtochaError(Exception):
     using Atocha.
     """
     
-#-------------------------------------------------------------------------------
-#
+
 class AtochaDelError(AtochaError):
     """
     Exception used within constructors and destructors.
@@ -109,8 +106,7 @@ class AtochaDelError(AtochaError):
                 (self.args[1], self.args[2]))
 
 
-#-------------------------------------------------------------------------------
-#
+
 class AtochaInternalError(AtochaError):
     """
     Internal errors probably due to a bug in the Atocha library.
@@ -121,8 +117,7 @@ class AtochaInternalError(AtochaError):
     """
 
 
-#-------------------------------------------------------------------------------
-#
+
 
 # atocha imports
 from form import *

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # $Id$
 #
@@ -35,8 +34,7 @@ from atocha.messages import msg_registry
 __all__ = ('UsernameField', 'UsernameOrEmailField',)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class UsernameField(StringField):
     """
     Username field with a maximum length and which automatically lowercases the
@@ -109,8 +107,7 @@ class UsernameField(StringField):
     validate_username = staticmethod(validate_username)
 
 
-#-------------------------------------------------------------------------------
-#
+
 class UsernameOrEmailField(EmailField):
     """
     A field that can accept either a username or an email address.

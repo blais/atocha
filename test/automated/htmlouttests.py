@@ -43,8 +43,7 @@ from atocha import *
 from htmlout import tostring
 
 
-#-------------------------------------------------------------------------------
-#
+
 class TestHoutRender:
     """
     Tests for rendering.
