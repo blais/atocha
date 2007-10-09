@@ -25,8 +25,6 @@ Form definition and exceptions.
 
 # stdlib imports
 import sys
-if sys.version_info[:2] < (2, 4):
-    from sets import Set as set
 from types import NoneType
 import keyword
 import copy
