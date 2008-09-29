@@ -44,7 +44,7 @@ class _NumericalField(Field, OptRequired):
     Note: the fields derived from this field can parse 'no value' and in that
     case return None to indicate that nothing was sent by the user.
     """
-    types_parse = (NoneType, unicode,)
+    types_parse = (NoneType, unicode, list)
     types_render = (unicode,)
 
     attributes_declare = (
@@ -84,6 +84,10 @@ class _NumericalField(Field, OptRequired):
         # And treat an empty string submission same as unset.
         if pvalue is None or pvalue == u'':
             return None # Indicate nothing sent by the user.
+
+        # Support lists (Twisted.Web does this, unfortunately).
+        if isinstance(pvalue, list) and len(pvalue) == 1:
+            pvalue = pvalue[0]
 
         # Otherwise try to perform the conversion and assume that the string is
         # convertible to the numerical type.

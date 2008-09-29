@@ -41,7 +41,7 @@ class _TextField(Field, OptRequired):
     Base class for fields receiving text.
     """
     types_data = (str, unicode,)
-    types_parse = (NoneType, unicode,)
+    types_parse = (NoneType, unicode, list)
     types_render = (unicode,)
     css_class = 'text'
 
@@ -90,6 +90,10 @@ class _TextField(Field, OptRequired):
         if pvalue is None:
             pvalue = u''
 
+        # Support lists (Twisted.Web does this, unfortunately).
+        if isinstance(pvalue, list) and len(pvalue) == 1:
+            pvalue = pvalue[0]
+            
         # Convert the data value to the specified encoding if requested.
         if self.encoding is not None:
             try:
