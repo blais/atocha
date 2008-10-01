@@ -510,7 +510,8 @@ class Form:
 
             # We check that the type of the parsed data value is one of the
             # expected types.
-            assert isinstance(parsed_dvalue, fi.types_data)
+            assert isinstance(parsed_dvalue, fi.types_data), (
+                repr(parsed_dvalue), type(parsed_dvalue))
 
         except FieldError, e:
             # There was an error parsing the field, i.e. the parsing raised
