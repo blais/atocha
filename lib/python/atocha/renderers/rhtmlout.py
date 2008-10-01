@@ -114,8 +114,9 @@ class HoutRenderer(atocha.render.FormRenderer):
 
     do_table_imp = staticmethod(do_table_imp)
 
-
 
+
+
 class HoutFormRenderer(HoutRenderer):
     """
     Form renderer that outputs htmlout nodes.
@@ -460,8 +461,8 @@ for fcls, fun in HoutFormRenderer_routines:
     atocha.render.register_render_routine(HoutFormRenderer, fcls, fun)
 
 
-
 
+
 class HoutDisplayRenderer(HoutRenderer, atocha.render.DisplayRendererBase):
     """
     Display renderer in normal text. This renderer is meant to display parsed

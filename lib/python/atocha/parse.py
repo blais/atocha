@@ -583,7 +583,7 @@ class FormParser:
 
         # Merge the errors in the keywords (we'll check everything below).
         for e in _names:
-            assert isinstance(e, str)
+            assert isinstance(e, str), repr(e)
             assert e not in kwds
             kwds[e] = True
 

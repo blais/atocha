@@ -19,11 +19,8 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 """
-Normalizer for Python's cgi library to handle data coming from CGI scripts.
+Normalizer for Twisted.Web arguments.
 """
-
-# stdlib imports
-import cgi
 
 # atocha imports
 from atocha.fields.uploads import FileUpload
@@ -41,13 +38,15 @@ def normalize_args(parser, form):
     for varname in form.keys():
         value = form[varname]
 
-        if (isinstance(value, cgi.FieldStorage) and
-            isinstance(value.file, file)):
+## FIXME: we need to figure out what Twisted provides for us for file uploads.
+        if (False
+            #isinstance(value, cgi.FieldStorage) and 
+            #isinstance(value.file, file)
+            ):
 
             ovalue = FileUpload(value, value.filename)
 
         else:
-            value = form.getlist(varname)
             if len(value) == 1:
                 ovalue = value[0]
             else:

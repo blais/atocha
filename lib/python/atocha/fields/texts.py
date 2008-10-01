@@ -150,11 +150,11 @@ class _TextField(Field, OptRequired):
 
     def display_value(self, dvalue):
         if self.encoding is not None:
-            assert isinstance(dvalue, str)
+            assert isinstance(dvalue, str), repr(dvalue)
             # Convert the data value to a unicode object for rendering.
             rvalue = dvalue.decode(self.encoding)
         else:
-            assert isinstance(dvalue, unicode)
+            assert isinstance(dvalue, unicode), repr(dvalue)
             rvalue = dvalue
         return rvalue
 
