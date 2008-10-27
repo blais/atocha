@@ -38,7 +38,9 @@ __all__ = ('StringField', 'TextAreaField', 'PasswordField',
 
 class _TextField(Field, OptRequired):
     """
-    Base class for fields receiving text.
+    Base class for fields receiving text. This field supports providing a
+    specific encoding and converting the result to an encoded string within that
+    encoding.
     """
     types_data = (str, unicode,)
     types_parse = (NoneType, unicode,)

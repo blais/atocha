@@ -62,7 +62,7 @@ class Form:
 
     - 'submit': submit button name, which can also be a tuple of (value, label)
       pairs for each submit button to be rendered, to indicate multiple submit
-      buttons.;
+      buttons;
 
     - 'action': the action type, usually a URL for the handler for this form,
       but this can be any data type, so that we can implement delayed evaluation
