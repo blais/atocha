@@ -292,7 +292,7 @@ class FormRenderer:
         # Dispatch to renderer.
         output = self._dispatch_render(field, rvalue, errmsg, state)
 
-        # Mark this fields as having been rendered.
+        # Mark this field as having been rendered.
         if field.name in self._rendered:
             raise AtochaError(
                 "Error: field '%s' being rendered more than once." %
@@ -414,7 +414,7 @@ class FormRenderer:
         """
         Render the entire form including the labels and inputs and hidden fields
         and all.  This is intended to be the simple straightforward way to
-        render an reasonably looking form with no fuss.  If you want to
+        render a reasonably looking form with no fuss.  If you want to
         customize rendering to make it more fancy, render the components of the
         form independently.
 
