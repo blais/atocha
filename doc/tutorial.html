@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.4.1: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>atocha: 10-min Tutorial</title>
 <link rel="stylesheet" href="../style.css" type="text/css" />
 </head>
@@ -16,42 +16,43 @@
 
 <div class="document" id="atocha-10-min-tutorial">
 <h1 class="title">atocha: 10-min Tutorial</h1>
+
 <div class="abstract topic">
 <p class="topic-title first">Abstract</p>
 <p>A short and sweet overview and tutorial to teach the flavour of what the
 Atocha library provides for the web developer.</p>
 </div>
-<div class="contents topic">
-<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference" href="#introduction" id="id2" name="id2">Introduction</a></li>
-<li><a class="reference" href="#form-definition" id="id3" name="id3">Form Definition</a></li>
-<li><a class="reference" href="#form-rendering" id="id4" name="id4">Form Rendering</a><ul>
-<li><a class="reference" href="#breaking-down-the-rendering" id="id5" name="id5">Breaking down the Rendering</a></li>
-<li><a class="reference" href="#dynamically-generated-choices" id="id6" name="id6">Dynamically Generated Choices</a></li>
+<li><a class="reference internal" href="#introduction" id="id2">Introduction</a></li>
+<li><a class="reference internal" href="#form-definition" id="id3">Form Definition</a></li>
+<li><a class="reference internal" href="#form-rendering" id="id4">Form Rendering</a><ul>
+<li><a class="reference internal" href="#breaking-down-the-rendering" id="id5">Breaking down the Rendering</a></li>
+<li><a class="reference internal" href="#dynamically-generated-choices" id="id6">Dynamically Generated Choices</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#form-handling" id="id7" name="id7">Form Handling</a><ul>
-<li><a class="reference" href="#simple-method" id="id8" name="id8">Simple Method</a></li>
-<li><a class="reference" href="#custom-validation-method" id="id9" name="id9">Custom Validation Method</a></li>
+<li><a class="reference internal" href="#form-handling" id="id7">Form Handling</a><ul>
+<li><a class="reference internal" href="#simple-method" id="id8">Simple Method</a></li>
+<li><a class="reference internal" href="#custom-validation-method" id="id9">Custom Validation Method</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#display-renderers" id="id10" name="id10">Display Renderers</a></li>
-<li><a class="reference" href="#rendering-buttons-only" id="id11" name="id11">Rendering Buttons Only</a></li>
-<li><a class="reference" href="#options" id="id12" name="id12">Options</a></li>
-<li><a class="reference" href="#extending-atocha" id="id13" name="id13">Extending Atocha</a></li>
-<li><a class="reference" href="#online-demo" id="id14" name="id14">Online Demo</a></li>
+<li><a class="reference internal" href="#display-renderers" id="id10">Display Renderers</a></li>
+<li><a class="reference internal" href="#rendering-buttons-only" id="id11">Rendering Buttons Only</a></li>
+<li><a class="reference internal" href="#options" id="id12">Options</a></li>
+<li><a class="reference internal" href="#extending-atocha" id="id13">Extending Atocha</a></li>
+<li><a class="reference internal" href="#online-demo" id="id14">Online Demo</a></li>
 </ul>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id2" id="introduction" name="introduction">Introduction</a></h1>
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#id2">Introduction</a></h1>
 <p>This document presents a quick overview and tutorial about the Atocha web form
 rendering and handling library.  This is meant to quickly provide a sense of
 what the library does.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id3" id="form-definition" name="form-definition">Form Definition</a></h1>
-<p>You create a single <tt class="docutils literal"><span class="pre">Form</span></tt> instance for both rendering and handling of the
+<div class="section" id="form-definition">
+<h1><a class="toc-backref" href="#id3">Form Definition</a></h1>
+<p>You create a single <tt class="docutils literal">Form</tt> instance for both rendering and handling of the
 form.  The form consists of &quot;fields&quot;, which are akin to desktop application
 widgets, which automatically return an appropriate data type for the value
 entered by the user:</p>
@@ -86,9 +87,9 @@ myform = Form(
 <p>This form can be created at global module level, and does not have to be
 recreated on every request.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id4" id="form-rendering" name="form-rendering">Form Rendering</a></h1>
-<p>You can then use this form object, in collboration with a <tt class="docutils literal"><span class="pre">FormRenderer</span></tt> to
+<div class="section" id="form-rendering">
+<h1><a class="toc-backref" href="#id4">Form Rendering</a></h1>
+<p>You can then use this form object, in collboration with a <tt class="docutils literal">FormRenderer</tt> to
 render the form on a page for the user to fill in:</p>
 <pre class="literal-block">
 # In resource: /person/edit...
@@ -107,8 +108,8 @@ sys.stdout.write( rdr.render(action='handle.cgi') )
 <p>Note that a set of initial values and errors is specified for the renderer to
 use, and usually will come from session data to provide error feedback if the
 form is being re-rendered for errors from user input.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id5" id="breaking-down-the-rendering" name="breaking-down-the-rendering">Breaking down the Rendering</a></h2>
+<div class="section" id="breaking-down-the-rendering">
+<h2><a class="toc-backref" href="#id5">Breaking down the Rendering</a></h2>
 <p>One problem with automatic rendering of form is that it breaks down quite
 rapidly as soon as you want to render fancy forms, which always end up requiring
 Hand-customization.  The basic automatic rendering provides a reasonably good
@@ -149,8 +150,8 @@ outputs unicode text, and a renderer that builds a tree of nodes using my
 htmlout library.  You could easily implemnent one using Stan (from Nevow) if you
 liked.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id6" id="dynamically-generated-choices" name="dynamically-generated-choices">Dynamically Generated Choices</a></h2>
+<div class="section" id="dynamically-generated-choices">
+<h2><a class="toc-backref" href="#id6">Dynamically Generated Choices</a></h2>
 <p>If you need to render menus, listboxes, radio buttons, checkbox lists that are
 generated dynamically, you can simply set the list of valid choices on the field
 before rendering or parsing, in the renderer:</p>
@@ -172,17 +173,17 @@ o = FormParser.parse(f, args)
 </pre>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id7" id="form-handling" name="form-handling">Form Handling</a></h1>
-<p>A <tt class="docutils literal"><span class="pre">FormParser</span></tt> instance is used to oversee the process of parsing and
+<div class="section" id="form-handling">
+<h1><a class="toc-backref" href="#id7">Form Handling</a></h1>
+<p>A <tt class="docutils literal">FormParser</tt> instance is used to oversee the process of parsing and
 validating user-submitted inputs, and carrying out appropriate errors to be
 re-rendered in the form when they occur.  The basic validation of the data types
 output from the fields is automatic, and the particular types depend on the
 types of the fields in the form.</p>
 <p>This FormParser object has to be configured once somewhere in your code so that
 it knows how to perform a redirection if there are errors.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id8" id="simple-method" name="simple-method">Simple Method</a></h2>
+<div class="section" id="simple-method">
+<h2><a class="toc-backref" href="#id8">Simple Method</a></h2>
 <p>If you do not need to do any special validation that could result in the user
 being sent back to the form with marked errors, that is, if you are happy with
 the automatic types validation that the fields offer--and this would be the most
@@ -195,8 +196,8 @@ o = FormParser.parse(myform, args, '/person/edit')
 #...  use o.gender, o.milserv, o.firstname, etc.
 </pre>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id9" id="custom-validation-method" name="custom-validation-method">Custom Validation Method</a></h2>
+<div class="section" id="custom-validation-method">
+<h2><a class="toc-backref" href="#id9">Custom Validation Method</a></h2>
 <p>Most often some custom validation code needs be integrated in the
 validation/error checking process.  This is often custom code that needs to
 verify the constraints of the fields or between fields.  Rather than forcing you
@@ -231,8 +232,8 @@ the caller.  At this point you can use the data to store it or do whatever else
 you want with it.</p>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id10" id="display-renderers" name="display-renderers">Display Renderers</a></h1>
+<div class="section" id="display-renderers">
+<h1><a class="toc-backref" href="#id10">Display Renderers</a></h1>
 <p>The form object can also be used to display parsed values in a nice-looking
 table, without editing capabilities.  This is simply accomplished by using a
 special kind of renderer, that I call &quot;display renderers&quot;, and which instead of
@@ -249,8 +250,8 @@ print rdr.render()  # Renders a table.
 print &quot;&lt;/div&gt;
 </pre>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id11" id="rendering-buttons-only" name="rendering-buttons-only">Rendering Buttons Only</a></h1>
+<div class="section" id="rendering-buttons-only">
+<h1><a class="toc-backref" href="#id11">Rendering Buttons Only</a></h1>
 <p>If you want to just render some buttons, you can use an empty form:</p>
 <pre class="literal-block">
 form = Form(
@@ -269,14 +270,14 @@ TextFormRenderer.render_buttons(
     '/u/%s/profile/general_edit' % u.username))
 </pre>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id12" id="options" name="options">Options</a></h1>
-<p>The <tt class="docutils literal"><span class="pre">Form</span></tt>, <tt class="docutils literal"><span class="pre">FormRenderer</span></tt> and <tt class="docutils literal"><span class="pre">FormParser</span></tt> and <tt class="docutils literal"><span class="pre">Field</span></tt> classes support
+<div class="section" id="options">
+<h1><a class="toc-backref" href="#id12">Options</a></h1>
+<p>The <tt class="docutils literal">Form</tt>, <tt class="docutils literal">FormRenderer</tt> and <tt class="docutils literal">FormParser</tt> and <tt class="docutils literal">Field</tt> classes support
 many options for various parameters depending on their specific application.
 Visit the source code to find out what the specific options are.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id13" id="extending-atocha" name="extending-atocha">Extending Atocha</a></h1>
+<div class="section" id="extending-atocha">
+<h1><a class="toc-backref" href="#id13">Extending Atocha</a></h1>
 <p>You can also write your own field classes and register rendering routines for
 them.  For example, if you often use the same parameters, you may define a
 subclass of one of the fields, e.g.:</p>
@@ -310,9 +311,9 @@ class UsernameField(StringField):
 <p>You may also write a particular rendering routine for this field and register it
 separately.  Rendering routines can be defined for each (renderer, field) pairs.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id14" id="online-demo" name="online-demo">Online Demo</a></h1>
-<p>Try the <a class="reference" href="../demo/cgi-bin/display.cgi">online demo</a> which features an instance of most of the fields, to
+<div class="section" id="online-demo">
+<h1><a class="toc-backref" href="#id14">Online Demo</a></h1>
+<p>Try the <a class="reference external" href="../demo/cgi-bin/display.cgi">online demo</a> which features an instance of most of the fields, to
 quickly see what the library can do.</p>
 </div>
 </div>

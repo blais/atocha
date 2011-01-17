@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta name="generator" content="Docutils 0.4.1: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>atocha: Developer's Guide</title>
 <meta name="author" content="Martin Blais &lt;blais&#64;furius.ca&gt;" />
 <meta name="date" content="2005-10-16" />
@@ -23,7 +23,7 @@
 <col class="docinfo-content" />
 <tbody valign="top">
 <tr><th class="docinfo-name">Author:</th>
-<td>Martin Blais &lt;<a class="reference" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
+<td>Martin Blais &lt;<a class="reference external" href="mailto:blais&#64;furius.ca">blais&#64;furius.ca</a>&gt;</td></tr>
 <tr><th class="docinfo-name">Date:</th>
 <td>2005-10-16</td></tr>
 </tbody>
@@ -32,13 +32,13 @@
 <p class="topic-title first">Abstract</p>
 <p>Notes for developers about procedures for Atocha.</p>
 </div>
-<div class="section">
-<h1><a id="snapshots" name="snapshots">Snapshots</a></h1>
+<div class="section" id="snapshots">
+<h1>Snapshots</h1>
 <p>Snapshots of the latest development releases will always be available in the
 download area.</p>
 </div>
-<div class="section">
-<h1><a id="source-code-repository" name="source-code-repository">Source Code Repository</a></h1>
+<div class="section" id="source-code-repository">
+<h1>Source Code Repository</h1>
 <p>I do not have a shared source code repository yet, no time to set one up and it
 would take a lot of time to validate security issues on my server.  Maybe this
 will be available in the future-- if you would really like to have this to
@@ -47,38 +47,38 @@ how to setup a Subversion server on a Linux machine, and a summary of all the
 potential security issues related to this.  Otherwise I will need to do this
 myself to set this up and I really have very little time.</p>
 </div>
-<div class="section">
-<h1><a id="contributions" name="contributions">Contributions</a></h1>
+<div class="section" id="contributions">
+<h1>Contributions</h1>
 <p>Please send patches to the author, I will be happy to review and include them.
 You <strong>need</strong> to submit an accompanying automated test (at least some minimum).</p>
 </div>
-<div class="section">
-<h1><a id="adding-widgets" name="adding-widgets">Adding Widgets</a></h1>
+<div class="section" id="adding-widgets">
+<h1>Adding Widgets</h1>
 <p>Please be careful with the data, parse and render types that the fields declare,
 read the comments in the Field class, because otherwise you will have difficulty
 integrating new fields in the code.  The codebase is made really anal about
 strict type checking on purpose, and this forces you to really think about all
 the possible cases, which is a good thing.</p>
 </div>
-<div class="section">
-<h1><a id="running-tests" name="running-tests">Running Tests</a></h1>
-<p>A suite of automated tests is available in the <tt class="docutils literal"><span class="pre">/test/automated</span></tt> directory.
-Use <tt class="docutils literal"><span class="pre">make</span></tt> to run it.  You will need the pydev <tt class="docutils literal"><span class="pre">py.test</span></tt> program to run the
+<div class="section" id="running-tests">
+<h1>Running Tests</h1>
+<p>A suite of automated tests is available in the <tt class="docutils literal">/test/automated</tt> directory.
+Use <tt class="docutils literal">make</tt> to run it.  You will need the pydev <tt class="docutils literal">py.test</tt> program to run the
 tests, or run can add some simple invocation in the script to run them directly.</p>
-<div class="section">
-<h2><a id="implicit-conversions" name="implicit-conversions">Implicit Conversions</a></h2>
-<p>Implicit <tt class="docutils literal"><span class="pre">unicode</span></tt> to <tt class="docutils literal"><span class="pre">str</span></tt> and <tt class="docutils literal"><span class="pre">str</span></tt> to <tt class="docutils literal"><span class="pre">unicode</span></tt> conversions are
+<div class="section" id="implicit-conversions">
+<h2>Implicit Conversions</h2>
+<p>Implicit <tt class="docutils literal">unicode</tt> to <tt class="docutils literal">str</tt> and <tt class="docutils literal">str</tt> to <tt class="docutils literal">unicode</tt> conversions are
 disabled on purpose in the automated tests.  This forces you to think about
 where conversion occur and to take appropriate explicit action.</p>
 </div>
 </div>
-<div class="section">
-<h1><a id="demo-testing" name="demo-testing">Demo Testing</a></h1>
-<p>Under <tt class="docutils literal"><span class="pre">/demo/</span></tt> are a set of scripts that are used to interactively test
+<div class="section" id="demo-testing">
+<h1>Demo Testing</h1>
+<p>Under <tt class="docutils literal">/demo/</tt> are a set of scripts that are used to interactively test
 the library without the overhead of a framework and isolates the library from
 the effect of other codes.  It uses CGI scripts, and all you have to do to use
 it is to setup an Apache web server (on your development machine) to point to
-the <tt class="docutils literal"><span class="pre">/demo/cgi-bin</span></tt> subdirectory, with <tt class="docutils literal"><span class="pre">ExecCGI</span></tt> option enabled.  This
+the <tt class="docutils literal"><span class="pre">/demo/cgi-bin</span></tt> subdirectory, with <tt class="docutils literal">ExecCGI</tt> option enabled.  This
 is how I interactively test and isolated version of the fields/widgets.</p>
 </div>
 </div>

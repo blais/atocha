@@ -129,10 +129,11 @@ demo web pages too.
 Download
 ========
 
-Snapshots of the latest atocha source code can be found in the Download_ area.
-If you make any modification to the source, please update and run the tests.
+A Mercurial repository can be found at:
 
-.. _Download: /downloads/atocha
+  https://hg.furius.ca/public/atocha/
+
+`Click here for download instructions. </web-furius/downloading.html>`_
 
 
 Mailing-Lists
