@@ -131,7 +131,7 @@ Download
 
 A Mercurial repository can be found at:
 
-  http://bitbucket.org/blais/atocha
+  http://github.com/blais/atocha
 
 
 Mailing-Lists

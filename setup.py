@@ -44,7 +44,7 @@ CGI scrips or to incorporate it in your favourite web application framework
       author="Martin Blais",
       author_email="blais@furius.ca",
       url="http://furius.ca/atocha",
-      download_url="http://bitbucket.org/blais/atocha",
+      download_url="http://github.com/blais/atocha",
       package_dir = {'': 'lib/python'},
       packages = ['atocha',
                   'atocha.fields',
